@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Maximilian Antoni. All rights reserved.
+ * Copyright (c) 2011 Maximilian Antoni
  */
 /**
  * 
