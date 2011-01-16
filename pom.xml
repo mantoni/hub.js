@@ -1,0 +1,115 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>de.maxantoni</groupId>
+	<artifactId>hub</artifactId>
+	<name>hub.js</name>
+	<packaging>jar</packaging>
+	<version>0.1-SNAPSHOT</version>
+	
+	<url>https://github.com/mantoni/hub.js</url>
+	<description>
+		Hub.js helps developing message driven applications in JavaScript.
+	</description>
+	
+	<inceptionYear>2011</inceptionYear>
+	
+	<developers>
+		<developer>
+			<id>mantoni</id>
+			<name>Maximilian Antoni</name>
+			<email>dev@evaserver.com</email>
+		</developer>
+	</developers>
+	
+	<pluginRepositories>
+		<pluginRepository>
+			<id>jstd-maven-plugin google code repo</id>
+			<url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+		</pluginRepository>
+	</pluginRepositories>
+	
+	<dependencies>
+		<!-- JsTestDriver - http://code.google.com/p/js-test-driver/ -->
+		<dependency>
+			<groupId>com.google.jstestdriver</groupId>
+			<artifactId>jstestdriver</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+				
+		<!-- JsTestDriver Maven Plugin - http://code.google.com/p/jstd-maven-plugin -->
+		<dependency>
+			<groupId>com.google.jstestdriver</groupId>
+			<artifactId>maven-jstestdriver-plugin</artifactId>
+			<version>1.2.2-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- http://mojo.codehaus.org/exec-maven-plugin/ -->
+		<dependency>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>exec-maven-plugin</artifactId>
+			<version>1.2</version>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.jstestdriver</groupId>
+				<artifactId>maven-jstestdriver-plugin</artifactId>
+				<version>1.2.2-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>run-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<debug>true</debug>
+							<config>src/test/resources/jsTestDriver.conf</config>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>jstd</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<configuration>
+							<executable>java</executable>
+							<workingDirectory>${project.dir}</workingDirectory>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath>
+									<dependency>com.google.jstestdriver:jstestdriver</dependency>
+								</classpath>
+								<argument>com.google.jstestdriver.JsTestDriver</argument>
+								<argument>--port</argument>
+								<argument>4444</argument>
+							</arguments>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>validate</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+</project>
