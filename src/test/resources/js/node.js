@@ -35,7 +35,7 @@ TestCase("node", {
 				}
 			};
 		});
-		Hub.publish("simple.message");
+		Hub.publish("simple", "message");
 		assertTrue(called);
 	},
 	
@@ -52,9 +52,9 @@ TestCase("node", {
 				}
 			};
 		});
-		Hub.publish("a.b.c");
+		Hub.publish("a.b", "c");
 		assertFalse(called);
-		Hub.publish("a.b.c.d");
+		Hub.publish("a.b", "c.d");
 		assertTrue(called);
 	}
 

@@ -8,10 +8,10 @@ TestCase("publish", {
 	},
 	
 	/*
-	 * assert publishing a topic that is not picked up by anybody does not fail.
+	 * assert publishing a namespace that is not picked up by anybody does not fail.
 	 */
 	testPublishUnknown: function() {
-		Hub.publish("unknown.node"); // should not throw an error.
+		Hub.publish("unknown", "message"); // should not throw an error.
 		assertTrue(true); // Just to have at least one assert.
 	},
 	
@@ -21,23 +21,23 @@ TestCase("publish", {
 	 */
 	testPublishMulticast: function() {
 		var chain = [];
-		Hub.node("a", function() {
+		Hub.node("a.b", function() {
 			return {
-				"b.c": function() {
+				"m": function() {
 					chain.push("x");
 				}
 			};
 		});
-		Hub.node("a.b", function() {
+		Hub.node("a.c", function() {
 			return {
-				"c": function() {
+				"m": function() {
 					chain.push("y");
 				}
 			};
 		});
-		Hub.publish("a.b.c");
-		// Assert y is added first, then x because "a.b" is more specific than "a".
-		assertEquals("yx", chain.join(""));
+		Hub.publish("a.*", "m");
+		// The nodes will be called in the order as they are defined.
+		assertEquals("xy", chain.join(""));
 	},
 	
 	testPublishWildcard: function() {
@@ -49,24 +49,23 @@ TestCase("publish", {
 				}
 			};
 		});
-		Hub.publish("a.b.c.*");
-		assertEquals("a.b.c.*", 1, count);
-		Hub.publish("a.b.c.**");
-		assertEquals("a.b.c.**", 2, count);
-		Hub.publish("a.b.*");
-		assertEquals("a.b.*", 2, count);
-		Hub.publish("a.b.**");
-		assertEquals("a.b.**", 3, count);
-		Hub.publish("a.*");
-		assertEquals("a.*", 3, count);
+		Hub.publish("a.b", "c.*");
+		assertEquals("a.b : c.*", 1, count);
+		Hub.publish("a.b", "c.**");
+		assertEquals("a.b : c.**", 2, count);
+		Hub.publish("a.b", "*");
+		assertEquals("a.b : *", 2, count); // no match
+		Hub.publish("a.b", "**");
+		assertEquals("a.b : **", 3, count);
 		
-		// publish is not smart enough for a.** yet.
-		//Hub.publish("a.**");
-		//assertEquals("a.**", 4, count);
-		//Hub.publish("*");
-		//assertEquals("*", 4, count);
-		//Hub.publish("**");
-		//assertEquals("**", 5, count);
+		Hub.publish("a.*", "c.d");
+		assertEquals("a.* : c.d", 4, count);
+		Hub.publish("a.**", "c.d");
+		assertEquals("a.** : c.d", 5, count);
+		Hub.publish("*", "c.d");
+		assertEquals("* : c.d", 5, count); // no match
+		Hub.publish("**", "c.d");
+		assertEquals("** : c.d", 6, count);
 	}
 
 });
