@@ -1,10 +1,21 @@
 hub.js
 ======
 
-Hub.js helps developing message driven applications in JavaScript.
+hub.js wants to provide a foundation for large JavaScript applications.
 
-Tooling
--------
+Whishlist:
+----------
+
+* Mixins: Copying the Java inheritance model does not work very well. Mixins are more flexible and fit into the language naturally.
+* Scope: People just get confused with "this".
+* AOP: Solving cross cutting concerns elegantly.
+* Decoupling: "Nodes" send each messages with publish and subscribe.
+* Encapsulation: This is often not taken care of.
+* Consistent API: Fast to learn, easy to use.
+* Small footprint (aiming for < 10kb compressed)
+
+Tools:
+------
 
 * Maven
 * JsTestDriver
