@@ -12,31 +12,31 @@ Hub = function() {
 	 * nodes: all node instances that have been created
 	 * aspects: all aspect instances that have been created
 	 * definitions: all node or aspect definitions
-	 * nextCallback: the next callback to execute in the current chain or false
-	 * nextScope: the scope to use for nextCallback
-	 * nextData: the data to pass to nextCallback
+	 * nextFn: the next function to execute in the current chain or false
+	 * nextScope: the scope to use for nextFn
+	 * nextData: the data to pass to nextFn
 	 * emptyArray: an empty array used as an internal value object
 	 */
-	var nodes = {}, aspects = {}, definitions = {}, nextCallback = false,
-		nextScope, nextData, emptyArray = [];
+	var nodes = {}, aspects = {}, definitions = {}, nextFn = false,
+		nextScope, nextData, promise = true, emptyArray = [];
 	
 	/*
 	 * creates a call chain for the two given functions.
 	 */
 	var chain = function(first, second) {
 		return function(data) {
-			var previous = nextCallback;
-			nextCallback = second;
+			var previous = nextFn;
+			nextFn = second;
 			nextScope = this;
 			nextData = data;
 			try {
 				first.call(this, data);
-				if(nextCallback) {
+				if(nextFn) {
 					second.call(this, data);
 				}
 			}
 			finally {
-				nextCallback = previous;
+				nextFn = previous;
 				nextScope = undefined;
 				nextData = undefined;
 			}
@@ -44,10 +44,10 @@ Hub = function() {
 	};
 	
 	/*
-	 * adds a callback to the given node under the specified message.
+	 * adds a function to the given node under the specified message.
 	 */
-	var apply = function(node, message, callback) {
-		node[message] = message in node ? chain(callback, node[message]) : callback;
+	var apply = function(node, message, fn) {
+		node[message] = message in node ? chain(fn, node[message]) : fn;
 	};
 	
 	/*
@@ -100,8 +100,9 @@ Hub = function() {
 		return node;
 	};
 	
-	var matcher = function(name) {
-		var exp = name.replace(/\./g, '\\.').replace(/\*\*/g, '[a-zA-Z0-9\\.]+').replace(/\*/g, '[a-zA-Z0-9]+');
+	var pathMatcher = function(name) {
+		var exp = name.replace(/\./g, '\\.').replace(
+				/\*\*/g, '[a-zA-Z0-9\\.]+').replace(/\*/g, '[a-zA-Z0-9]+');
 		return new RegExp('^' + exp + '$');
 	};
 	
@@ -117,7 +118,7 @@ Hub = function() {
 	 */
 	var findNodes = function(namespace) {
 		var match = [];
-		var re = matcher(namespace);
+		var re = pathMatcher(namespace);
 		for(namespace in definitions) {
 			if(re.test(namespace)) {
 				match.push(getNode(namespace));
@@ -125,13 +126,13 @@ Hub = function() {
 		}
 		return match;
 	};
-		
-	var publish = function(node, message, data) {
+	
+	var publishMessageOnNode = function(node, message, data) {
 		if(node[message]) {
 			node[message](data);
 		}
 		else if(message.indexOf("*") !== -1) {
-			var re = matcher(message);
+			var re = pathMatcher(message);
 			for(message in node) {
 				if(re.test(message)) {
 					node[message](data);
@@ -140,6 +141,100 @@ Hub = function() {
 		}
 	};
 	
+	var processChainItem = function(item, data, success) {
+		if(success) {
+			if(!item.success) {
+				return true;
+			}
+			try {
+				item.success(data);
+				return true;
+			}
+			catch(e1) {
+				console.warn("Hub - error in promise success handler: "
+						+ e1.message);
+				return false;
+			}
+		}
+		if(item.error) {
+			try {
+				item.error(data);
+			}
+			catch(e2) {
+				console.warn("Hub - error in promise error handler: "
+						+ e2.message);
+			}
+		}
+		return false;
+	};
+	
+	var createPromise = function(fulfilled) {
+		var chain = [], value, success = true;
+		return {
+			then: function(success, error) {
+				var item = {
+					success: success,
+					error: error
+				};
+				if(fulfilled) {
+					success = processChainItem(item, value, success);
+				}
+				else {
+					chain.push(item);
+				}
+				return this;
+			},
+			publish: function(namespace, message, data) {
+				if(fulfilled) {
+					return Hub.publish(namespace, message, data);
+				}
+				return this.then(function() {
+					return Hub.publish(namespace, message, data);
+				});
+			},
+			fulfill: function(data) {
+				if(fulfilled) {
+					throw new Error("Hub - promise already fulfilled");
+				}
+				fulfilled = true;
+				value = data;
+				while(chain.length) {
+					success = processChainItem(chain.shift(), value, success);
+				}
+				return this;
+			},
+			fulfilled: function() {
+				return fulfilled;
+			}
+		};
+	};
+	
+	// Helper function to replace the given proxy with a new promise.
+	var replacePromiseProxy = function(proxy) {
+		var real = createPromise(true);
+		proxy.then = real.then;
+		proxy.publish = real.publish;
+		return real;
+	}
+	/*
+	 * PromiseProxy is a lightweight object that creates the actual
+	 * promise on demand.
+	 */
+	var PromiseProxy = function() {};
+	PromiseProxy.prototype = {
+		then: function(success, error) {
+			return replacePromiseProxy(this).then(success, error);
+		},
+		publish: function(namespace, message, data) {
+			return replacePromiseProxy(this).publish(namespace, message, data);
+		},
+		fulfill: function(data) {
+			throw new Error("Hub - promise already fulfilled");
+		},
+		fulfilled: function() {
+			return true;
+		},
+	};
 	
 	// Public API:
 	return {
@@ -159,15 +254,16 @@ Hub = function() {
 		PROTOTYPE: "PROTOTYPE",
 		
 		/**
-		 * resets the Hub to it's initial state. Primarily required for unit testing.
+		 * resets the Hub to it's initial state. Primarily required for unit
+		 * testing.
 		 */
 		reset: function() {
 			nodes = {};
 			definitions = {};
 		},
 		
-		subscribe: function(namespace, message, callback) {
-			apply(getNode(namespace), message, callback);
+		subscribe: function(namespace, message, fn) {
+			apply(getNode(namespace), message, fn);
 		},
 		
 		/**
@@ -178,10 +274,10 @@ Hub = function() {
 		 * Configuration parameters:
 		 * </p>
 		 * <ul>
-		 * <li>is (String|Array): single node name or list of node names
-		 * this node inherits from</li>
-		 * <li>requires (String|Array): single function name or list of
-		 * function names this node requires to be defined</li>
+		 * <li>is (String|Array): single node name or list of node names this
+		 * node inherits from</li>
+		 * <li>requires (String|Array): single function name or list of function
+		 * names this node requires to be defined</li>
 		 * <li>scope (String): the scope, either Hub.SINGLETON or
 		 * Hub.PROTOTYPE</li>
 		 * <li>lazy (Boolean): whether to instantiate the singleton lazy</li>
@@ -224,14 +320,23 @@ Hub = function() {
 		 * @param {Object} data the data to pass
 		 */
 		publish: function(namespace, message, data) {
-			if(namespace.indexOf("*") === -1) {
-				publish(getNode(namespace), message, data);
-			}
-			else {
-				var nodes = findNodes(namespace);
-				for(var i = 0, node; node = nodes[i++];) {
-					publish(node, message, data);
+			var previousPromise = promise;
+			promise = false;
+			try {
+				if(namespace.indexOf("*") === -1) {
+					publishMessageOnNode(getNode(namespace), message, data);
 				}
+				else {
+					var nodes = findNodes(namespace);
+					for(var i = 0, node; node = nodes[i++];) {
+						publishMessageOnNode(node, message, data);
+					}
+				}
+			}
+			finally {
+				var result = promise;
+				promise = previousPromise;
+				return result || new PromiseProxy();
 			}
 		},
 		
@@ -239,7 +344,7 @@ Hub = function() {
 		 * stops message propagation for the current publish call.
 		 */
 		stopPropagation: function() {
-			nextCallback = false;
+			nextFn = false;
 		},
 		
 		/**
@@ -247,13 +352,26 @@ Hub = function() {
 		 * current publish call.
 		 */
 		propagate: function() {
-			nextCallback.call(nextScope, nextData);
-			nextCallback = false;
+			nextFn.call(nextScope, nextData);
+			nextFn = false;
+		},
+		
+		/**
+		 * returns a promise.
+		 */
+		promise: function() {
+			if(promise === true) {
+				return createPromise(false);
+			}
+			if(promise === false) {
+				promise = createPromise(false);
+			}
+			return promise;
 		},
 		
 		/**
 		 * <p>
-		 * defines a proxy node with the given name that loads a script lazily
+		 * defines a node with the given name that loads a script lazily
 		 * expecting the node to be properly defined in the script. Once the
 		 * script is loaded the original request made to the proxy is forwarded
 		 * to the actual node.
@@ -265,8 +383,30 @@ Hub = function() {
 		 * @param namespace the namespace
 		 * @param scriptUrl the script URL
 		 */
-		proxy: function(namespace, scriptUrl) {
+		lazy: function(namespace, scriptUrl) {
 			
+		},
+		
+		/**
+		 * <p>
+		 * defines an alias for a namespace / message pair. This allows to
+		 * define a general purpose listener or node and reuse it on different
+		 * namespaces and messages.
+		 * </p>
+		 * <p>
+		 * Publishing on a namespace / message pair that matches the alias will
+		 * trigger the subscribers on the "real" namespace / message pair.
+		 * </p>
+		 * 
+		 * @param aliasNamespace the alias for the namespace
+		 * @param aliasMessage the alias for the message
+		 * @param namespace the namespace to forward to
+		 * @param message the message to forward to
+		 */
+		alias: function(aliasNamespace, aliasMessage, namespace, message) {
+			Hub.subscribe(aliasNamespace, aliasMessage, function(data) {
+				return Hub.publish(namespace, message, data);
+			});
 		}
 	
 	};

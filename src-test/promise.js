@@ -7,25 +7,69 @@ TestCase("promise", {
 		Hub.reset();
 	},
 	
-	/*
-	 * asserts that a listeners return value is handed over as the value
-	 * of the promise callback.
-	 */
-	testValuePromise: function() {
-/*		Hub.node("x", function() {
-			return {
-				"y": function() {
-					return 1;
-				}
-			};
+	testFulfillPromise: function() {
+		var promise = Hub.promise();
+		var called = false;
+		promise.then(function() {
+			called = true;
 		});
-		var n = 0;
-		Hub.publish("x.y").then(function(value, data) {
-			n += value;
+		promise.fulfill();
+		assertTrue(called);
+	},
+	
+	testPromiseQueue: function() {
+		var chain = [];
+		// then-then-fulfill:
+		Hub.promise().then(function() {
+			chain.push("a")
+		}).then(function() {
+			chain.push("b")
+		}).fulfill();
+		assertEquals("a,b", chain.join());
+		// then-fulfill-then:
+		Hub.promise().then(function() {
+			chain.push("c")
+		}).fulfill().then(function() {
+			chain.push("d")
 		});
-		assertEquals(1, n);
-*/
-		assertTrue(true);
-	}
+		assertEquals("a,b,c,d", chain.join());
+	},
+	
+	testPublishWithThen: function() {
+		var chain = [];
+		Hub.subscribe("test", "promise", function() {
+			chain.push("a");
+		});
+		Hub.publish("test", "promise").then(function() {
+			chain.push("b");
+		});
+		assertEquals("a,b", chain.join());
+	},
+	
+	testThenWithPromisePublish: function() {
+		var chain = [];
+		Hub.subscribe("test", "promise", function() {
+			chain.push("a");
+		});
+		Hub.promise().publish("test", "promise").then(function() {
+			chain.push("b");
+		}).fulfill();
+		assertEquals("a,b", chain.join());
+	},
 
+	testThenWithHubPublish: function() {
+		var chain = [];
+		Hub.subscribe("test", "promise", function() {
+			chain.push("a");
+		});
+		Hub.promise().then(function() {
+			Hub.publish("test", "promise").then(function() {
+				chain.push("b");
+			});
+		}).then(function() {
+			chain.push("c");
+		}).fulfill();
+		assertEquals("a,b,c", chain.join());
+	}
+	
 });
