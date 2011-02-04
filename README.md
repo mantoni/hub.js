@@ -4,9 +4,9 @@ hub.js
 Tools:
 ------
 
-* Maven
-* JsTestDriver
-* Plans to use JsDoc and Closure compiler
+* Maven (http://maven.apache.org/)
+* JsTestDriver (http://code.google.com/p/js-test-driver/)
+* Closure Compiler (http://code.google.com/closure/compiler/)
 
 Running the test cases:
 -----------------------

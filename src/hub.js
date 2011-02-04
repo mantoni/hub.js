@@ -1,8 +1,13 @@
-/*
- * Copyright (c) 2011 Maximilian Antoni
+/**
+ * @license hub.js JavaScript library
+ * https://github.com/mantoni/hub.js
+ * 
+ * Copyright 2011, Maximilian Antoni
+ * Released under the MIT license:
+ * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /**
- * The Hub is a message multi-caster, object factory with mixin support
+ * The Hub singleton exposes the Hub API.
  */
 Hub = function() {
 	
@@ -23,7 +28,7 @@ Hub = function() {
 	/*
 	 * creates a call chain for the two given functions.
 	 */
-	var chain = function(first, second) {
+	function chain(first, second) {
 		return function(data) {
 			var previous = nextFn;
 			nextFn = second;
@@ -46,14 +51,15 @@ Hub = function() {
 	/*
 	 * adds a function to the given node under the specified message.
 	 */
-	var apply = function(node, message, fn) {
+	function apply(node, message, fn) {
 		node[message] = message in node ? chain(fn, node[message]) : fn;
 	};
 	
 	/*
 	 * applies a mix-in to a node.
 	 */
-	var mix = function(node, mixin) {
+
+	function mix(node, mixin) {
 		for(var message in mixin) {
 			apply(node, message, mixin[message]);
 		}
@@ -62,7 +68,7 @@ Hub = function() {
 	/*
 	 * converts the given argument to an array if necessary.
 	 */
-	var argArray = function(arg) {
+	function argArray(arg) {
 		return arg ? (typeof arg === "string" ? [arg] : arg) : emptyArray;
 	};
 	
@@ -70,7 +76,7 @@ Hub = function() {
 	 * stores a node in the given namespace. If there is a node
 	 * associated with the namespace, the nodes get mixed.
 	 */
-	var storeNode = function(namespace, node) {
+	function storeNode(namespace, node) {
 		if(namespace in nodes) {
 			mix(nodes[namespace], node);
 		}
@@ -82,7 +88,7 @@ Hub = function() {
 	/*
 	 * creates a node for the node definition with the given name.
 	 */
-	var createNode = function(namespace) {
+	function createNode(namespace) {
 		var node = {}, definition = definitions[namespace], store = true;
 		if(definition) {
 			var is = argArray(definition.is);
@@ -100,7 +106,7 @@ Hub = function() {
 		return node;
 	};
 	
-	var pathMatcher = function(name) {
+	function pathMatcher(name) {
 		var exp = name.replace(/\./g, '\\.').replace(
 				/\*\*/g, '[a-zA-Z0-9\\.]+').replace(/\*/g, '[a-zA-Z0-9]+');
 		return new RegExp('^' + exp + '$');
@@ -109,14 +115,14 @@ Hub = function() {
 	/*
 	 * returns a node instance for the definition with the given namespace.
 	 */
-	var getNode = function(namespace) {
+	function getNode(namespace) {
 		return nodes[namespace] || createNode(namespace);
 	};
 	
 	/*
 	 * finds all matching nodes for a namespace that contains wildcards.
 	 */
-	var findNodes = function(namespace) {
+	function findNodes(namespace) {
 		var match = [];
 		var re = pathMatcher(namespace);
 		for(namespace in definitions) {
@@ -127,7 +133,7 @@ Hub = function() {
 		return match;
 	};
 	
-	var publishMessageOnNode = function(node, message, data) {
+	function publishMessageOnNode(node, message, data) {
 		if(node[message]) {
 			node[message](data);
 		}
@@ -141,7 +147,7 @@ Hub = function() {
 		}
 	};
 	
-	var processChainItem = function(item, data, success) {
+	function processChainItem(item, data, success) {
 		if(success) {
 			if(!item.success) {
 				return true;
@@ -168,7 +174,7 @@ Hub = function() {
 		return false;
 	};
 	
-	var createPromise = function(fulfilled) {
+	function createPromise(fulfilled) {
 		var chain = [], value, success = true;
 		return {
 			then: function(success, error) {
@@ -210,7 +216,7 @@ Hub = function() {
 	};
 	
 	// Helper function to replace the given proxy with a new promise.
-	var replacePromiseProxy = function(proxy) {
+	function replacePromiseProxy(proxy) {
 		var real = createPromise(true);
 		proxy.then = real.then;
 		proxy.publish = real.publish;
@@ -233,16 +239,17 @@ Hub = function() {
 		},
 		fulfilled: function() {
 			return true;
-		},
+		}
 	};
 	
-	// Public API:
+	// Return public API:
 	return {
 		
 		/**
 		 * the SINGLETON scope.
 		 * 
 		 * @type String
+		 * @const
 		 */
 		SINGLETON: "SINGLETON",
 		
@@ -250,6 +257,7 @@ Hub = function() {
 		 * the PROTOTYPE scope.
 		 * 
 		 * @type String
+		 * @const
 		 */
 		PROTOTYPE: "PROTOTYPE",
 		
@@ -384,7 +392,7 @@ Hub = function() {
 		 * @param scriptUrl the script URL
 		 */
 		lazy: function(namespace, scriptUrl) {
-			
+			throw new Error("Not yet supported");
 		},
 		
 		/**

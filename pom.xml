@@ -10,7 +10,7 @@
 	
 	<url>https://github.com/mantoni/hub.js</url>
 	<description>
-		Hub.js helps developing message driven applications in JavaScript.
+		hub.js is a message multi-caster and object factory with mix-in support.
 	</description>
 	
 	<inceptionYear>2011</inceptionYear>
@@ -23,6 +23,11 @@
 		</developer>
 	</developers>
 	
+	<scm>
+		<url>https://github.com/mantoni/hub.js</url>
+		<developerConnection>https://mantoni@github.com/mantoni/hub.js.git</developerConnection>
+	</scm>
+	
 	<pluginRepositories>
 		<pluginRepository>
 			<id>jstd-maven-plugin google code repo</id>
@@ -31,59 +36,136 @@
 	</pluginRepositories>
 	
 	<dependencies>
-		<!-- JsTestDriver - http://code.google.com/p/js-test-driver/ -->
+		<!--
+			JsTestDriver
+			http://code.google.com/p/js-test-driver/
+		-->
 		<dependency>
 			<groupId>com.google.jstestdriver</groupId>
 			<artifactId>jstestdriver</artifactId>
 			<version>1.2.2</version>
 		</dependency>
 				
-		<!-- JsTestDriver Maven Plugin - http://code.google.com/p/jstd-maven-plugin -->
+		<!--
+			JsTestDriver Maven Plugin
+			http://code.google.com/p/jstd-maven-plugin
+		-->
 		<dependency>
 			<groupId>com.google.jstestdriver</groupId>
 			<artifactId>maven-jstestdriver-plugin</artifactId>
 			<version>1.2.2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
-		
-		<!-- http://mojo.codehaus.org/exec-maven-plugin/ -->
+				
+		<!--
+			Google Closure Compiler
+			http://code.google.com/p/closure-compiler/wiki/Maven
+		-->
 		<dependency>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>exec-maven-plugin</artifactId>
-			<version>1.2</version>
+			<groupId>com.google.javascript</groupId>
+			<artifactId>closure-compiler</artifactId>
+			<version>r706</version>
+		</dependency>
+		<!-- Dependency of Closure Compiler -->
+		<dependency>
+			<groupId>args4j</groupId>
+			<artifactId>args4j</artifactId>
+			<version>2.0.12</version>
+		</dependency>
+		<!-- Dependency of Closure Compiler -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r07</version>
 		</dependency>
 	</dependencies>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jstestdriver.port>4444</jstestdriver.port>
 	</properties>
 	
 	<build>
-		<resources>
-			<resource>
-				<directory>src</directory>
-			</resource>
-		</resources>
 		<testResources>
 			<testResource>
-				<directory>src-test</directory>
+				<directory>src-test/config</directory>
+				<filtering>true</filtering>
+				<targetPath>test-config</targetPath>
 			</testResource>
 		</testResources>
+		<testOutputDirectory>target</testOutputDirectory>
+		
 		<plugins>
+			<!-- Closure Compiler configuration -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2</version>
+				<configuration>
+					<executable>java</executable>
+					<workingDirectory>${project.dir}</workingDirectory>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath>
+							<dependency>args4j:args4j</dependency>
+							<dependency>com.google.guava:guava</dependency>
+							<dependency>com.google.javascript:closure-compiler</dependency>
+						</classpath>
+						<argument>com.google.javascript.jscomp.CommandLineRunner</argument>
+						<argument>--compilation_level</argument>
+						<argument>SIMPLE_OPTIMIZATIONS</argument>
+						<argument>--js</argument>
+						<argument>src/hub.js</argument>
+						<argument>--js_output_file</argument>
+						<argument>dist/hub-${project.version}.js</argument>
+						<argument>--use_only_custom_externs</argument>
+					</arguments>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- JsTestDriver configuration for testing the original source -->
 			<plugin>
 				<groupId>com.google.jstestdriver</groupId>
 				<artifactId>maven-jstestdriver-plugin</artifactId>
 				<version>1.2.2-SNAPSHOT</version>
 				<executions>
 					<execution>
-						<id>run-tests</id>
+						<id>run-src-tests</id>
 						<phase>test</phase>
 						<goals>
 							<goal>test</goal>
 						</goals>
 						<configuration>
 							<debug>true</debug>
-							<config>src-test/jsTestDriver.conf</config>
+							<config>target/test-config/src.conf</config>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- JsTestDriver configuration for testing the compiled source -->
+			<plugin>
+				<groupId>com.google.jstestdriver</groupId>
+				<artifactId>maven-jstestdriver-plugin</artifactId>
+				<version>1.2.2-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>run-dist-tests</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<debug>true</debug>
+							<config>target/test-config/dist.conf</config>
 						</configuration>
 					</execution>
 				</executions>
@@ -99,6 +181,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2</version>
 						<configuration>
 							<executable>java</executable>
 							<workingDirectory>${project.dir}</workingDirectory>
@@ -109,7 +192,7 @@
 								</classpath>
 								<argument>com.google.jstestdriver.JsTestDriver</argument>
 								<argument>--port</argument>
-								<argument>4444</argument>
+								<argument>${jstestdriver.port}</argument>
 							</arguments>
 						</configuration>
 						<executions>
