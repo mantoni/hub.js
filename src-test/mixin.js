@@ -14,7 +14,7 @@ TestCase("mixin", {
 	 */
 	testMixinCallOrder: function() {
 		var chain = [];
-		Hub.node("parent",
+		Hub.peer("parent",
 			function() {
 				return {
 					"test": function() {
@@ -23,7 +23,7 @@ TestCase("mixin", {
 				};
 			}
 		);
-		Hub.node("child",
+		Hub.peer("child",
 			{
 				is: "parent"
 			},
@@ -47,7 +47,7 @@ TestCase("mixin", {
 	 */
 	testStopPropagation: function() {
 		var chain = [];
-		Hub.node("parent",
+		Hub.peer("parent",
 			function() {
 				return {
 					"test": function() {
@@ -56,7 +56,7 @@ TestCase("mixin", {
 				};
 			}
 		);
-		Hub.node("child",
+		Hub.peer("child",
 			{
 				is: "parent"
 			},
@@ -80,7 +80,7 @@ TestCase("mixin", {
 	 */
 	testPropagate: function() {
 		var chain = [];
-		Hub.node("parent",
+		Hub.peer("parent",
 			function() {
 				return {
 					"test": function() {
@@ -89,7 +89,7 @@ TestCase("mixin", {
 				};
 			}
 		);
-		Hub.node("child",
+		Hub.peer("child",
 			{
 				is: "parent"
 			},

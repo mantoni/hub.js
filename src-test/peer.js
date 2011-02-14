@@ -1,7 +1,7 @@
 /*
- * Test cases for Hub.node.
+ * Test cases for Hub.peer.
  */
-TestCase("node", {
+TestCase("peer", {
 	
 	tearDown: function() {
 		Hub.reset();
@@ -11,13 +11,13 @@ TestCase("node", {
 	 * assert defining a node twice fails.
 	 */
 	testDefineTwice: function() {
-		Hub.node("definedTwice", function() {
+		Hub.peer("definedTwice", function() {
 			return {};
 		});
 		try {
-			Hub.node("definedTwice", function() {});
+			Hub.peer("definedTwice", function() {});
 		} catch(e) {
-			assertEquals("Hub - node already defined: definedTwice", e.message);
+			assertEquals("Hub - peer already defined: definedTwice", e.message);
 			return;
 		}
 		fail("Exception expected");
@@ -28,7 +28,7 @@ TestCase("node", {
 	 */
 	testSimple: function() {
 		var called = false;
-		Hub.node("simple", function() {
+		Hub.peer("simple", function() {
 			return {
 				"message": function() {
 					called = true;
@@ -40,12 +40,12 @@ TestCase("node", {
 	},
 	
 	/*
-	 * assert dot separated namespaces can be used for node names
+	 * assert dot separated namespaces can be used for peer identifiers
 	 * as well as listeners.
 	 */
 	testDotSeparatedNamespaces: function() {
 		var called = false;
-		Hub.node("a.b", function() {
+		Hub.peer("a.b", function() {
 			return {
 				"c.d": function() {
 					called = true;

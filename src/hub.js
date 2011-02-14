@@ -14,15 +14,15 @@ Hub = function() {
 	/*
 	 * internal fields:
 	 * 
-	 * nodes: all node instances that have been created
+	 * peers: all peer instances that have been created
 	 * aspects: all aspect instances that have been created
-	 * definitions: all node or aspect definitions
+	 * definitions: all peer or aspect definitions
 	 * nextFn: the next function to execute in the current chain or false
 	 * nextScope: the scope to use for nextFn
 	 * nextData: the data to pass to nextFn
 	 * emptyArray: an empty array used as an internal value object
 	 */
-	var nodes = {}, aspects = {}, definitions = {}, nextFn = false,
+	var peers = {}, aspects = {}, definitions = {}, nextFn = false,
 		nextScope, nextData, promise = true, emptyArray = [];
 	
 	/*
@@ -49,19 +49,19 @@ Hub = function() {
 	};
 	
 	/*
-	 * adds a function to the given node under the specified message.
+	 * adds a function to the given peer under the specified message.
 	 */
-	function apply(node, message, fn) {
-		node[message] = message in node ? chain(fn, node[message]) : fn;
+	function apply(peer, message, fn) {
+		peer[message] = message in peer ? chain(fn, peer[message]) : fn;
 	};
 	
 	/*
-	 * applies a mix-in to a node.
+	 * applies a mix-in to a peer.
 	 */
 
-	function mix(node, mixin) {
+	function mix(peer, mixin) {
 		for(var message in mixin) {
-			apply(node, message, mixin[message]);
+			apply(peer, message, mixin[message]);
 		}
 	};
 	
@@ -73,37 +73,37 @@ Hub = function() {
 	};
 	
 	/*
-	 * stores a node in the given namespace. If there is a node
-	 * associated with the namespace, the nodes get mixed.
+	 * stores a peer in the given namespace. If there is a peer
+	 * associated with the namespace, the peers get mixed.
 	 */
-	function storeNode(namespace, node) {
-		if(namespace in nodes) {
-			mix(nodes[namespace], node);
+	function storePeer(namespace, peer) {
+		if(namespace in peers) {
+			mix(peers[namespace], peer);
 		}
 		else {
-			nodes[namespace] = node;
+			peers[namespace] = peer;
 		}
 	};
 	
 	/*
-	 * creates a node for the node definition with the given name.
+	 * creates a peer for the peer definition with the given name.
 	 */
-	function createNode(namespace) {
-		var node = {}, definition = definitions[namespace], store = true;
+	function createPeer(namespace) {
+		var peer = {}, definition = definitions[namespace], store = true;
 		if(definition) {
 			var is = argArray(definition.is);
 			for(var i = 0, mixin; mixin = is[i++];) {
-				mix(node, getNode(mixin));
+				mix(peer, getPeer(mixin));
 			}
-			mix(node, definition.factory());
+			mix(peer, definition.factory());
 			if(definition.scope === Hub.PROTOTYPE) {
 				store = false;
 			}
 		}
 		if(store) {
-			storeNode(namespace, node);
+			storePeer(namespace, peer);
 		}
-		return node;
+		return peer;
 	};
 	
 	function pathMatcher(name) {
@@ -113,35 +113,35 @@ Hub = function() {
 	};
 	
 	/*
-	 * returns a node instance for the definition with the given namespace.
+	 * returns a peer instance for the definition with the given namespace.
 	 */
-	function getNode(namespace) {
-		return nodes[namespace] || createNode(namespace);
+	function getPeer(namespace) {
+		return peers[namespace] || createPeer(namespace);
 	};
 	
 	/*
-	 * finds all matching nodes for a namespace that contains wildcards.
+	 * finds all matching peers for a namespace that contains wildcards.
 	 */
-	function findNodes(namespace) {
+	function findPeers(namespace) {
 		var match = [];
 		var re = pathMatcher(namespace);
 		for(namespace in definitions) {
 			if(re.test(namespace)) {
-				match.push(getNode(namespace));
+				match.push(getPeer(namespace));
 			}
 		}
 		return match;
 	};
 	
-	function publishMessageOnNode(node, message, data) {
-		if(node[message]) {
-			node[message](data);
+	function publishMessageOnPeer(peer, message, data) {
+		if(peer[message]) {
+			peer[message](data);
 		}
 		else if(message.indexOf("*") !== -1) {
 			var re = pathMatcher(message);
-			for(message in node) {
+			for(message in peer) {
 				if(re.test(message)) {
-					node[message](data);
+					peer[message](data);
 				}
 			}
 		}
@@ -266,38 +266,38 @@ Hub = function() {
 		 * testing.
 		 */
 		reset: function() {
-			nodes = {};
+			peers = {};
 			definitions = {};
 		},
 		
 		subscribe: function(namespace, message, fn) {
-			apply(getNode(namespace), message, fn);
+			apply(getPeer(namespace), message, fn);
 		},
 		
 		/**
 		 * <p>
-		 * defines a node in the Hub that publishes and receives messages.
+		 * defines a peer in the Hub that publishes and receives messages.
 		 * </p>
 		 * <p>
 		 * Configuration parameters:
 		 * </p>
 		 * <ul>
-		 * <li>is (String|Array): single node name or list of node names this
-		 * node inherits from</li>
+		 * <li>is (String|Array): single peer name or list of peer names this
+		 * peer inherits from</li>
 		 * <li>requires (String|Array): single function name or list of function
-		 * names this node requires to be defined</li>
-		 * <li>scope (String): the scope, either Hub.SINGLETON or
+		 * names this peer requires to be defined</li>
+		 * <li>scope (String): the peer scope, either Hub.SINGLETON or
 		 * Hub.PROTOTYPE</li>
 		 * <li>lazy (Boolean): whether to instantiate the singleton lazy</li>
 		 * </ul>
 		 * 
-		 * @param {String} namespace the namespace of the node
-		 * @param {Object} config the node configuration
+		 * @param {String} namespace the namespace of the peer
+		 * @param {Object} config the peer configuration
 		 * @param {Function} factory the factory for the map of listeners
 		 */
-		node: function(namespace, config, factory) {
+		peer: function(namespace, config, factory) {
 			if(definitions[namespace]) {
-				throw new Error("Hub - node already defined: " + namespace);
+				throw new Error("Hub - peer already defined: " + namespace);
 			}
 			if(typeof config === "function") {
 				factory = config;
@@ -305,23 +305,17 @@ Hub = function() {
 			}
 			config.factory = factory;
 			definitions[namespace] = config;
-			if(nodes[namespace]) {
+			if(peers[namespace]) {
 				/*
-				 * If the node already exists, we have to eagerly create
-				 * the node and merge it with the existing.
+				 * If the peer already exists, we have to eagerly create
+				 * the peer and merge it with the existing.
 				 */
-				createNode(namespace);
+				createPeer(namespace);
 			}
 		},
 		
 		/**
-		 * <p>
 		 * publishes a message on the given namespace.
-		 * </p>
-		 * <p>
-		 * If forceSync is set to true but any listener can only process the
-		 * request asynchronously, an error is thrown.
-		 * </p>
 		 * 
 		 * @param {String} namespace the namespace
 		 * @param {String} message the message
@@ -332,12 +326,12 @@ Hub = function() {
 			promise = false;
 			try {
 				if(namespace.indexOf("*") === -1) {
-					publishMessageOnNode(getNode(namespace), message, data);
+					publishMessageOnPeer(getPeer(namespace), message, data);
 				}
 				else {
-					var nodes = findNodes(namespace);
-					for(var i = 0, node; node = nodes[i++];) {
-						publishMessageOnNode(node, message, data);
+					var matches = findPeers(namespace);
+					for(var i = 0, peer; peer = matches[i++];) {
+						publishMessageOnPeer(peer, message, data);
 					}
 				}
 			}
@@ -379,13 +373,13 @@ Hub = function() {
 		
 		/**
 		 * <p>
-		 * defines a node with the given name that loads a script lazily
-		 * expecting the node to be properly defined in the script. Once the
+		 * defines a peer with the given name that loads a script lazily
+		 * expecting the peer to be properly defined in the script. Once the
 		 * script is loaded the original request made to the proxy is forwarded
-		 * to the actual node.
+		 * to the actual peer.
 		 * </p>
 		 * <p>
-		 * If the script does define the expected node an error is thrown. 
+		 * If the script does define the expected peer an error is thrown. 
 		 * </p>
 		 * 
 		 * @param namespace the namespace
@@ -398,7 +392,7 @@ Hub = function() {
 		/**
 		 * <p>
 		 * defines an alias for a namespace / message pair. This allows to
-		 * define a general purpose listener or node and reuse it on different
+		 * define a general purpose listener or peer and reuse it on different
 		 * namespaces and messages.
 		 * </p>
 		 * <p>

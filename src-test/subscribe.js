@@ -28,7 +28,7 @@ TestCase("subscribe", {
 		Hub.subscribe("a", "b", function() {
 			chain.push("subscribe");
 		});
-		Hub.node("a", function() {
+		Hub.peer("a", function() {
 			return {
 				"b": function() {
 					chain.push("node");

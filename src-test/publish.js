@@ -21,14 +21,14 @@ TestCase("publish", {
 	 */
 	testPublishMulticast: function() {
 		var chain = [];
-		Hub.node("a.b", function() {
+		Hub.peer("a.b", function() {
 			return {
 				"m": function() {
 					chain.push("x");
 				}
 			};
 		});
-		Hub.node("a.c", function() {
+		Hub.peer("a.c", function() {
 			return {
 				"m": function() {
 					chain.push("y");
@@ -42,7 +42,7 @@ TestCase("publish", {
 	
 	testPublishWildcard: function() {
 		var count = 0;
-		Hub.node("a.b", function() {
+		Hub.peer("a.b", function() {
 			return {
 				"c.d": function() {
 					count++;
