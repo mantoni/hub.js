@@ -18,59 +18,71 @@ Hub = function() {
 	 * aspects: all aspect instances that have been created
 	 * definitions: all peer or aspect definitions
 	 * nextFn: the next function to execute in the current chain or false
-	 * nextScope: the scope to use for nextFn
 	 * nextData: the data to pass to nextFn
 	 * emptyArray: an empty array used as an internal value object
 	 */
 	var peers = {}, aspects = {}, definitions = {}, nextFn = false,
-		nextScope, nextData, promise = true, emptyArray = [];
+		nextData, promise = true, emptyArray = [];
 	
 	/*
 	 * creates a call chain for the two given functions.
 	 */
-	function chain(first, second) {
-		return function(data) {
+	function chain() {
+		function fn(data) {
 			var previous = nextFn;
-			nextFn = second;
-			nextScope = this;
+			nextFn = fn.second;
 			nextData = data;
 			try {
-				first.call(this, data);
+				fn.first(data);
 				if(nextFn) {
-					second.call(this, data);
+					fn.second(data);
 				}
 			}
 			finally {
 				nextFn = previous;
-				nextScope = undefined;
 				nextData = undefined;
 			}
 		};
-	};
+		fn.first = arguments[0];
+		fn.second = arguments[1];
+		return fn;
+	}
+	
+	function unsubscribe(f, fn) {
+		if(f === fn) {
+			return;
+		}
+		if(f.first === fn) {
+			return f.second;
+		}
+		if(!(f.second = unsubscribe(f.second, fn))) {
+			return f.first;
+		}
+		return f;
+	}
 	
 	/*
 	 * adds a function to the given peer under the specified message.
 	 */
 	function apply(peer, message, fn) {
 		peer[message] = message in peer ? chain(fn, peer[message]) : fn;
-	};
+	}
 	
 	/*
 	 * applies a mix-in to a peer.
 	 */
-
 	function mix(peer, mixin) {
 		for(var message in mixin) {
 			apply(peer, message, mixin[message]);
 		}
-	};
+	}
 	
 	/*
 	 * converts the given argument to an array if necessary.
 	 */
 	function argArray(arg) {
 		return arg ? (typeof arg === "string" ? [arg] : arg) : emptyArray;
-	};
+	}
 	
 	/*
 	 * stores a peer in the given namespace. If there is a peer
@@ -83,7 +95,7 @@ Hub = function() {
 		else {
 			peers[namespace] = peer;
 		}
-	};
+	}
 	
 	/*
 	 * creates a peer for the peer definition with the given name.
@@ -104,20 +116,20 @@ Hub = function() {
 			storePeer(namespace, peer);
 		}
 		return peer;
-	};
+	}
 	
 	function pathMatcher(name) {
 		var exp = name.replace(/\./g, '\\.').replace(
 				/\*\*/g, '[a-zA-Z0-9\\.]+').replace(/\*/g, '[a-zA-Z0-9]+');
 		return new RegExp('^' + exp + '$');
-	};
+	}
 	
 	/*
 	 * returns a peer instance for the definition with the given namespace.
 	 */
 	function getPeer(namespace) {
 		return peers[namespace] || createPeer(namespace);
-	};
+	}
 	
 	/*
 	 * finds all matching peers for a namespace that contains wildcards.
@@ -131,7 +143,7 @@ Hub = function() {
 			}
 		}
 		return match;
-	};
+	}
 	
 	function publishMessageOnPeer(peer, message, data) {
 		if(peer[message]) {
@@ -145,7 +157,7 @@ Hub = function() {
 				}
 			}
 		}
-	};
+	}
 	
 	function processChainItem(item, data, success) {
 		if(success) {
@@ -172,7 +184,7 @@ Hub = function() {
 			}
 		}
 		return false;
-	};
+	}
 	
 	function createPromise(fulfilled) {
 		var chain = [], value, success = true;
@@ -213,7 +225,7 @@ Hub = function() {
 				return fulfilled;
 			}
 		};
-	};
+	}
 	
 	// Helper function to replace the given proxy with a new promise.
 	function replacePromiseProxy(proxy) {
@@ -222,6 +234,7 @@ Hub = function() {
 		proxy.publish = real.publish;
 		return real;
 	}
+	
 	/*
 	 * PromiseProxy is a lightweight object that creates the actual
 	 * promise on demand.
@@ -248,7 +261,7 @@ Hub = function() {
 		/**
 		 * the SINGLETON scope.
 		 * 
-		 * @type String
+		 * @type {string}
 		 * @const
 		 */
 		SINGLETON: "SINGLETON",
@@ -256,7 +269,7 @@ Hub = function() {
 		/**
 		 * the PROTOTYPE scope.
 		 * 
-		 * @type String
+		 * @type {string}
 		 * @const
 		 */
 		PROTOTYPE: "PROTOTYPE",
@@ -270,8 +283,32 @@ Hub = function() {
 			definitions = {};
 		},
 		
+		/**
+		 * subscribes a callback function to the given namespace and message.
+		 * 
+		 * @param {string} namespace The namespace.
+		 * @param {string} message The message.
+		 * @param {function(object)} fn The callback function.
+		 */
 		subscribe: function(namespace, message, fn) {
 			apply(getPeer(namespace), message, fn);
+		},
+		
+		/**
+		 * subscribes a callback function to the given namespace and message.
+		 * 
+		 * @param {string} namespace The namespace.
+		 * @param {string} message The message.
+		 * @param {function(object)} fn The callback function.
+		 */
+		unsubscribe: function(namespace, message, fn) {
+			var peer = peers[namespace];
+			if(!peer) {
+				return;
+			}
+			if(peer[message] && !(peer[message] = unsubscribe(peer[message], fn))) {
+				delete peer[message];
+			}
 		},
 		
 		/**
@@ -354,7 +391,7 @@ Hub = function() {
 		 * current publish call.
 		 */
 		propagate: function() {
-			nextFn.call(nextScope, nextData);
+			nextFn(nextData);
 			nextFn = false;
 		},
 		

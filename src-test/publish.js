@@ -8,7 +8,8 @@ TestCase("publish", {
 	},
 	
 	/*
-	 * assert publishing a namespace that is not picked up by anybody does not fail.
+	 * assert publishing a namespace that is not picked up by anybody does not
+	 * fail.
 	 */
 	testPublishUnknown: function() {
 		Hub.publish("unknown", "message"); // should not throw an error.
