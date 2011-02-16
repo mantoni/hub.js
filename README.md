@@ -70,39 +70,40 @@ Message propagation can also be stopped:
 Object factory
 --------------
 
-The hub allows users to install "nodes" which are instances containing groups of message subscribers for one specific namespace. This is an equivalent to the class concept.
+The hub allows users to define "peers" which are instances containing groups of message subscribers for one specific namespace. This is an equivalent to the class concept.
 
-    Hub.node("some.node.specific.namespace", function() {
+    Hub.peer("some.peer.specific.namespace", function() {
         var privateVar = 123;
 
         Hub.subscribe("some.other.namespace", "**", function(data) {
 			// Subscribed to some.other.namespace/**
 		});
 
+        // public API:
         return {
             "one.message": function(data) {
-                // Subscribed to some.node.specific.namespace/one.message
+                // Subscribed to some.peer.specific.namespace/one.message
             },
             "another.message": function(data) {
-				// Subscribed to some.node.specific.namespace/another.message
+				// Subscribed to some.peer.specific.namespace/another.message
             }
         };
     });
 	
-Each of the key value pairs returned by the nodes factory follow the same semantics as calling the following for each:
+Each of the key value pairs returned by the peers factory follow the same semantics as calling the following for each:
 
-    Hub.subscribe("some.node.specific.namespace", key, callback);
+    Hub.subscribe("some.peer.specific.namespace", message, callback);
 
-A nodes namespace might also contain asterisks to implement a conceptual equivalent to an aspect in AOP.
+A peers namespace might also contain asterisks to implement a conceptual equivalent to an aspect in AOP.
 
 
 Mix-ins
 -------
 
-Nodes might optionaly receive a configuration object as the second argument. One of the supported configuration options is the "is" property. This can be another nodes namespace or an array of namespaces. All listed nodes will be resolved and the provided functions are all merged into this node. If this node subscribes to the same message as a "super" node, they form a chain where this nodes function is invoked first to allow to override the behavior of another node.
+Peers might optionaly receive a configuration object as the second argument. One of the supported configuration options is the "is" property. This can be another peers namespace or an array of namespaces. All listed peers will be resolved and the provided functions are all merged into this peer. If this peer subscribes to the same message as a "super" peer, they form a chain where this peers function is invoked first to allow to override the behavior of another peer.
 
-    Hub.node("some.node.specific.namespace", {
-        is: ["some.other.node", "yet.another.node"]
+    Hub.peer("some.peer.specific.namespace", {
+        is: ["some.other.peer", "yet.another.peer"]
     }, function() {
         return { ... };
     });
