@@ -8,8 +8,8 @@ Tools:
 * JsTestDriver (http://code.google.com/p/js-test-driver/)
 * Closure Compiler (http://code.google.com/closure/compiler/)
 
-Running the test cases:
------------------------
+Running the JsTestDriver test cases:
+------------------------------------
 
 1. Run JsTestDriver server:
      mvn -P jstd validate
@@ -21,9 +21,9 @@ Running the test cases:
 Concepts
 ========
 
-This is a JavaScript implementation of a general programming concept focusing on these three techniques:
+The Hub intends to decouple components by using techniques like message multicasting, object factories ("peers"), mixins and promises in one consistent API. It helps structuring your code, encapsulate internal data and encourages non-blocking designs.
 
-Message multi-casting
+Message multicasting
 ---------------------
 
 The publish / subscribe pattern is used for all component interactions. A user can publish a message on a namespace with some optional data:
@@ -40,12 +40,8 @@ A single asterisk will match any identifier but stop at a dot while a double ast
 Subscriptions work in the same way, although it is also possible to subscribe to messages using wildcards:
 
     Hub.subscribe("some.namespace", "my.message", function(data) { ... });
-    Hub.subscribe("some.*.namespace", "my.message", function(data) { ... });
-    Hub.subscribe("some.**", "my.message", function(data) { ... });
-    Hub.subscribe("some.namespace", "my.*.message", function(data) { ... });
-    Hub.subscribe("some.namespace", "my.**", function(data) { ... });
-    Hub.subscribe("some.*.namespace", "my.*.message", function(data) { ... });
-    Hub.subscribe("some.**", "my.**", function(data) { ... });
+    Hub.subscribe("some.namespace", "**", function(data) { ... });
+    Hub.subscribe("any.**", "pref.*", function(data) { ... });
     Hub.subscribe("**", "**", function(data) { ... });
 
 If more than one subscription matches a published message, the subscriptions with asterisks are notified first which allows to apply AOP style concepts. In a second step the concrete subscriptions are notified in reverse order of subscribe calls. This allows to apply "overriding" semantics.
@@ -97,7 +93,7 @@ Each of the key value pairs returned by the peers factory follow the same semant
 A peers namespace might also contain asterisks to implement a conceptual equivalent to an aspect in AOP.
 
 
-Mix-ins
+Mixins
 -------
 
 Peers might optionaly receive a configuration object as the second argument. One of the supported configuration options is the "is" property. This can be another peers namespace or an array of namespaces. All listed peers will be resolved and the provided functions are all merged into this peer. If this peer subscribes to the same message as a "super" peer, they form a chain where this peers function is invoked first to allow to override the behavior of another peer.
