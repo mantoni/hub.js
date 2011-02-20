@@ -11,12 +11,20 @@ Tools:
 Running the JsTestDriver test cases:
 ------------------------------------
 
-0. You want JsTestDriver in your Maven repository:
+1. You want JsTestDriver in your Maven repository:
+
      mvn install:install-file -Dfile=JsTestDriver-1.3.1.jar -DgroupId=com.google.jstestdriver -DartifactId=jstestdriver -Dversion=1.3.1 -Dpackaging=jar
-1. Run JsTestDriver server:
+
+2. Run JsTestDriver server:
+
      mvn -P jstd validate
-2. Point at least one browser at http://localhost:4444/capture
-3. Run tests (in a second Terminal):
+
+3. Point at least one browser at 
+
+     http://localhost:4444/capture
+
+4. Run tests (in a second Terminal):
+
      mvn test
 
 
