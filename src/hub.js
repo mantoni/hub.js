@@ -280,7 +280,11 @@ Hub = function() {
 		 */
 		reset: function() {
 			peers = {};
-			definitions = {};
+			for(var k in definitions) {
+				if(k.indexOf("lib.") === -1) {
+					delete definitions[k];
+				}
+			}
 		},
 		
 		/**
@@ -446,6 +450,45 @@ Hub = function() {
 			Hub.subscribe(aliasNamespace, aliasMessage, function(data) {
 				return Hub.publish(namespace, message, data);
 			});
+		},
+		
+		util: {
+			
+			/**
+			 * merges the source object into the target object.
+			 */
+			merge: function(target, source) {
+				if(target === undefined || target === source) {
+					return source;
+				}
+				var sourceType = Object.prototype.toString.call(source);
+				var targetType = Object.prototype.toString.call(target);
+				if(sourceType === "[object Object]") {
+					for(var k in source) {
+						try {
+							target[k] = arguments.callee(target[k], source[k]);
+						}
+						catch(e) {
+							Hub.publish("hub.error.warn", "util.merge", {
+								message: "Cannot replace {property}={targetValue} with {sourceValue}",
+								context: {
+									target: target,
+									source: source,
+									property: k,
+									targetValue: target[k],
+									sourceValue: source[k]
+								}
+							});
+						}
+					}
+					return target;
+				}
+				if(sourceType === "[object Array]") {
+					return target.concat(source);
+				}
+				throw new Error();
+			}
+			
 		}
 	
 	};
