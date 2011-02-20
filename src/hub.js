@@ -227,9 +227,11 @@ Hub = function() {
 			},
 			publish: function(namespace, message, data) {
 				if(fulfilled) {
+					data = Hub.util.merge(value, data);
 					return Hub.publish(namespace, message, data);
 				}
 				return this.then(function() {
+					data = Hub.util.merge(value, data);
 					return Hub.publish(namespace, message, data);
 				});
 			},
