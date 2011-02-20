@@ -10,7 +10,7 @@
 	
 	<url>https://github.com/mantoni/hub.js</url>
 	<description>
-		hub.js is a message multi-caster and object factory with mix-in support.
+		separation of concerns with pub/sub multicasting, mixins and promises
 	</description>
 	
 	<inceptionYear>2011</inceptionYear>
@@ -28,13 +28,6 @@
 		<developerConnection>https://mantoni@github.com/mantoni/hub.js.git</developerConnection>
 	</scm>
 	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>jstd-maven-plugin google code repo</id>
-			<url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
 	<dependencies>
 		<!--
 			JsTestDriver
@@ -43,20 +36,9 @@
 		<dependency>
 			<groupId>com.google.jstestdriver</groupId>
 			<artifactId>jstestdriver</artifactId>
-			<version>1.2.2</version>
+			<version>1.3.1</version>
 		</dependency>
-				
-		<!--
-			JsTestDriver Maven Plugin
-			http://code.google.com/p/jstd-maven-plugin
-		-->
-		<dependency>
-			<groupId>com.google.jstestdriver</groupId>
-			<artifactId>maven-jstestdriver-plugin</artifactId>
-			<version>1.2.2-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-				
+						
 		<!--
 			Google Closure Compiler
 			http://code.google.com/p/closure-compiler/wiki/Maven
@@ -89,83 +71,101 @@
 		<testResources>
 			<testResource>
 				<directory>src-test/config</directory>
-				<filtering>true</filtering>
 				<targetPath>test-config</targetPath>
+				<!-- Filter ${jstestdriver.port} etc. -->
+				<filtering>true</filtering>
 			</testResource>
 		</testResources>
 		<testOutputDirectory>target</testOutputDirectory>
-		
+
 		<plugins>
-			<!-- Closure Compiler configuration -->
+			<!-- Disable surefire since we don't have any JUnit tests -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.7.2</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			<!-- Execute Closure Compiler and JsTestDriver -->
+      		<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2</version>
-				<configuration>
-					<executable>java</executable>
-					<workingDirectory>${project.dir}</workingDirectory>
-					<arguments>
-						<argument>-classpath</argument>
-						<classpath>
-							<dependency>args4j:args4j</dependency>
-							<dependency>com.google.guava:guava</dependency>
-							<dependency>com.google.javascript:closure-compiler</dependency>
-						</classpath>
-						<argument>com.google.javascript.jscomp.CommandLineRunner</argument>
-						<argument>--compilation_level</argument>
-						<argument>SIMPLE_OPTIMIZATIONS</argument>
-						<argument>--js</argument>
-						<argument>src/hub.js</argument>
-						<argument>--js_output_file</argument>
-						<argument>dist/hub-${project.version}.js</argument>
-						<argument>--use_only_custom_externs</argument>
-					</arguments>
-				</configuration>
 				<executions>
+					<!-- Closure Compiler configuration -->
 					<execution>
+						<id>src-compile</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<!-- JsTestDriver configuration for testing the original source -->
-			<plugin>
-				<groupId>com.google.jstestdriver</groupId>
-				<artifactId>maven-jstestdriver-plugin</artifactId>
-				<version>1.2.2-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>run-src-tests</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
 						<configuration>
-							<debug>true</debug>
-							<config>target/test-config/src.conf</config>
+							<executable>java</executable>
+							<workingDirectory>${project.dir}</workingDirectory>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath>
+									<dependency>args4j:args4j</dependency>
+									<dependency>com.google.guava:guava</dependency>
+									<dependency>com.google.javascript:closure-compiler</dependency>
+								</classpath>
+								<argument>com.google.javascript.jscomp.CommandLineRunner</argument>
+								<argument>--compilation_level</argument>
+								<argument>SIMPLE_OPTIMIZATIONS</argument>
+								<argument>--js</argument>
+								<argument>src/hub.js</argument>
+								<argument>--js_output_file</argument>
+								<argument>dist/hub-${project.version}.js</argument>
+								<argument>--use_only_custom_externs</argument>
+							</arguments>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			
-			<!-- JsTestDriver configuration for testing the compiled source -->
-			<plugin>
-				<groupId>com.google.jstestdriver</groupId>
-				<artifactId>maven-jstestdriver-plugin</artifactId>
-				<version>1.2.2-SNAPSHOT</version>
-				<executions>
+					<!-- JsTestDriver configuration for testing the original source -->
 					<execution>
-						<id>run-dist-tests</id>
+						<id>src-tests</id>
 						<phase>test</phase>
 						<goals>
-							<goal>test</goal>
+							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<debug>true</debug>
-							<config>target/test-config/dist.conf</config>
+							<executable>java</executable>
+							<workingDirectory>${project.dir}</workingDirectory>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath>
+									<dependency>com.google.jstestdriver:jstestdriver</dependency>
+								</classpath>
+								<argument>com.google.jstestdriver.JsTestDriver</argument>
+								<argument>--tests</argument>
+								<argument>all</argument>
+								<argument>--config</argument>
+								<argument>target/test-config/src.conf</argument>
+							</arguments>
+						</configuration>
+					</execution>
+					<!-- JsTestDriver configuration for testing the compiled source -->
+					<execution>
+						<id>dist-tests</id>
+						<phase>package</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>java</executable>
+							<workingDirectory>${project.dir}</workingDirectory>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath>
+									<dependency>com.google.jstestdriver:jstestdriver</dependency>
+								</classpath>
+								<argument>com.google.jstestdriver.JsTestDriver</argument>
+								<argument>--tests</argument>
+								<argument>all</argument>
+								<argument>--config</argument>
+								<argument>target/test-config/dist.conf</argument>
+							</arguments>
 						</configuration>
 					</execution>
 				</executions>
@@ -174,6 +174,7 @@
 	</build>
 	
 	<profiles>
+		<!-- Launches the JsTestDriver server on port ${jstestdriver.port} -->
 		<profile>
 			<id>jstd</id>
 			<build>
@@ -197,6 +198,7 @@
 						</configuration>
 						<executions>
 							<execution>
+								<id>start-jstestdriver-server</id>
 								<phase>validate</phase>
 								<goals>
 									<goal>exec</goal>

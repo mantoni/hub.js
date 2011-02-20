@@ -7,7 +7,7 @@ AsyncTestCase("peer & promise", {
 		Hub.reset();
 	},
 	
-	testPeerAndPromise: function(pool) {
+	testPeerAndPromise: function(queue) {
 		Hub.peer("test", function() {
 			return {
 				"defer": function() {
@@ -19,9 +19,12 @@ AsyncTestCase("peer & promise", {
 				}
 			};
 		});
-		Hub.publish("test", "defer").then(pool.add(function(args) {
-			assertEquals("Tadaa!", args[0]);
-		}));
+		
+		queue.call(function(pool) {
+			Hub.publish("test", "defer").then(pool.add(function(value) {
+				assertEquals("Tadaa!", value);
+			}));
+		});
 	}
 
 });
