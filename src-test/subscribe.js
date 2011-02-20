@@ -20,10 +20,10 @@ TestCase("subscribe", {
 	},
 	
 	/*
-	 * ensure a node can be defined after an existing subscription
+	 * ensure a peer can be defined after an existing subscription
 	 * and both get mixed and then invoked in the correct order.
 	 */
-	testSubscribeThenAddNode: function() {
+	testSubscribeThenAddPeer: function() {
 		var chain = [];
 		Hub.subscribe("a", "b", function() {
 			chain.push("subscribe");

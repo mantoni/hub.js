@@ -70,6 +70,36 @@ TestCase("promise", {
 			chain.push("c");
 		}).fulfill();
 		assertEquals("a,b,c", chain.join());
+	},
+	
+	/**
+	 * the return value of a subscriber callback is passed as the data
+	 * argument the promise.
+	 */
+	testCallbackReturnString: function() {
+		Hub.subscribe("test", "promise", function() {
+			return "Hello";
+		});
+		var result = null;
+		Hub.publish("test", "promise").then(function(data) {
+			result = data;
+		});
+		assertEquals("Hello", result);
+	},
+	
+	testCallbackReturnMerge: function() {
+		Hub.subscribe("test", "promise.a", function() {
+			return ["Hello"];
+		});
+		Hub.subscribe("test", "promise.b", function() {
+			return ["World"];
+		});
+		var result = null;
+		Hub.publish("test", "promise.*").then(function(data) {
+			result = data;
+		});
+		assertEquals("[object Array]", Object.prototype.toString.call(result));
+		assertEquals("Hello World", result.join(" "));
 	}
 	
 });
