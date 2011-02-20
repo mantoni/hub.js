@@ -145,17 +145,40 @@ Hub = function() {
 		return match;
 	}
 	
-	function publishMessageOnPeer(peer, message, data) {
+	function publishCallbackError(namespace, message, error) {
+		Hub.publish("hub.error.error", "publish", {
+			message: "Error in callback for {namespace}/{message}: {error}",
+			context: {
+				namespace: namespace,
+				message: message,
+				error: error
+			}
+		});
+	}
+	
+	function publishMessageOnPeer(namespace, peer, message, data) {
 		if(peer[message]) {
-			peer[message](data);
+			try {
+				return peer[message](data);
+			}
+			catch(e) {
+				publishCallbackError(namespace, message, e.message);
+				return;
+			}
 		}
-		else if(message.indexOf("*") !== -1) {
-			var re = pathMatcher(message);
+		if(message.indexOf("*") !== -1) {
+			var re = pathMatcher(message), result;
 			for(message in peer) {
 				if(re.test(message)) {
-					peer[message](data);
+					try {
+						result = Hub.util.merge(result, peer[message](data));
+					}
+					catch(e) {
+						publishCallbackError(namespace, message, e.message);
+					}
 				}
 			}
+			return result;
 		}
 	}
 	
@@ -211,11 +234,8 @@ Hub = function() {
 				});
 			},
 			fulfill: function(data) {
-				if(fulfilled) {
-					throw new Error("Hub - promise already fulfilled");
-				}
+				this.mergeValue(data);
 				fulfilled = true;
-				value = data;
 				while(chain.length) {
 					success = processChainItem(chain.shift(), value, success);
 				}
@@ -223,6 +243,12 @@ Hub = function() {
 			},
 			fulfilled: function() {
 				return fulfilled;
+			},
+			mergeValue: function(data) {
+				if(fulfilled) {
+					throw new Error("Hub - promise already fulfilled");
+				}
+				value = Hub.util.merge(value, data);
 			}
 		};
 	}
@@ -363,24 +389,31 @@ Hub = function() {
 		 * @param {Object} data the data to pass
 		 */
 		publish: function(namespace, message, data) {
-			var previousPromise = promise;
+			var previousPromise = promise, result;
 			promise = false;
-			try {
-				if(namespace.indexOf("*") === -1) {
-					publishMessageOnPeer(getPeer(namespace), message, data);
+			if(namespace.indexOf("*") === -1) {
+				var peer = getPeer(namespace);
+				result = publishMessageOnPeer(namespace, peer, message, data);
+			}
+			else {
+				var matches = findPeers(namespace);
+				for(var i = 0, peer; peer = matches[i++];) {
+					var value = publishMessageOnPeer(namespace, peer, message, data);
+					result = Hub.util.merge(result, value);
+				}
+			}
+			var returnPromise = promise;
+			promise = previousPromise;
+			if(result !== undefined) {
+				if(returnPromise) {
+					returnPromise.mergeValue(result);
 				}
 				else {
-					var matches = findPeers(namespace);
-					for(var i = 0, peer; peer = matches[i++];) {
-						publishMessageOnPeer(peer, message, data);
-					}
+					returnPromise = createPromise(false);
+					returnPromise.fulfill(result);
 				}
 			}
-			finally {
-				var result = promise;
-				promise = previousPromise;
-				return result || new PromiseProxy();
-			}
+			return returnPromise || new PromiseProxy();
 		},
 		
 		/**
@@ -458,35 +491,37 @@ Hub = function() {
 			 * merges the source object into the target object.
 			 */
 			merge: function(target, source) {
-				if(target === undefined || target === source) {
+				if(target === undefined || target === null || target === source) {
 					return source;
+				}
+				if(source === undefined || source === null) {
+					return target;
 				}
 				var sourceType = Object.prototype.toString.call(source);
 				var targetType = Object.prototype.toString.call(target);
-				if(sourceType === "[object Object]") {
-					for(var k in source) {
-						try {
+				if(targetType === sourceType) {
+					if(sourceType === "[object Object]") {
+						for(var k in source) {
 							target[k] = arguments.callee(target[k], source[k]);
 						}
-						catch(e) {
-							Hub.publish("hub.error.warn", "util.merge", {
-								message: "Cannot replace {property}={targetValue} with {sourceValue}",
-								context: {
-									target: target,
-									source: source,
-									property: k,
-									targetValue: target[k],
-									sourceValue: source[k]
-								}
-							});
-						}
+						return target;
 					}
-					return target;
+					if(sourceType === "[object Array]") {
+						return target.concat(source);
+					}
 				}
-				if(sourceType === "[object Array]") {
-					return target.concat(source);
-				}
-				throw new Error();
+				Hub.publish("hub.error.warn", "util.merge", {
+					message: targetType === sourceType ?
+							"Cannot merge value {target} with {source}" :
+							"Cannot merge type {targetType} with {sourceType}",
+					context: {
+						target: target,
+						source: source,
+						targetType: targetType,
+						sourceType: sourceType
+					}
+				});
+				return target;
 			}
 			
 		}
