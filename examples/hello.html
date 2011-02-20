@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hello - hub.js examples</title>
+		<script type="text/javascript" src="../src/hub.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+		<!--
+			Hub.peer("greeter", function() {
+				return {
+					"greet": function(name) {
+						document.write("Hi " + name + "!");
+					}
+				};
+			});
+
+			Hub.peer("input", function() {
+				return {
+					"name": function() {
+						return prompt("Your name?");
+					}
+				};
+			});
+			
+			Hub.publish("input", "name").publish("greeter", "greet");
+		-->
+		</script>
+	</body>
+</html>
