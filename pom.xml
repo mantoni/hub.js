@@ -148,7 +148,7 @@
 					<!-- JsTestDriver configuration for testing the compiled source -->
 					<execution>
 						<id>dist-tests</id>
-						<phase>package</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>

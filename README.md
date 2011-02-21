@@ -13,19 +13,25 @@ Running the JsTestDriver test cases:
 
 1. You want JsTestDriver in your Maven repository:
 
-     mvn install:install-file -Dfile=JsTestDriver-1.3.1.jar -DgroupId=com.google.jstestdriver -DartifactId=jstestdriver -Dversion=1.3.1 -Dpackaging=jar
+    mvn install:install-file -Dfile=JsTestDriver-1.3.1.jar -DgroupId=com.google.jstestdriver -DartifactId=jstestdriver -Dversion=1.3.1 -Dpackaging=jar -DgeneratePom=true
 
 2. Run JsTestDriver server:
 
-     mvn -P jstd validate
+    scripts/server.sh (or mvn -Pjstd validate)
 
 3. Point at least one browser at 
 
-     http://localhost:4444/capture
+    http://localhost:4444/capture
 
 4. Run tests (in a second Terminal):
 
-     mvn test
+    mvn test
+
+Once you have this running, you can run scripts/gen-test.sh which will generate a test.sh file that will run your test cases on the command line. This is a bit faster an produces shorter output.
+
+Tip for TextMate users: Add a new command in the bundle editor that saves the current file, takes no input, shows the output as a tooltip and has this content:
+
+    $TM_PROJECT_DIRECTORY/scripts/test.sh
 
 
 Concepts
