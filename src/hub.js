@@ -316,24 +316,48 @@ Hub = function() {
 		},
 		
 		/**
+		 * <p>
 		 * subscribes a callback function to the given namespace and message.
+		 * </p>
+		 * <p>
+		 * The namespace and message pair can be also joined in one string:
+		 * "{namespace}/{message}".
+		 * </p>
 		 * 
 		 * @param {string} namespace The namespace.
 		 * @param {string} message The message.
 		 * @param {function(object)} fn The callback function.
 		 */
 		subscribe: function(namespace, message, fn) {
+			var p = namespace.indexOf("/");
+			if(p !== -1) {
+				fn = message;
+				message = namespace.substring(p + 1);
+				namespace = namespace.substring(0, p);
+			}
 			apply(getPeer(namespace), message, fn);
 		},
 		
 		/**
+		 * <p>
 		 * subscribes a callback function to the given namespace and message.
+		 * </p>
+		 * <p>
+		 * The namespace and message pair can be also joined in one string:
+		 * "{namespace}/{message}".
+		 * </p>
 		 * 
 		 * @param {string} namespace The namespace.
 		 * @param {string} message The message.
 		 * @param {function(object)} fn The callback function.
 		 */
 		unsubscribe: function(namespace, message, fn) {
+			var p = namespace.indexOf("/");
+			if(p !== -1) {
+				fn = message;
+				message = namespace.substring(p + 1);
+				namespace = namespace.substring(0, p);
+			}
 			var peer = peers[namespace];
 			if(!peer) {
 				return;
@@ -384,13 +408,25 @@ Hub = function() {
 		},
 		
 		/**
+		 * <p>
 		 * publishes a message on the given namespace.
+		 * </p>
+		 * <p>
+		 * The namespace and message pair can be also joined in one string:
+		 * "{namespace}/{message}".
+		 * </p>
 		 * 
 		 * @param {String} namespace the namespace
 		 * @param {String} message the message
 		 * @param {Object} data the data to pass
 		 */
 		publish: function(namespace, message, data) {
+			var p = namespace.indexOf("/");
+			if(p !== -1) {
+				data = message;
+				message = namespace.substring(p + 1);
+				namespace = namespace.substring(0, p);
+			}
 			var previousPromise = promise, result;
 			promise = false;
 			if(namespace.indexOf("*") === -1) {
@@ -467,24 +503,90 @@ Hub = function() {
 		
 		/**
 		 * <p>
-		 * defines an alias for a namespace / message pair. This allows to
+		 * defines a forward for a namespace / message pair. This allows to
 		 * define a general purpose listener or peer and reuse it on different
-		 * namespaces and messages.
+		 * namespaces and messages. Publishing on a namespace / message pair
+		 * that matches the forward will trigger the subscribers on the "real"
+		 * namespace / message pair.
 		 * </p>
 		 * <p>
-		 * Publishing on a namespace / message pair that matches the alias will
-		 * trigger the subscribers on the "real" namespace / message pair.
+		 * Both namespace and message pairs can be also joined in one string:
+		 * "{namespace}/{message}".
 		 * </p>
 		 * 
 		 * @param aliasNamespace the alias for the namespace
 		 * @param aliasMessage the alias for the message
 		 * @param namespace the namespace to forward to
 		 * @param message the message to forward to
+		 * @param dataTransformer the optional function to transform the data on the callback
+		 * @param dataToMerge the optional data to merge with the data on the callback
 		 */
-		alias: function(aliasNamespace, aliasMessage, namespace, message) {
-			Hub.subscribe(aliasNamespace, aliasMessage, function(data) {
+		forward: function(aliasNamespace, aliasMessage, namespace, message, dataTransformer, dataToMerge) {
+			if(typeof aliasNamespace === "object") {
+				for(var alias in aliasNamespace) {
+					var value = aliasNamespace[alias];
+					if(typeof value === "string") {
+						Hub.forward(alias, value);
+					}
+					else {
+						Hub.forward.apply(Hub, [alias].concat(value));
+					}
+				}
+				return;
+			}
+			var p = aliasNamespace.indexOf("/");
+			if(p !== -1) {
+				dataToMerge = dataTransformer;
+				dataTransformer = message;
+				message = namespace;
+				namespace = aliasMessage;
+				aliasMessage = aliasNamespace.substring(p + 1);
+				aliasNamespace = aliasNamespace.substring(0, p);
+			}
+			Hub.subscribe(aliasNamespace, aliasMessage, Hub.forwarder(namespace, message, dataToMerge, dataTransformer));
+		},
+		
+		/**
+		 * <p>
+		 * creates a forwarder function for a namespace / message pair. The
+		 * returned function forwards (publishes) on the given namespace and message.
+		 * </p>
+		 * <p>
+		 * The namespace and message pair can be also joined in one string:
+		 * "{namespace}/{message}".
+		 * </p>
+		 * 
+		 * @param namespace the namespace to forward to
+		 * @param message the message to forward to
+		 * @param dataTransformer the optional function to transform the data on the callback
+		 * @param dataToMerge the optional data to merge with the data on the callback
+		 */
+		forwarder: function(namespace, message, dataTransformer, dataToMerge) {
+			var p = namespace.indexOf("/");
+			if(p !== -1) {
+				dataToMerge = dataTransformer;
+				dataTransformer = message;
+				message = namespace.substring(p + 1);
+				namespace = namespace.substring(0, p);
+			}
+			if(dataTransformer) {
+				if(dataToMerge) {
+					return function(data) {
+						return Hub.publish(namespace, message, Hub.util.merge(dataTransformer(data), dataToMerge));
+					}
+				}
+				if(typeof dataTransformer === "function") {
+					return function(data) {
+						return Hub.publish(namespace, message, dataTransformer(data));
+					}
+				}
+				return function(data) {
+					return Hub.publish(namespace, message, Hub.util.merge(data, dataTransformer));
+				}
+			}
+			return function(data) {
 				return Hub.publish(namespace, message, data);
-			});
+			};
 		},
 		
 		util: {

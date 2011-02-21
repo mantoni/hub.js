@@ -19,6 +19,15 @@ TestCase("subscribe", {
 		assertTrue(called);
 	},
 	
+	testShortSubscribe: function() {
+		var called = false;
+		Hub.subscribe("x/y", function() {
+			called = true;
+		});
+		Hub.publish("x", "y");
+		assertTrue(called);
+	},
+	
 	/*
 	 * ensure a peer can be defined after an existing subscription
 	 * and both get mixed and then invoked in the correct order.

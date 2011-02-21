@@ -7,6 +7,15 @@ TestCase("publish", {
 		Hub.reset();
 	},
 	
+	testPublishShort: function() {
+		var called = false;
+		Hub.subscribe("x", "y", function() {
+			called = true;
+		});
+		Hub.publish("x/y");
+		assertTrue(called);
+	},
+	
 	/*
 	 * assert publishing a namespace that is not picked up by anybody does not
 	 * fail.

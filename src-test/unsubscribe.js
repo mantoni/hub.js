@@ -24,6 +24,20 @@ TestCase("unsubscribe", {
 		assertFalse(called);
 	},
 	
+	testShortUnsubscribe: function() {
+		var called = false;
+		var fn = function() {
+			called = true;
+		};
+		Hub.subscribe("x", "y", fn);
+		Hub.publish("x", "y");
+		assertTrue(called);
+		called = false;
+		Hub.unsubscribe("x/y", fn);
+		Hub.publish("x", "y");
+		assertFalse(called);
+	},
+	
 	testUnsubscribeFirstInChainOfTwo: function() {
 		var a = [];
 		var f1 = function() {
