@@ -436,7 +436,8 @@ Hub = function() {
 			else {
 				var matches = findPeers(namespace);
 				for(var i = 0, peer; peer = matches[i++];) {
-					var value = publishMessageOnPeer(namespace, peer, message, data);
+					var value = publishMessageOnPeer(namespace, peer, message,
+									data);
 					result = Hub.util.merge(result, value);
 				}
 			}
@@ -518,10 +519,13 @@ Hub = function() {
 		 * @param aliasMessage the alias for the message
 		 * @param namespace the namespace to forward to
 		 * @param message the message to forward to
-		 * @param dataTransformer the optional function to transform the data on the callback
-		 * @param dataToMerge the optional data to merge with the data on the callback
+		 * @param dataTransformer the optional function to transform the data
+		 * 			on the callback
+		 * @param dataToMerge the optional data to merge with the data on the
+		 * 			callback
 		 */
-		forward: function(aliasNamespace, aliasMessage, namespace, message, dataTransformer, dataToMerge) {
+		forward: function(aliasNamespace, aliasMessage, namespace, message,
+					dataTransformer, dataToMerge) {
 			if(typeof aliasNamespace === "object") {
 				for(var alias in aliasNamespace) {
 					var value = aliasNamespace[alias];
@@ -543,13 +547,15 @@ Hub = function() {
 				aliasMessage = aliasNamespace.substring(p + 1);
 				aliasNamespace = aliasNamespace.substring(0, p);
 			}
-			Hub.subscribe(aliasNamespace, aliasMessage, Hub.forwarder(namespace, message, dataToMerge, dataTransformer));
+			Hub.subscribe(aliasNamespace, aliasMessage, Hub.forwarder(
+					namespace, message, dataToMerge, dataTransformer));
 		},
 		
 		/**
 		 * <p>
 		 * creates a forwarder function for a namespace / message pair. The
-		 * returned function forwards (publishes) on the given namespace and message.
+		 * returned function forwards (publishes) on the given namespace and
+		 * message.
 		 * </p>
 		 * <p>
 		 * The namespace and message pair can be also joined in one string:
@@ -558,8 +564,10 @@ Hub = function() {
 		 * 
 		 * @param namespace the namespace to forward to
 		 * @param message the message to forward to
-		 * @param dataTransformer the optional function to transform the data on the callback
-		 * @param dataToMerge the optional data to merge with the data on the callback
+		 * @param dataTransformer the optional function to transform the data
+		 * 			on the callback
+		 * @param dataToMerge the optional data to merge with the data on the
+		 * 			callback
 		 */
 		forwarder: function(namespace, message, dataTransformer, dataToMerge) {
 			var p = namespace.indexOf("/");
@@ -572,16 +580,19 @@ Hub = function() {
 			if(dataTransformer) {
 				if(dataToMerge) {
 					return function(data) {
-						return Hub.publish(namespace, message, Hub.util.merge(dataTransformer(data), dataToMerge));
+						return Hub.publish(namespace, message, Hub.util.merge(
+								dataTransformer(data), dataToMerge));
 					}
 				}
 				if(typeof dataTransformer === "function") {
 					return function(data) {
-						return Hub.publish(namespace, message, dataTransformer(data));
+						return Hub.publish(namespace, message,
+								dataTransformer(data));
 					}
 				}
 				return function(data) {
-					return Hub.publish(namespace, message, Hub.util.merge(data, dataTransformer));
+					return Hub.publish(namespace, message,
+							Hub.util.merge(data, dataTransformer));
 				}
 			}
 			return function(data) {
@@ -595,7 +606,8 @@ Hub = function() {
 			 * merges the source object into the target object.
 			 */
 			merge: function(target, source) {
-				if(target === undefined || target === null || target === source) {
+				if(target === undefined || target === null ||
+						target === source) {
 					return source;
 				}
 				if(source === undefined || source === null) {
