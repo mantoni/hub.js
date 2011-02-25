@@ -131,6 +131,7 @@ stop() {
 		for PID in $MATCH; do
 			kill $PID
 			echo "Killed"
+			break
 		done
 	else
 		echo "JsTestDriver server not running"
