@@ -110,9 +110,14 @@ JsTestDriver server not running. Do this:
 
 start() {
 	check_jstd
-	java -jar lib/$JSTD_FILENAME --port 4444 &
-	if [ $? -ne 0 ]; then
-		exit 1
+	find_server_process
+	if [ "$MATCH" ]; then
+		echo "JsTestDriver server already running"
+	else
+		java -jar lib/$JSTD_FILENAME --port 4444 &
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 	fi
 }
 
@@ -126,7 +131,6 @@ stop() {
 		for PID in $MATCH; do
 			kill $PID
 			echo "Killed"
-			exit 0
 		done
 	else
 		echo "JsTestDriver server not running"
