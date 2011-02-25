@@ -4,8 +4,8 @@ hub.js
 Tools:
 ------
 
-* JsTestDriver (http://code.google.com/p/js-test-driver/)
-* Closure Compiler (http://code.google.com/closure/compiler/)
+* [JsTestDriver](http://code.google.com/p/js-test-driver/)
+* [Closure Compiler](http://code.google.com/closure/compiler/)
 
 Running the JsTestDriver test cases:
 ------------------------------------
