@@ -156,10 +156,18 @@ Hub = function() {
 		});
 	}
 	
+	function handleMessageResult(result) {
+		if(result === undefined) {
+			return;
+		}
+		var p = createPromise(true, result);
+		promise = promise ? joinPromises(promise, p) : p;
+	}
+	
 	function publishMessageOnPeer(namespace, peer, message, data) {
 		if(peer[message]) {
 			try {
-				return peer[message](data);
+				handleMessageResult(peer[message](data));
 			}
 			catch(e) {
 				publishCallbackError(namespace, message, e.message);
@@ -167,18 +175,17 @@ Hub = function() {
 			}
 		}
 		if(message.indexOf("*") !== -1) {
-			var re = pathMatcher(message), result;
+			var re = pathMatcher(message);
 			for(message in peer) {
 				if(re.test(message)) {
 					try {
-						result = Hub.util.merge(result, peer[message](data));
+						handleMessageResult(peer[message](data));
 					}
 					catch(e) {
 						publishCallbackError(namespace, message, e.message);
 					}
 				}
 			}
-			return result;
 		}
 	}
 	
@@ -209,8 +216,9 @@ Hub = function() {
 		return false;
 	}
 	
-	function createPromise(fulfilled) {
-		var chain = [], value, success = true;
+	function createPromise(fulfilled, value) {
+		var chain = [], success = true;
+		// Public API:
 		return {
 			then: function(success, error) {
 				var item = {
@@ -232,27 +240,64 @@ Hub = function() {
 				}
 				return this.then(function() {
 					data = Hub.util.merge(value, data);
-					return Hub.publish(namespace, message, data);
+					Hub.publish(namespace, message, data);
+					// A return value would be meaningless here.
 				});
 			},
 			fulfill: function(data) {
-				this.mergeValue(data);
+				if(fulfilled) {
+					throw new Error("Hub - promise already fulfilled");
+				}
 				fulfilled = true;
+				value = Hub.util.merge(value, data);
 				while(chain.length) {
 					success = processChainItem(chain.shift(), value, success);
 				}
 				return this;
 			},
-			fulfilled: function() {
-				return fulfilled;
-			},
-			mergeValue: function(data) {
+			reject: function(error) {
 				if(fulfilled) {
 					throw new Error("Hub - promise already fulfilled");
 				}
-				value = Hub.util.merge(value, data);
+				fulfilled = true;
+				success = false;
+				while(chain.length) {
+					success = processChainItem(chain.shift(), error, success);
+				}
+				return this;
+			},
+			fulfilled: function() {
+				return fulfilled;
 			}
 		};
+	}
+	
+	function joinPromises(p1, p2) {
+		var mergedData, count = 0, wrapper = createPromise(false), success = true;
+		function checkDone() {
+			if(++count === 2) {
+				(success ? wrapper.fulfill : wrapper.reject)(mergedData);
+			}
+		}
+		function onSuccess(data) {
+			if(success) {
+				mergedData = Hub.util.merge(mergedData, data);
+			}
+			checkDone();
+		}
+		function onError(data) {
+			if(success) {
+				success = false;
+				mergedData = data;
+			}
+			else {
+				mergedData = Hub.util.merge(mergedData, data);
+			}
+			checkDone();
+		}
+		p1.then(onSuccess, onError);
+		p2.then(onSuccess, onError);
+		return wrapper;
 	}
 	
 	// Helper function to replace the given proxy with a new promise.
@@ -427,31 +472,21 @@ Hub = function() {
 				message = namespace.substring(p + 1);
 				namespace = namespace.substring(0, p);
 			}
-			var previousPromise = promise, result;
+			var previousPromise = promise;
 			promise = false;
 			if(namespace.indexOf("*") === -1) {
 				var peer = getPeer(namespace);
-				result = publishMessageOnPeer(namespace, peer, message, data);
+				publishMessageOnPeer(namespace, peer, message, data);
 			}
 			else {
 				var matches = findPeers(namespace);
 				for(var i = 0, peer; peer = matches[i++];) {
-					var value = publishMessageOnPeer(namespace, peer, message,
+					publishMessageOnPeer(namespace, peer, message,
 									data);
-					result = Hub.util.merge(result, value);
 				}
 			}
 			var returnPromise = promise;
 			promise = previousPromise;
-			if(result !== undefined) {
-				if(returnPromise) {
-					returnPromise.mergeValue(result);
-				}
-				else {
-					returnPromise = createPromise(false);
-					returnPromise.fulfill(result);
-				}
-			}
 			return returnPromise || new PromiseProxy();
 		},
 		
@@ -475,13 +510,21 @@ Hub = function() {
 		 * returns a promise.
 		 */
 		promise: function() {
+			var newPromise = createPromise(false);
 			if(promise === true) {
-				return createPromise(false);
+				// This means we are not within a publish call.
+				return newPromise;
 			}
+			/*
+			 * This means we are within a publish call now. If promise is false
+			 * it means we do not have a promise yet. Otherwise there is an
+			 * existing promise already which we can join with the new one.
+			 */
 			if(promise === false) {
-				promise = createPromise(false);
+				return promise = newPromise;
 			}
-			return promise;
+			promise = joinPromises(promise, newPromise);
+			return newPromise;
 		},
 		
 		/**

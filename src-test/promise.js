@@ -100,6 +100,60 @@ TestCase("promise", {
 		});
 		assertEquals("[object Array]", Object.prototype.toString.call(result));
 		assertEquals("Hello World", result.join(" "));
+	},
+	
+	testJoinedPromisesFulfill1First: function() {
+		var p1, p2, done = false;
+		Hub.subscribe("test", "promise.a", function() {
+			p1 = Hub.promise();
+		});
+		Hub.subscribe("test", "promise.b", function() {
+			p2 = Hub.promise();
+		});
+		var p3 = Hub.publish("test/promise.*").then(function() {
+			done = true;
+		});
+		assertFalse(p1 === p2);
+		assertFalse(p1 === p3);
+		assertFalse(p2 === p3);
+		assertFalse(p1.fulfilled());
+		assertFalse(p2.fulfilled());
+		assertFalse(done);
+		p1.fulfill();
+		assertTrue(p1.fulfilled());
+		assertFalse(p2.fulfilled());
+		assertFalse(done);
+		p2.fulfill();
+		assertTrue(p1.fulfilled());
+		assertTrue(p2.fulfilled());
+		assertTrue(done);
+	},
+
+	testJoinedPromisesFulfill2First: function() {
+		var p1, p2, done = false;
+		Hub.subscribe("test", "promise.a", function() {
+			p1 = Hub.promise();
+		});
+		Hub.subscribe("test", "promise.b", function() {
+			p2 = Hub.promise();
+		});
+		var p3 = Hub.publish("test/promise.*").then(function() {
+			done = true;
+		});
+		assertFalse(p1 === p2);
+		assertFalse(p1 === p3);
+		assertFalse(p2 === p3);
+		assertFalse(p1.fulfilled());
+		assertFalse(p2.fulfilled());
+		assertFalse(done);
+		p2.fulfill();
+		assertFalse(p1.fulfilled());
+		assertTrue(p2.fulfilled());
+		assertFalse(done);
+		p1.fulfill();
+		assertTrue(p1.fulfilled());
+		assertTrue(p2.fulfilled());
+		assertTrue(done);
 	}
 	
 });
