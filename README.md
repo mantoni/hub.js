@@ -4,31 +4,33 @@ hub.js
 Tools:
 ------
 
-* JsTestDriver (http://code.google.com/p/js-test-driver/)
-* Closure Compiler (http://code.google.com/closure/compiler/)
+* [JsTestDriver](http://code.google.com/p/js-test-driver/)
+* [Closure Compiler](http://code.google.com/closure/compiler/)
 
 Running the JsTestDriver test cases:
 ------------------------------------
 
-Start the test server:
+1. Start the test server:
 
-    ./build.sh start
+        ./build.sh start
 
-Open http://localhost:4444/capture
+2. Open [http://localhost:4444/capture](http://localhost:4444/capture)
 
-Run the tests:
+3. Run the tests:
 
-    ./build.sh test
-
-Tip for TextMate users: Create a new command in the bundle editor that saves the current file, takes no input, shows the output as a tooltip and has this content:
-
-    $TM_PROJECT_DIRECTORY/build.sh ct
+        ./build.sh test
 
 
 Compiling with Closure compiler:
 --------------------------------
 
     ./build.sh compile
+
+Tip for TextMate users: Create a new command in the bundle editor that saves the current file, takes no input, shows the output as a tooltip and has this content:
+
+    $TM_PROJECT_DIRECTORY/build.sh ct
+
+This will compile and test in one go.
 
 
 Concepts
