@@ -83,12 +83,12 @@ TestCase("publish", {
 			throw new Error("d'oh!");
 		});
 		var error = null;
-		Hub.subscribe("hub.error.error", "publish", function(data) {
+		Hub.subscribe("hub.error", "publish", function(data) {
 			error = data;
 		});
 		Hub.publish("test", "publish");
 		assertNotNull("error caught", error);
-		assertEquals("Error in callback for {namespace}/{message}: {error}", error.message);
+		assertEquals("Error in callback for {namespace}/{message}: {error}", error.description);
 		assertEquals("test", error.context.namespace);
 		assertEquals("publish", error.context.message);
 		assertEquals("d'oh!", error.context.error);

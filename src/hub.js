@@ -11,20 +11,50 @@
  */
 Hub = function() {
 	
-	/*
-	 * internal fields:
-	 * 
-	 * peers: all peer instances that have been created
-	 * aspects: all aspect instances that have been created
-	 * definitions: all peer or aspect definitions
-	 * nextFn: the next function to execute in the current chain or false
-	 * nextData: the data to pass to nextFn
-	 * emptyArray: an empty array used as an internal value object
+	/**
+	 * All peer instances that have been created.
 	 */
-	var peers = {}, aspects = {}, definitions = {}, nextFn = false,
-		nextData, promise = true, emptyArray = [], currentTimeout;
+	var peers = {};
 	
-	/*
+	/**
+	 * All peer or aspect definitions.
+	 */
+	var definitions = {};
+	
+	/**
+	 * The next function to execute in the current chain or false.
+	 */
+	var nextFn = false;
+	
+	/**
+	 * The data to pass to nextFn.
+	 */
+	var nextData;
+	
+	/**
+	 * An empty array used as an internal value object.
+	 */
+	var emptyArray = [];
+	
+	/**
+	 * The current promise. Also indicates whether currently executing
+	 * Hub.publish.
+	 */
+	var promise = true;
+	
+	/**
+	 * All promises currently monitored for timeouts.
+	 */
+	var monitored = {};
+	
+	/**
+	 * The current timeout value during Hub.publish.
+	 */
+	var currentTimeout;
+	var nextTimeout = false;
+	var timer = false;
+	
+	/**
 	 * creates a call chain for the two given functions.
 	 */
 	function chain() {
@@ -48,14 +78,14 @@ Hub = function() {
 		return fn;
 	}
 	
-	function unsubscribe(f, fn) {
+	function unchain(f, fn) {
 		if(f === fn) {
 			return;
 		}
 		if(f.first === fn) {
 			return f.second;
 		}
-		if(!(f.second = unsubscribe(f.second, fn))) {
+		if(!(f.second = unchain(f.second, fn))) {
 			return f.first;
 		}
 		return f;
@@ -146,8 +176,9 @@ Hub = function() {
 	}
 	
 	function publishCallbackError(namespace, message, error) {
-		Hub.publish("hub.error.error", "publish", {
-			message: "Error in callback for {namespace}/{message}: {error}",
+		Hub.publish("hub.error", "publish", {
+			type: "error",
+			description: "Error in callback for {namespace}/{message}: {error}",
 			context: {
 				namespace: namespace,
 				message: message,
@@ -188,35 +219,6 @@ Hub = function() {
 			}
 		}
 	}
-	
-	function processChainItem(item, data, success) {
-		if(success) {
-			if(!item.success) {
-				return true;
-			}
-			try {
-				item.success(data);
-				return true;
-			}
-			catch(e1) {
-				console.warn("Hub - error in promise success handler: "
-						+ e1.message);
-				return false;
-			}
-		}
-		if(item.error) {
-			try {
-				item.error(data);
-			}
-			catch(e2) {
-				console.warn("Hub - error in promise error handler: "
-						+ e2.message);
-			}
-		}
-		return false;
-	}
-	
-	var monitored = {}, nextTimeout = false, timer = false;
 	
 	function resetTimeout() {
 		nextTimeout = Number.MAX_VALUE;
@@ -265,6 +267,9 @@ Hub = function() {
 	}
 	
 	function unmonitor(key, p) {
+		if(!key) {
+			return;
+		}
 		var arr = monitored[key];
 		for(var i = arr.length; i--;) {
 			if(arr[i] === p) {
@@ -280,20 +285,50 @@ Hub = function() {
 		resetTimeout();
 	}
 	
+	function invokePromiseCallback(callback, data) {
+		if(callback) {
+			try {
+				callback(data);
+			}
+			catch(e) {
+				Hub.publish("hub.error", "promise.callback", {
+					type: "error",
+					description: "Error in promise callback: ${error}",
+					context: {
+						error: e.message
+					}
+				});
+			}
+		}
+	}
+	
+	function promiseAlreadyFulfilled() {
+		Hub.publish("hub.error", "promise.fulfilled", {
+			type: "validation",
+			description: "Promise already fulfilled",
+			context: {}
+		});
+	}
+	
 	function createPromise(fulfilled, value, timeout) {
-		var chain = [], success = true, timeoutKey, p;
+		var callbacks = [];
+		var errorCallbacks = [];
+		var success = true;
+		var timeoutKey;
+		var p;
 		// Public API:
 		p = {
-			then: function(success, error) {
-				var item = {
-					success: success,
-					error: error
-				};
+			then: function(callback, errorCallback) {
 				if(fulfilled) {
-					success = processChainItem(item, value, success);
+					invokePromiseCallback(success ? callback : errorCallback, value);
 				}
 				else {
-					chain.push(item);
+					if(callback) {
+						callbacks.push(callback);
+					}
+					if(errorCallback) {
+						errorCallbacks.push(errorCallback);
+					}
 				}
 				return this;
 			},
@@ -310,25 +345,29 @@ Hub = function() {
 			},
 			fulfill: function(data) {
 				if(fulfilled) {
-					throw new Error("Hub - promise already fulfilled");
+					promiseAlreadyFulfilled();
 				}
-				fulfilled = true;
-				unmonitor(timeoutKey, p);
-				value = Hub.util.merge(value, data);
-				while(chain.length) {
-					success = processChainItem(chain.shift(), value, success);
+				else {
+					fulfilled = true;
+					unmonitor(timeoutKey, p);
+					value = Hub.util.merge(value, data);
+					while(callbacks.length) {
+						invokePromiseCallback(callbacks.shift(), value);
+					}
 				}
 				return this;
 			},
 			reject: function(error) {
 				if(fulfilled) {
-					throw new Error("Hub - promise already fulfilled");
+					promiseAlreadyFulfilled();
 				}
-				fulfilled = true;
-				unmonitor(timeoutKey, p);
-				success = false;
-				while(chain.length) {
-					success = processChainItem(chain.shift(), error, success);
+				else {
+					fulfilled = true;
+					success = false;
+					unmonitor(timeoutKey, p);
+					while(callbacks.length) {
+						invokePromiseCallback(errorCallbacks.shift(), error);
+					}
 				}
 				return this;
 			},
@@ -336,8 +375,8 @@ Hub = function() {
 				return fulfilled;
 			}
 		};
-		if(!fulfilled) {
-			timeoutKey = monitor(p, timeout || 20000);
+		if(!fulfilled && timeout) {
+			timeoutKey = monitor(p, timeout);
 		}
 		return p;
 	}
@@ -481,7 +520,7 @@ Hub = function() {
 			if(!peer) {
 				return;
 			}
-			if(peer[message] && !(peer[message] = unsubscribe(peer[message], fn))) {
+			if(peer[message] && !(peer[message] = unchain(peer[message], fn))) {
 				delete peer[message];
 			}
 		},
@@ -559,8 +598,8 @@ Hub = function() {
 			else {
 				var matches = findPeers(namespace);
 				for(var i = 0, peer; peer = matches[i++];) {
-					publishMessageOnPeer(namespace, peer, message,
-									data, timeout);
+					publishMessageOnPeer(namespace, peer, message, data,
+							timeout);
 				}
 			}
 			currentTimeout = previousTimeout;
@@ -750,8 +789,9 @@ Hub = function() {
 						return target.concat(source);
 					}
 				}
-				Hub.publish("hub.error.warn", "util.merge", {
-					message: targetType === sourceType ?
+				Hub.publish("hub.error", "util.merge", {
+					type: "validation",
+					description: targetType === sourceType ?
 							"Cannot merge value {target} with {source}" :
 							"Cannot merge type {targetType} with {sourceType}",
 					context: {
