@@ -22,7 +22,7 @@ Hub = function() {
 	 * emptyArray: an empty array used as an internal value object
 	 */
 	var peers = {}, aspects = {}, definitions = {}, nextFn = false,
-		nextData, promise = true, emptyArray = [];
+		nextData, promise = true, emptyArray = [], currentTimeout;
 	
 	/*
 	 * creates a call chain for the two given functions.
@@ -156,18 +156,18 @@ Hub = function() {
 		});
 	}
 	
-	function handleMessageResult(result) {
+	function handleMessageResult(result, timeout) {
 		if(result === undefined) {
 			return;
 		}
 		var p = createPromise(true, result);
-		promise = promise ? joinPromises(promise, p) : p;
+		promise = promise ? joinPromises(promise, p, timeout) : p;
 	}
 	
-	function publishMessageOnPeer(namespace, peer, message, data) {
+	function publishMessageOnPeer(namespace, peer, message, data, timeout) {
 		if(peer[message]) {
 			try {
-				handleMessageResult(peer[message](data));
+				handleMessageResult(peer[message](data), timeout);
 			}
 			catch(e) {
 				publishCallbackError(namespace, message, e.message);
@@ -179,7 +179,7 @@ Hub = function() {
 			for(message in peer) {
 				if(re.test(message)) {
 					try {
-						handleMessageResult(peer[message](data));
+						handleMessageResult(peer[message](data), timeout);
 					}
 					catch(e) {
 						publishCallbackError(namespace, message, e.message);
@@ -216,10 +216,74 @@ Hub = function() {
 		return false;
 	}
 	
-	function createPromise(fulfilled, value) {
-		var chain = [], success = true;
+	var monitored = {}, nextTimeout = false, timer = false;
+	
+	function resetTimeout() {
+		nextTimeout = Number.MAX_VALUE;
+		for(key in monitored) {
+			nextTimeout = Math.min(nextTimeout, Number(key));
+		}
+		if(nextTimeout === Number.MAX_VALUE) {
+			nextTimeout = false;
+		}
+		else {
+			timer = setTimeout(checkMonitored, nextTimeout - new Date().getTime());
+		}
+	}
+	
+	function checkMonitored() {
+		timer = false;
+		var key = String(nextTimeout), late = monitored[key];
+		if(late) {
+			for(var i = 0, l = late.length; i < l; i++) {
+				late[i].reject({
+					type: "timeout"
+				});
+			}
+			delete monitored[key];
+		}
+		resetTimeout();
+	}
+	
+	function monitor(p, timeout) {
+		var time = new Date().getTime() + timeout;
+		var key = String(time);
+		if(key in monitored) {
+			monitored[key].push(p);
+		}
+		else {
+			monitored[key] = [p];
+		}
+		if(!nextTimeout || nextTimeout > time) {
+			if(timer) {
+				clearTimeout(timer);
+			}
+			timer = setTimeout(checkMonitored, timeout);
+			nextTimeout = time;
+		}
+		return key;
+	}
+	
+	function unmonitor(key, p) {
+		var arr = monitored[key];
+		for(var i = arr.length; i--;) {
+			if(arr[i] === p) {
+				if(arr.length === 1) {
+					delete monitored[key];
+				}
+				else {
+					arr.splice(i, 1);
+				}
+				break;
+			}
+		}
+		resetTimeout();
+	}
+	
+	function createPromise(fulfilled, value, timeout) {
+		var chain = [], success = true, timeoutKey, p;
 		// Public API:
-		return {
+		p = {
 			then: function(success, error) {
 				var item = {
 					success: success,
@@ -233,14 +297,14 @@ Hub = function() {
 				}
 				return this;
 			},
-			publish: function(namespace, message, data) {
+			publish: function(namespace, message, data, timeout) {
 				if(fulfilled) {
 					data = Hub.util.merge(value, data);
-					return Hub.publish(namespace, message, data);
+					return Hub.publish(namespace, message, data, timeout);
 				}
 				return this.then(function() {
 					data = Hub.util.merge(value, data);
-					Hub.publish(namespace, message, data);
+					Hub.publish(namespace, message, data, timeout);
 					// A return value would be meaningless here.
 				});
 			},
@@ -249,6 +313,7 @@ Hub = function() {
 					throw new Error("Hub - promise already fulfilled");
 				}
 				fulfilled = true;
+				unmonitor(timeoutKey, p);
 				value = Hub.util.merge(value, data);
 				while(chain.length) {
 					success = processChainItem(chain.shift(), value, success);
@@ -260,6 +325,7 @@ Hub = function() {
 					throw new Error("Hub - promise already fulfilled");
 				}
 				fulfilled = true;
+				unmonitor(timeoutKey, p);
 				success = false;
 				while(chain.length) {
 					success = processChainItem(chain.shift(), error, success);
@@ -270,10 +336,14 @@ Hub = function() {
 				return fulfilled;
 			}
 		};
+		if(!fulfilled) {
+			timeoutKey = monitor(p, timeout || 20000);
+		}
+		return p;
 	}
 	
-	function joinPromises(p1, p2) {
-		var mergedData, count = 0, wrapper = createPromise(false), success = true;
+	function joinPromises(p1, p2, timeout) {
+		var mergedData, count = 0, wrapper = createPromise(false, undefined, timeout), success = true;
 		function checkDone() {
 			if(++count === 2) {
 				(success ? wrapper.fulfill : wrapper.reject)(mergedData);
@@ -317,8 +387,8 @@ Hub = function() {
 		then: function(success, error) {
 			return replacePromiseProxy(this).then(success, error);
 		},
-		publish: function(namespace, message, data) {
-			return replacePromiseProxy(this).publish(namespace, message, data);
+		publish: function(namespace, message, data, timeout) {
+			return replacePromiseProxy(this).publish(namespace, message, data, timeout);
 		},
 		fulfill: function(data) {
 			throw new Error("Hub - promise already fulfilled");
@@ -358,6 +428,10 @@ Hub = function() {
 					delete definitions[k];
 				}
 			}
+			if(timer) {
+				clearTimeout(timer);
+			}
+			monitored = {}, nextTimeout = false, timer = false;
 		},
 		
 		/**
@@ -464,27 +538,32 @@ Hub = function() {
 		 * @param {String} namespace the namespace
 		 * @param {String} message the message
 		 * @param {Object} data the data to pass
+		 * @param {Number} timeout the timeout
 		 */
-		publish: function(namespace, message, data) {
+		publish: function(namespace, message, data, timeout) {
 			var p = namespace.indexOf("/");
 			if(p !== -1) {
+				timeout = data;
 				data = message;
 				message = namespace.substring(p + 1);
 				namespace = namespace.substring(0, p);
 			}
 			var previousPromise = promise;
 			promise = false;
+			var previousTimeout = currentTimeout;
+			currentTimeout = timeout;
 			if(namespace.indexOf("*") === -1) {
 				var peer = getPeer(namespace);
-				publishMessageOnPeer(namespace, peer, message, data);
+				publishMessageOnPeer(namespace, peer, message, data, timeout);
 			}
 			else {
 				var matches = findPeers(namespace);
 				for(var i = 0, peer; peer = matches[i++];) {
 					publishMessageOnPeer(namespace, peer, message,
-									data);
+									data, timeout);
 				}
 			}
+			currentTimeout = previousTimeout;
 			var returnPromise = promise;
 			promise = previousPromise;
 			return returnPromise || new PromiseProxy();
@@ -508,9 +587,11 @@ Hub = function() {
 		
 		/**
 		 * returns a promise.
+		 *
+		 * @param {Number} timeout the optional timeout for the promise.
 		 */
-		promise: function() {
-			var newPromise = createPromise(false);
+		promise: function(timeout) {
+			var newPromise = createPromise(false, undefined, timeout || currentTimeout);
 			if(promise === true) {
 				// This means we are not within a publish call.
 				return newPromise;
