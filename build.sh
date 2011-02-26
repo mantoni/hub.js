@@ -97,12 +97,16 @@ test() {
 		echo "
 JsTestDriver server not running. Do this:
 - ./build.sh start
-- Open http://localhost:4444/capture
+- Open http://localhost:4224/capture
 - ./build.sh test
 "
 		exit 1
 	fi
-	java -jar lib/$JSTD_FILENAME --tests all --config src-test/jstd.conf
+	TEST_CASE="all"
+	if [ $1 ]; then
+		TEST_CASE="$1"
+	fi
+	java -jar lib/$JSTD_FILENAME --tests $TEST_CASE
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -114,7 +118,7 @@ start() {
 	if [ "$MATCH" ]; then
 		echo "JsTestDriver server already running"
 	else
-		java -jar lib/$JSTD_FILENAME --port 4444 &
+		java -jar lib/$JSTD_FILENAME --port 4224 &
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
@@ -152,7 +156,7 @@ case "$1" in
 		compile
 	;;
 	"test" | "t" )
-		test
+		test $2
 	;;
 	"ct" )
 		compile

@@ -14,7 +14,7 @@ Running the JsTestDriver test cases:
 
         ./build.sh start
 
-2. Open [http://localhost:4444/capture](http://localhost:4444/capture)
+2. Open [http://localhost:4224/capture](http://localhost:4224/capture)
 
 3. Run the tests:
 
