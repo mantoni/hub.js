@@ -55,40 +55,44 @@ Hub = function() {
 	var timer = false;
 	
 	/**
-	 * creates a call chain for the two given functions.
+	 * creates a call chain for the given functions.
 	 */
-	function chain() {
-		function fn(data) {
-			var previous = nextFn;
-			nextFn = fn.second;
-			nextData = data;
-			try {
-				fn.first(data);
-				if(nextFn) {
-					fn.second(data);
+	function chain(first, second) {
+		var newChain = function(data) {
+			if(!first) {
+				second(data);
+			}
+			else if(!second) {
+				first(data);
+			}
+			else {
+				var previousFn = nextFn;
+				nextFn = second;
+				nextData = data;
+				try {
+					first(data);
+					if(nextFn) {
+						second(data);
+					}
+				}
+				finally {
+					nextFn = previousFn;
+					nextData = undefined;
 				}
 			}
-			finally {
-				nextFn = previous;
-				nextData = undefined;
-			}
 		};
-		fn.first = arguments[0];
-		fn.second = arguments[1];
-		return fn;
-	}
-	
-	function unchain(f, fn) {
-		if(f === fn) {
-			return;
+		newChain.remove = function(fn) {
+			if(fn === first) {
+				first = undefined;
+				return second;
+			}
+			if(fn === second || (typeof second.remove === "function" && !(second = second.remove(fn)))) {
+				second = undefined;
+				return first;
+			}
+			return newChain;
 		}
-		if(f.first === fn) {
-			return f.second;
-		}
-		if(!(f.second = unchain(f.second, fn))) {
-			return f.first;
-		}
-		return f;
+		return newChain;
 	}
 	
 	/*
@@ -149,9 +153,9 @@ Hub = function() {
 	}
 	
 	function pathMatcher(name) {
-		var exp = name.replace(/\./g, '\\.').replace(
-				/\*\*/g, '[a-zA-Z0-9\\.]+').replace(/\*/g, '[a-zA-Z0-9]+');
-		return new RegExp('^' + exp + '$');
+		var exp = name.replace(/\./g, "\\.").replace(
+				/\*\*/g, "[a-zA-Z0-9\\.]+").replace(/\*/g, "[a-zA-Z0-9]+");
+		return new RegExp("^" + exp + "$");
 	}
 	
 	/*
@@ -520,8 +524,14 @@ Hub = function() {
 			if(!peer) {
 				return;
 			}
-			if(peer[message] && !(peer[message] = unchain(peer[message], fn))) {
-				delete peer[message];
+			var chain = peer[message];
+			if(chain) {
+				if(chain === fn) {
+					delete peer[message];
+				}
+				else {
+					peer[message] = chain.remove(fn);
+				}
 			}
 		},
 		
@@ -627,7 +637,8 @@ Hub = function() {
 		/**
 		 * returns a promise.
 		 *
-		 * @param {Number} timeout the optional timeout for the promise.
+		 * @param {Number} timeout the optional timeout for the promise
+		 * @return {Object} the promise
 		 */
 		promise: function(timeout) {
 			var newPromise = createPromise(false, undefined, timeout || currentTimeout);
@@ -658,8 +669,8 @@ Hub = function() {
 		 * If the script does define the expected peer an error is thrown. 
 		 * </p>
 		 * 
-		 * @param namespace the namespace
-		 * @param scriptUrl the script URL
+		 * @param {String} namespace the namespace
+		 * @param {String} scriptUrl the script URL
 		 */
 		lazy: function(namespace, scriptUrl) {
 			throw new Error("Not yet supported");
@@ -678,14 +689,14 @@ Hub = function() {
 		 * "{namespace}/{message}".
 		 * </p>
 		 * 
-		 * @param aliasNamespace the alias for the namespace
-		 * @param aliasMessage the alias for the message
-		 * @param namespace the namespace to forward to
-		 * @param message the message to forward to
-		 * @param dataTransformer the optional function to transform the data
+		 * @param {String} aliasNamespace the alias for the namespace
+		 * @param {String} aliasMessage the alias for the message
+		 * @param {String} namespace the namespace to forward to
+		 * @param {String} message the message to forward to
+		 * @param {Function} dataTransformer the optional function to transform
+		 * 			the data on the callback
+		 * @param {Object} dataToMerge the optional data to merge with the data
 		 * 			on the callback
-		 * @param dataToMerge the optional data to merge with the data on the
-		 * 			callback
 		 */
 		forward: function(aliasNamespace, aliasMessage, namespace, message,
 					dataTransformer, dataToMerge) {
@@ -725,12 +736,13 @@ Hub = function() {
 		 * "{namespace}/{message}".
 		 * </p>
 		 * 
-		 * @param namespace the namespace to forward to
-		 * @param message the message to forward to
-		 * @param dataTransformer the optional function to transform the data
+		 * @param {String} namespace the namespace to forward to
+		 * @param {String} message the message to forward to
+		 * @param {Function} dataTransformer the optional function to transform
+		 * 			the data on the callback
+		 * @param {Object} dataToMerge the optional data to merge with the data
 		 * 			on the callback
-		 * @param dataToMerge the optional data to merge with the data on the
-		 * 			callback
+		 * @return {Function} the forwarder function
 		 */
 		forwarder: function(namespace, message, dataTransformer, dataToMerge) {
 			var p = namespace.indexOf("/");
@@ -767,6 +779,10 @@ Hub = function() {
 			
 			/**
 			 * merges the source object into the target object.
+			 *
+			 * @param {*} target the target value or object
+			 * @param {*} source the source value or object
+			 * @return {*} the new target value or object
 			 */
 			merge: function(target, source) {
 				if(target === undefined || target === null ||
@@ -802,6 +818,26 @@ Hub = function() {
 					}
 				});
 				return target;
+			},
+			
+			/**
+			 * creates a call chain for the given functions. The returned
+			 * chain is a function itself which will invoke all functions in
+			 * the given order.
+			 * The chain implements remove(Function) which removes one of
+			 * the functions from the chain.
+			 * 
+			 * @param {...Function} the functions to chain
+			 * @return {Function} the chain function
+			 */
+			chain: function() {
+				var l = arguments.length - 1;
+				var newChain = chain(arguments[l - 1], arguments[l]);
+				l--;
+				while(l) {
+					newChain = chain(arguments[--l], newChain);
+				}
+				return newChain;
 			}
 			
 		}
