@@ -13,46 +13,70 @@ Hub = function() {
 	
 	/**
 	 * All peer instances that have been created.
+	 *
+	 * @type {object}
 	 */
 	var peers = {};
 	
 	/**
 	 * All peer or aspect definitions.
+	 *
+	 * @type {object}
 	 */
 	var definitions = {};
 	
 	/**
 	 * The next function to execute in the current chain or false.
+	 *
+	 * @type {Function}
 	 */
 	var nextFn = false;
 	
 	/**
 	 * The data to pass to nextFn.
+	 *
+	 * @type {*}
 	 */
 	var nextData;
 	
 	/**
 	 * An empty array used as an internal value object.
+	 *
+	 * @type {Array}
 	 */
 	var emptyArray = [];
 	
 	/**
 	 * The current promise. Also indicates whether currently executing
 	 * Hub.publish.
+	 *
+	 * @type {object}
 	 */
 	var promise = true;
 	
 	/**
 	 * All promises currently monitored for timeouts.
+	 *
+	 * @type {object}
 	 */
 	var monitored = {};
 	
 	/**
-	 * The current timeout value during Hub.publish.
-	 */
-	var currentTimeout;
-	var nextTimeout = false;
-	var timer = false;
+	 * @type {number}
+	 */	
+	var monitorTimeout = undefined;
+	/**
+	 * @type {number}
+	 */	
+	var onceTimeout = undefined;
+	/**
+	 * @type {number}
+	 */	
+	var promiseCounter = 0;
+	/**
+	 * @type {number}
+	 */	
+	var now = undefined;
 	
 	/**
 	 * creates a call chain for the given functions.
@@ -86,7 +110,8 @@ Hub = function() {
 				first = undefined;
 				return second;
 			}
-			if(fn === second || (typeof second.remove === "function" && !(second = second.remove(fn)))) {
+			if(fn === second || (typeof second.remove === "function" &&
+					!(second = second.remove(fn)))) {
 				second = undefined;
 				return first;
 			}
@@ -191,18 +216,20 @@ Hub = function() {
 		});
 	}
 	
-	function handleMessageResult(result, timeout) {
+	// helper function for publishMessageOnPeer
+	function handleMessageResult(result) {
 		if(result === undefined) {
 			return;
 		}
 		var p = createPromise(true, result);
-		promise = promise ? joinPromises(promise, p, timeout) : p;
+		promise = promise ? joinPromises(promise, p) : p;
 	}
 	
-	function publishMessageOnPeer(namespace, peer, message, data, timeout) {
+	// helper function for Hub.publish
+	function publishMessageOnPeer(namespace, peer, message, data) {
 		if(peer[message]) {
 			try {
-				handleMessageResult(peer[message](data), timeout);
+				handleMessageResult(peer[message](data));
 			}
 			catch(e) {
 				publishCallbackError(namespace, message, e.message);
@@ -214,7 +241,7 @@ Hub = function() {
 			for(message in peer) {
 				if(re.test(message)) {
 					try {
-						handleMessageResult(peer[message](data), timeout);
+						handleMessageResult(peer[message](data));
 					}
 					catch(e) {
 						publishCallbackError(namespace, message, e.message);
@@ -224,71 +251,73 @@ Hub = function() {
 		}
 	}
 	
-	function resetTimeout() {
-		nextTimeout = Number.MAX_VALUE;
-		for(key in monitored) {
-			nextTimeout = Math.min(nextTimeout, Number(key));
-		}
-		if(nextTimeout === Number.MAX_VALUE) {
-			nextTimeout = false;
-		}
-		else {
-			timer = setTimeout(checkMonitored, nextTimeout - new Date().getTime());
-		}
-	}
-	
+	// internal observer for monitored promises.
 	function checkMonitored() {
-		timer = false;
-		var key = String(nextTimeout), late = monitored[key];
-		if(late) {
-			for(var i = 0, l = late.length; i < l; i++) {
-				late[i].reject({
+		onceTimeout = undefined;
+		now = new Date().getTime();
+		var next = -1;
+		for(var id in monitored) {
+			var spec = monitored[id];
+			var expires = spec[0];
+			if(expires <= now) {
+				spec[1].reject({
 					type: "timeout"
 				});
+				delete monitored[id];
 			}
-			delete monitored[key];
+			else {
+				next = next === -1 ? expires : Math.min(expires, next);
+			}
 		}
-		resetTimeout();
+		if(next !== -1) {
+			monitorTimeout = setTimeout(checkMonitored, next);
+		}
+		now = undefined;
 	}
 	
+	/*
+	 * monitors the given promise which causes the promise to time out after
+	 * the specified timeout.
+	 *
+	 * @param {Object} p the promise to monitor.
+	 * @param {Number} timeout the timeout in milliseconds.
+	 * @return {Number} the monitor identifier.
+	 */
 	function monitor(p, timeout) {
-		var time = new Date().getTime() + timeout;
-		var key = String(time);
-		if(key in monitored) {
-			monitored[key].push(p);
+		if(!now) {
+			now = new Date().getTime();
 		}
-		else {
-			monitored[key] = [p];
+		var id = ++promiseCounter;
+		monitored[id] = [now + timeout, p];
+		if(!onceTimeout) {
+			clearTimeout(monitorTimeout);
+			onceTimeout = setTimeout(checkMonitored, 15);
 		}
-		if(!nextTimeout || nextTimeout > time) {
-			if(timer) {
-				clearTimeout(timer);
-			}
-			timer = setTimeout(checkMonitored, timeout);
-			nextTimeout = time;
-		}
-		return key;
+		return id;
 	}
 	
-	function unmonitor(key, p) {
-		if(!key) {
-			return;
-		}
-		var arr = monitored[key];
-		for(var i = arr.length; i--;) {
-			if(arr[i] === p) {
-				if(arr.length === 1) {
-					delete monitored[key];
-				}
-				else {
-					arr.splice(i, 1);
-				}
-				break;
-			}
-		}
-		resetTimeout();
+	/*
+	 * removes the promise monitor for the given monitor identifier. The
+	 * identifier is returned from monitor(promise, timeout).
+	 *
+	 * @param {Number} the monitor identifier.
+	 */
+	function unmonitor(id) {
+		delete monitored[id];
 	}
 	
+	/*
+	 * <p>
+	 * invoke the given callback and pass in the data. If an error occurs
+	 * during execution, an error message is published on the hub.
+	 * </p>
+	 * <p>
+	 * Used by promises to invoke the success or error callbacks.
+	 * </p>
+	 *
+	 * @param {Function} callback the callback function.
+	 * @param {*} data the data to pass to the callback.
+	 */
 	function invokePromiseCallback(callback, data) {
 		if(callback) {
 			try {
@@ -306,6 +335,10 @@ Hub = function() {
 		}
 	}
 	
+	/*
+	 * called by a promises fulfill() and reject() methods if the promise was
+	 * already fulfilled. Publishes an error message on the hub.
+	 */
 	function promiseAlreadyFulfilled() {
 		Hub.publish("hub.error", "promise.fulfilled", {
 			type: "validation",
@@ -314,14 +347,27 @@ Hub = function() {
 		});
 	}
 	
+	/*
+	 * creates a new promise.
+	 *
+	 * @param {Boolean} fulfilled whether the promise is initially fulfilled.
+	 * @param {*} value the initial value.
+	 * @param {Number} timeout the optional timeout.
+	 * @return {Object} the new promise.
+	 */
 	function createPromise(fulfilled, value, timeout) {
 		var callbacks = [];
 		var errorCallbacks = [];
 		var success = true;
-		var timeoutKey;
+		var timeoutId;
 		var p;
 		// Public API:
 		p = {
+			/**
+			 * @param {Function} callback the success callback.
+			 * @param {Function} errorCallback the error callback.
+			 * @return {Object} this promise.
+			 */
 			then: function(callback, errorCallback) {
 				if(fulfilled) {
 					invokePromiseCallback(success ? callback : errorCallback, value);
@@ -336,24 +382,34 @@ Hub = function() {
 				}
 				return this;
 			},
-			publish: function(namespace, message, data, timeout) {
+			/**
+			 * @param {String} namespace the namespace.
+			 * @param {String} message the message.
+			 * @param {*} data the data.
+			 * @return {Object} this promise.
+			 */
+			publish: function(namespace, message, data) {
 				if(fulfilled) {
 					data = Hub.util.merge(value, data);
-					return Hub.publish(namespace, message, data, timeout);
+					return Hub.publish(namespace, message, data);
 				}
 				return this.then(function() {
 					data = Hub.util.merge(value, data);
-					Hub.publish(namespace, message, data, timeout);
+					Hub.publish(namespace, message, data);
 					// A return value would be meaningless here.
 				});
 			},
+			/**
+			 * @param {*} data the data.
+			 * @return {Object} this promise.
+			 */
 			fulfill: function(data) {
 				if(fulfilled) {
 					promiseAlreadyFulfilled();
 				}
 				else {
 					fulfilled = true;
-					unmonitor(timeoutKey, p);
+					unmonitor(timeoutId);
 					value = Hub.util.merge(value, data);
 					while(callbacks.length) {
 						invokePromiseCallback(callbacks.shift(), value);
@@ -361,6 +417,10 @@ Hub = function() {
 				}
 				return this;
 			},
+			/**
+			 * @param {*} error the error data.
+			 * @return {Object} this promise.
+			 */
 			reject: function(error) {
 				if(fulfilled) {
 					promiseAlreadyFulfilled();
@@ -368,25 +428,48 @@ Hub = function() {
 				else {
 					fulfilled = true;
 					success = false;
-					unmonitor(timeoutKey, p);
+					unmonitor(timeoutId);
 					while(callbacks.length) {
 						invokePromiseCallback(errorCallbacks.shift(), error);
 					}
 				}
 				return this;
 			},
+			/**
+			 * @return {Boolean} whether this promise was fulfilled.
+			 */
 			fulfilled: function() {
 				return fulfilled;
 			}
 		};
-		if(!fulfilled && timeout) {
-			timeoutKey = monitor(p, timeout);
+		if(!fulfilled) {
+			timeoutId = monitor(p, timeout || 60000);
 		}
 		return p;
 	}
 	
-	function joinPromises(p1, p2, timeout) {
-		var mergedData, count = 0, wrapper = createPromise(false, undefined, timeout), success = true;
+	/**
+	 * joins the given promises together in a new promise. This means the
+	 * returned promise is fulfilled if the given promises are fulfilled. If
+	 * both promises succeed then the returned promise succeeds as well with
+	 * the data ob the promises being merged. If one of the given promises
+	 * failes, then the returned promise fails as well with the data set to
+	 * the data of the failing promise, or the merged data if both promises
+	 * failed.
+	 *
+	 * @param {Object} p1 the first promise
+	 * @param {Object} p2 the second promise
+	 * @return {Object} the joined promise
+	 */
+	function joinPromises(p1, p2) {
+		var mergedData;
+		var count = 0;
+		var wrapper = createPromise(false, undefined);
+		var success = true;
+		/*
+		 * checks whether the promise is done and calls fulfill or reject on
+		 * the wrapper.
+		 */
 		function checkDone() {
 			if(++count === 2) {
 				(success ? wrapper.fulfill : wrapper.reject)(mergedData);
@@ -422,16 +505,17 @@ Hub = function() {
 	}
 	
 	/*
-	 * PromiseProxy is a lightweight object that creates the actual
-	 * promise on demand.
+	 * PromiseProxy is a lightweight object that creates the actual promise
+	 * on demand.
 	 */
 	var PromiseProxy = function() {};
+	// Same API as actual promise:
 	PromiseProxy.prototype = {
 		then: function(success, error) {
 			return replacePromiseProxy(this).then(success, error);
 		},
-		publish: function(namespace, message, data, timeout) {
-			return replacePromiseProxy(this).publish(namespace, message, data, timeout);
+		publish: function(namespace, message, data) {
+			return replacePromiseProxy(this).publish(namespace, message, data);
 		},
 		fulfill: function(data) {
 			throw new Error("Hub - promise already fulfilled");
@@ -471,10 +555,16 @@ Hub = function() {
 					delete definitions[k];
 				}
 			}
-			if(timer) {
-				clearTimeout(timer);
+			if(onceTimeout) {
+				clearTimeout(onceTimeout);
+				onceTimeout = undefined;
 			}
-			monitored = {}, nextTimeout = false, timer = false;
+			if(monitorTimeout) {
+				clearTimeout(monitorTimeout);
+				monitorTimeout = undefined;
+			}
+			now = undefined;
+			monitored = {};
 		},
 		
 		/**
@@ -545,15 +635,12 @@ Hub = function() {
 		 * <ul>
 		 * <li>is (String|Array): single peer name or list of peer names this
 		 * peer inherits from</li>
-		 * <li>requires (String|Array): single function name or list of function
-		 * names this peer requires to be defined</li>
 		 * <li>scope (String): the peer scope, either Hub.SINGLETON or
-		 * Hub.PROTOTYPE</li>
-		 * <li>lazy (Boolean): whether to instantiate the singleton lazy</li>
+		 * Hub.PROTOTYPE. Defaults to Hub.SINGLETON.</li>
 		 * </ul>
 		 * 
 		 * @param {String} namespace the namespace of the peer
-		 * @param {Object} config the peer configuration
+		 * @param {Object} config the optional peer configuration
 		 * @param {Function} factory the factory for the map of listeners
 		 */
 		peer: function(namespace, config, factory) {
@@ -587,32 +674,26 @@ Hub = function() {
 		 * @param {String} namespace the namespace
 		 * @param {String} message the message
 		 * @param {Object} data the data to pass
-		 * @param {Number} timeout the timeout
 		 */
-		publish: function(namespace, message, data, timeout) {
+		publish: function(namespace, message, data) {
 			var p = namespace.indexOf("/");
 			if(p !== -1) {
-				timeout = data;
 				data = message;
 				message = namespace.substring(p + 1);
 				namespace = namespace.substring(0, p);
 			}
 			var previousPromise = promise;
 			promise = false;
-			var previousTimeout = currentTimeout;
-			currentTimeout = timeout;
 			if(namespace.indexOf("*") === -1) {
 				var peer = getPeer(namespace);
-				publishMessageOnPeer(namespace, peer, message, data, timeout);
+				publishMessageOnPeer(namespace, peer, message, data);
 			}
 			else {
 				var matches = findPeers(namespace);
 				for(var i = 0, peer; peer = matches[i++];) {
-					publishMessageOnPeer(namespace, peer, message, data,
-							timeout);
+					publishMessageOnPeer(namespace, peer, message, data);
 				}
 			}
-			currentTimeout = previousTimeout;
 			var returnPromise = promise;
 			promise = previousPromise;
 			return returnPromise || new PromiseProxy();
@@ -641,7 +722,7 @@ Hub = function() {
 		 * @return {Object} the promise
 		 */
 		promise: function(timeout) {
-			var newPromise = createPromise(false, undefined, timeout || currentTimeout);
+			var newPromise = createPromise(false, undefined, timeout);
 			if(promise === true) {
 				// This means we are not within a publish call.
 				return newPromise;

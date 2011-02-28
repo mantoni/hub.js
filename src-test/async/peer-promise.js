@@ -14,7 +14,7 @@ AsyncTestCase("peer-&-promise", {
 					var promise = Hub.promise();
 					setTimeout(function() {
 						promise.fulfill("Tadaa!");
-					}, 50);
+					}, 10);
 				}
 			};
 		});
@@ -33,7 +33,7 @@ AsyncTestCase("peer-&-promise", {
 					var promise = Hub.promise();
 					setTimeout(function() {
 						promise.fulfill(["Tadaa!"]);
-					}, 50);
+					}, 10);
 					return ["Deferred"];
 				}
 			};
