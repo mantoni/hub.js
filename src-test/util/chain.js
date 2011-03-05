@@ -1,7 +1,11 @@
 /*
  * Test cases for Hub.util.chain.
  */
-TestCase("util.chain", {
+TestCase("util_chain", {
+	
+	"test function exists": function() {
+		assertFunction(Hub.util.chain);
+	},
 
 	testChainCall: function() {
 		var calls = [];
@@ -74,7 +78,7 @@ TestCase("util.chain", {
 		assertFunction(chain.remove);
 		chain = chain.remove(f2);
 		assertFunction(chain);
-		//assertFunction(chain.remove);
+		assertFunction(chain.remove);
 		chain();
 		assertTrue(f1.called);
 		assertUndefined(f2.called);
@@ -89,7 +93,7 @@ TestCase("util.chain", {
 		assertFunction(chain.remove);
 		chain = chain.remove(f3);
 		assertFunction(chain);
-		//assertFunction(chain.remove);
+		assertFunction(chain.remove);
 		chain();
 		assertTrue(f1.called);
 		assertTrue(f2.called);

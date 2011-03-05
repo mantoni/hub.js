@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.util.merge.
  */
-TestCase("util.merge", {
+TestCase("util_merge", {
 	
 	testEmptyObject: function() {
 		var o = Hub.util.merge({}, {});
@@ -29,7 +29,7 @@ TestCase("util.merge", {
 		var source = { x: "bar" };
 		var error = this.mergeError(target, source);
 		assertEquals("foo", target.x);
-		assertEquals("Cannot merge value {target} with {source}", error.description);
+		assertEquals("Cannot merge value foo with bar", error.toString());
 		assertEquals("foo", error.context.target);
 		assertEquals("bar", error.context.source);
 		assertEquals("[object String]", error.context.targetType);
@@ -92,18 +92,20 @@ TestCase("util.merge", {
 	
 	testMergeObjectWithArray: function() {
 		var error = this.mergeError({}, []);
-		assertEquals("Cannot merge type {targetType} with {sourceType}", error.description);
+		assertEquals("validation", error.type);
+		assertEquals("Cannot merge type [object Object] with [object Array]", error.toString());
 		assertEquals("[object Object]", error.context.targetType);
 		assertEquals("[object Array]", error.context.sourceType);
 	},
 	
 	mergeError: function(target, source) {
 		var error = null;
-		Hub.subscribe("hub.error", "util.merge", function(data) {
+		Hub.subscribe("hub.error/util.merge", function(data) {
 			error = data;
 		});
 		Hub.util.merge(target, source);
-		assertObject("error caught", error);
+		assertNotNull(error);
+		assertObject(error);
 		assertEquals("validation", error.type);
 		return error;
 	}

@@ -12,6 +12,20 @@
 Hub = function() {
 	
 	/**
+	 * the empty function for internal use only.
+	 *
+	 * @type {Function}
+	 */
+	var emptyFn = function() {};
+	
+	/**
+	 * topic to subscriber functions.
+	 *
+	 * @type {object}
+	 */
+	var subscribers = {};
+	
+	/**
 	 * All peer instances that have been created.
 	 *
 	 * @type {object}
@@ -62,13 +76,20 @@ Hub = function() {
 	var monitored = {};
 	
 	/**
-	 * @type {number}
-	 */	
-	var monitorTimeout = undefined;
+	 * All path matcher regular expressions.
+	 *
+	 * @type {object}
+	 */
+	var pathMatchers = {};
+	
 	/**
 	 * @type {number}
 	 */	
-	var onceTimeout = undefined;
+	var monitorTimeout;
+	/**
+	 * @type {number}
+	 */	
+	var onceTimeout;
 	/**
 	 * @type {number}
 	 */	
@@ -76,28 +97,29 @@ Hub = function() {
 	/**
 	 * @type {number}
 	 */	
-	var now = undefined;
-	
+	var now;
+		
 	/**
 	 * creates a call chain for the given functions.
 	 */
 	function chain(first, second) {
 		var newChain = function(data) {
 			if(!first) {
-				second(data);
+				return second(data);
 			}
-			else if(!second) {
-				first(data);
+			if(!second) {
+				return first(data);
 			}
 			else {
 				var previousFn = nextFn;
 				nextFn = second;
 				nextData = data;
 				try {
-					first(data);
+					var result = first(data);
 					if(nextFn) {
-						second(data);
+						result = Hub.util.merge(result, second(data));
 					}
+					return result;
 				}
 				finally {
 					nextFn = previousFn;
@@ -146,7 +168,6 @@ Hub = function() {
 	/*
 	 * stores a peer in the given namespace. If there is a peer
 	 * associated with the namespace, the peers get mixed.
-	 */
 	function storePeer(namespace, peer) {
 		if(namespace in peers) {
 			mix(peers[namespace], peer);
@@ -155,41 +176,40 @@ Hub = function() {
 			peers[namespace] = peer;
 		}
 	}
+	 */
 	
 	/*
 	 * creates a peer for the peer definition with the given name.
 	 */
 	function createPeer(namespace) {
-		var peer = {}, definition = definitions[namespace], store = true;
+		var peer = {}, definition = definitions[namespace];
 		if(definition) {
 			var is = argArray(definition.is);
 			for(var i = 0, mixin; mixin = is[i++];) {
 				mix(peer, getPeer(mixin));
 			}
 			mix(peer, definition.factory());
-			if(definition.scope === Hub.PROTOTYPE) {
-				store = false;
-			}
-		}
-		if(store) {
-			storePeer(namespace, peer);
 		}
 		return peer;
 	}
 	
 	function pathMatcher(name) {
+		var matcher = pathMatchers[name];
+		if(matcher) {
+			return matcher;
+		}
 		var exp = name.replace(/\./g, "\\.").replace(
-				/\*\*/g, "[a-zA-Z0-9\\.]+").replace(/\*/g, "[a-zA-Z0-9]+");
-		return new RegExp("^" + exp + "$");
+			/\*\*/g, "[a-zA-Z0-9\\.]+").replace(/\*/g, "[a-zA-Z0-9]+");
+		return pathMatchers[name] = new RegExp("^" + exp + "$");
 	}
 	
 	/*
-	 * returns a peer instance for the definition with the given namespace.
+	 * returns a peer instance for the definition with the given topic.
 	 */
 	function getPeer(namespace) {
-		return peers[namespace] || createPeer(namespace);
+		return peers[namespace] || createPeer(topic);
 	}
-	
+		
 	/*
 	 * finds all matching peers for a namespace that contains wildcards.
 	 */
@@ -204,50 +224,47 @@ Hub = function() {
 		return match;
 	}
 	
-	function publishCallbackError(namespace, message, error) {
-		Hub.publish("hub.error", "publish", {
-			type: "error",
-			description: "Error in callback for {namespace}/{message}: {error}",
-			context: {
-				namespace: namespace,
-				message: message,
-				error: error
-			}
-		});
+	function substitutionFn(topic) {
+		return function() {
+			invoke(Hub.util.substitute(topic, arguments), arguments);
+		};
 	}
 	
-	// helper function for publishMessageOnPeer
-	function handleMessageResult(result) {
-		if(result === undefined) {
-			return;
+	function createTopicFunction(topic) {
+		var match;
+		if(topic.indexOf("{") !== -1) {
+			match = substitutionFn(topic);
 		}
-		var p = createPromise(true, result);
-		promise = promise ? joinPromises(promise, p) : p;
-	}
-	
-	// helper function for Hub.publish
-	function publishMessageOnPeer(namespace, peer, message, data) {
-		if(peer[message]) {
-			try {
-				handleMessageResult(peer[message](data));
-			}
-			catch(e) {
-				publishCallbackError(namespace, message, e.message);
-				return;
-			}
-		}
-		if(message.indexOf("*") !== -1) {
-			var re = pathMatcher(message);
-			for(message in peer) {
-				if(re.test(message)) {
-					try {
-						handleMessageResult(peer[message](data));
-					}
-					catch(e) {
-						publishCallbackError(namespace, message, e.message);
-					}
+		if(topic.indexOf("*") !== -1) {
+			var re = pathMatcher(topic);
+			for(var t in subscribers) {
+				if(re.test(t)) {
+					var subscriber = subscribers[t];
+					match = match ? chain(match, subscriber) : subscriber;
 				}
 			}
+		}
+		return subscribers[topic] = (match || emptyFn);
+	}
+	
+	function invoke(topic, args) {
+		var topicFn = subscribers[topic];
+		if(!topicFn) {
+			topicFn = createTopicFunction(topic);
+		}
+		try {
+			return topicFn.apply(null, args);
+		}
+		catch(e) {
+			var errorTopic = "hub.error/publish";
+			if(topic === errorTopic) {
+				throw e;
+			}
+			invoke(errorTopic, [new Hub.Error("error",
+				"Error in callback for topic \"{topic}\": {error}", {
+					topic: topic, error: e.message
+				})]
+			);
 		}
 	}
 	
@@ -316,21 +333,18 @@ Hub = function() {
 	 * </p>
 	 *
 	 * @param {Function} callback the callback function.
-	 * @param {*} data the data to pass to the callback.
+	 * @param {*} value the value to pass to the callback.
 	 */
-	function invokePromiseCallback(callback, data) {
+	function invokePromiseCallback(callback, value) {
 		if(callback) {
 			try {
-				callback(data);
+				callback(value);
 			}
 			catch(e) {
-				Hub.publish("hub.error", "promise.callback", {
-					type: "error",
-					description: "Error in promise callback: ${error}",
-					context: {
+				invoke("hub.error/promise.callback", [new Hub.Error("error",
+					"Error in promise callback: ${error}", {
 						error: e.message
-					}
-				});
+					})]);
 			}
 		}
 	}
@@ -340,11 +354,8 @@ Hub = function() {
 	 * already fulfilled. Publishes an error message on the hub.
 	 */
 	function promiseAlreadyFulfilled() {
-		Hub.publish("hub.error", "promise.fulfilled", {
-			type: "validation",
-			description: "Promise already fulfilled",
-			context: {}
-		});
+		invoke("hub.error/promise.fulfilled", [new Hub.Error("validation",
+			"Promise already fulfilled")]);
 	}
 	
 	/*
@@ -383,24 +394,27 @@ Hub = function() {
 				return this;
 			},
 			/**
-			 * @param {String} namespace the namespace.
-			 * @param {String} message the message.
-			 * @param {*} data the data.
+			 * @param {String} topic the topic.
+			 * @param {*} arguments the arguments.
 			 * @return {Object} this promise.
 			 */
-			publish: function(namespace, message, data) {
+			publish: function(topic) {
 				if(fulfilled) {
-					data = Hub.util.merge(value, data);
-					return Hub.publish(namespace, message, data);
+//					data = Hub.util.merge(value, data);
+					return Hub.publish.apply(Hub, arguments);
+				}
+				var args = [topic];
+				if(arguments.length > 1) {
+					args = args.concat(arguments);
 				}
 				return this.then(function() {
-					data = Hub.util.merge(value, data);
-					Hub.publish(namespace, message, data);
+//					data = Hub.util.merge(value, data);
+					return Hub.publish.apply(Hub, args);
 					// A return value would be meaningless here.
 				});
 			},
 			/**
-			 * @param {*} data the data.
+			 * @param {*} value the value.
 			 * @return {Object} this promise.
 			 */
 			fulfill: function(data) {
@@ -549,6 +563,7 @@ Hub = function() {
 		 * testing.
 		 */
 		reset: function() {
+			subscribers = {};
 			peers = {};
 			for(var k in definitions) {
 				if(k.indexOf("lib.") === -1) {
@@ -576,51 +591,34 @@ Hub = function() {
 		 * "{namespace}/{message}".
 		 * </p>
 		 * 
-		 * @param {string} namespace The namespace.
-		 * @param {string} message The message.
-		 * @param {function(object)} fn The callback function.
+		 * @param {string} topic the topic.
+		 * @param {function(object)} fn the callback function.
 		 */
-		subscribe: function(namespace, message, fn) {
-			var p = namespace.indexOf("/");
-			if(p !== -1) {
-				fn = message;
-				message = namespace.substring(p + 1);
-				namespace = namespace.substring(0, p);
-			}
-			apply(getPeer(namespace), message, fn);
+		subscribe: function(topic, fn) {
+			var topicFn = subscribers[topic];
+			subscribers[topic] = topicFn && topicFn !== emptyFn ?
+					chain(fn, topicFn) : fn;
 		},
 		
 		/**
-		 * <p>
-		 * subscribes a callback function to the given namespace and message.
-		 * </p>
-		 * <p>
-		 * The namespace and message pair can be also joined in one string:
-		 * "{namespace}/{message}".
-		 * </p>
-		 * 
-		 * @param {string} namespace The namespace.
-		 * @param {string} message The message.
-		 * @param {function(object)} fn The callback function.
+		 * @param {string} topic the topic.
+		 * @param {function(object)} fn the callback function.
 		 */
-		unsubscribe: function(namespace, message, fn) {
-			var p = namespace.indexOf("/");
-			if(p !== -1) {
-				fn = message;
-				message = namespace.substring(p + 1);
-				namespace = namespace.substring(0, p);
-			}
-			var peer = peers[namespace];
-			if(!peer) {
+		unsubscribe: function(topic, fn) {
+			var topicFn = subscribers[topic];
+			if(!topicFn) {
 				return;
 			}
-			var chain = peer[message];
-			if(chain) {
-				if(chain === fn) {
-					delete peer[message];
-				}
-				else {
-					peer[message] = chain.remove(fn);
+			for(var t in subscribers) {
+				var re = pathMatcher(t);
+				if(re.test(topic)) {
+					var topicFn = subscribers[t];
+					if(topicFn === fn) {
+						delete subscribers[t];
+					}
+					else {
+						topicFn.remove(fn);
+					}
 				}
 			}
 		},
@@ -653,46 +651,30 @@ Hub = function() {
 			}
 			config.factory = factory;
 			definitions[namespace] = config;
-			if(peers[namespace]) {
-				/*
-				 * If the peer already exists, we have to eagerly create
-				 * the peer and merge it with the existing.
-				 */
-				createPeer(namespace);
+			if(!config.scope || config.scope === Hub.SINGLETON) {
+				var peer = peers[namespace] = createPeer(namespace);
+				for(var message in peer) {
+					Hub.subscribe(namespace + "/" + message, peer[message]);
+				}
 			}
 		},
 		
 		/**
-		 * <p>
-		 * publishes a message on the given namespace.
-		 * </p>
-		 * <p>
-		 * The namespace and message pair can be also joined in one string:
+		 * publishes a topic along with optional arguments.
+		 * The topic consists of a namespace and a message in the form:
 		 * "{namespace}/{message}".
-		 * </p>
 		 * 
-		 * @param {String} namespace the namespace
-		 * @param {String} message the message
-		 * @param {Object} data the data to pass
+		 * @param {String} topic the topic
+		 * @param {...Object} args the arguments to pass
 		 */
-		publish: function(namespace, message, data) {
-			var p = namespace.indexOf("/");
-			if(p !== -1) {
-				data = message;
-				message = namespace.substring(p + 1);
-				namespace = namespace.substring(0, p);
-			}
+		publish: function(topic) {
 			var previousPromise = promise;
 			promise = false;
-			if(namespace.indexOf("*") === -1) {
-				var peer = getPeer(namespace);
-				publishMessageOnPeer(namespace, peer, message, data);
-			}
-			else {
-				var matches = findPeers(namespace);
-				for(var i = 0, peer; peer = matches[i++];) {
-					publishMessageOnPeer(namespace, peer, message, data);
-				}
+			var args = Array.prototype.slice.call(arguments, 1);
+			var result = invoke(topic, args);
+			if(result !== undefined) {
+				var p = createPromise(true, result);
+				promise = promise ? joinPromises(promise, p) : p;
 			}
 			var returnPromise = promise;
 			promise = previousPromise;
@@ -741,24 +723,6 @@ Hub = function() {
 		
 		/**
 		 * <p>
-		 * defines a peer with the given name that loads a script lazily
-		 * expecting the peer to be properly defined in the script. Once the
-		 * script is loaded the original request made to the proxy is forwarded
-		 * to the actual peer.
-		 * </p>
-		 * <p>
-		 * If the script does define the expected peer an error is thrown. 
-		 * </p>
-		 * 
-		 * @param {String} namespace the namespace
-		 * @param {String} scriptUrl the script URL
-		 */
-		lazy: function(namespace, scriptUrl) {
-			throw new Error("Not yet supported");
-		},
-		
-		/**
-		 * <p>
 		 * defines a forward for a namespace / message pair. This allows to
 		 * define a general purpose listener or peer and reuse it on different
 		 * namespaces and messages. Publishing on a namespace / message pair
@@ -770,40 +734,29 @@ Hub = function() {
 		 * "{namespace}/{message}".
 		 * </p>
 		 * 
-		 * @param {String} aliasNamespace the alias for the namespace
-		 * @param {String} aliasMessage the alias for the message
-		 * @param {String} namespace the namespace to forward to
-		 * @param {String} message the message to forward to
+		 * @param {String} alias the alias for the topic
+		 * @param {String} topic the topic
 		 * @param {Function} dataTransformer the optional function to transform
 		 * 			the data on the callback
 		 * @param {Object} dataToMerge the optional data to merge with the data
 		 * 			on the callback
 		 */
-		forward: function(aliasNamespace, aliasMessage, namespace, message,
-					dataTransformer, dataToMerge) {
-			if(typeof aliasNamespace === "object") {
-				for(var alias in aliasNamespace) {
-					var value = aliasNamespace[alias];
-					if(typeof value === "string") {
-						Hub.forward(alias, value);
+		forward: function(alias, topic, dataTransformer, dataToMerge) {
+			if(typeof alias === "object") {
+				for(var k in alias) {
+					var t = alias[k];
+					if(typeof t === "string") {
+						Hub.subscribe(k, Hub.publisher(t));
 					}
 					else {
-						Hub.forward.apply(Hub, [alias].concat(value));
+						Hub.subscribe(k, Hub.publisher(t[0], t[1], t[2]));
 					}
 				}
-				return;
 			}
-			var p = aliasNamespace.indexOf("/");
-			if(p !== -1) {
-				dataToMerge = dataTransformer;
-				dataTransformer = message;
-				message = namespace;
-				namespace = aliasMessage;
-				aliasMessage = aliasNamespace.substring(p + 1);
-				aliasNamespace = aliasNamespace.substring(0, p);
+			else {
+				Hub.subscribe(alias, Hub.publisher(topic, dataTransformer,
+						dataToMerge));
 			}
-			Hub.subscribe(aliasNamespace, aliasMessage, Hub.forwarder(
-					namespace, message, dataToMerge, dataTransformer));
 		},
 		
 		/**
@@ -817,42 +770,61 @@ Hub = function() {
 		 * "{namespace}/{message}".
 		 * </p>
 		 * 
-		 * @param {String} namespace the namespace to forward to
-		 * @param {String} message the message to forward to
+		 * @param {String} topic the topic to forward to
 		 * @param {Function} dataTransformer the optional function to transform
 		 * 			the data on the callback
 		 * @param {Object} dataToMerge the optional data to merge with the data
 		 * 			on the callback
 		 * @return {Function} the forwarder function
 		 */
-		forwarder: function(namespace, message, dataTransformer, dataToMerge) {
-			var p = namespace.indexOf("/");
-			if(p !== -1) {
-				dataToMerge = dataTransformer;
-				dataTransformer = message;
-				message = namespace.substring(p + 1);
-				namespace = namespace.substring(0, p);
-			}
+		publisher: function(topic, dataTransformer, dataToMerge) {
 			if(dataTransformer) {
 				if(dataToMerge) {
-					return function(data) {
-						return Hub.publish(namespace, message, Hub.util.merge(
-								dataTransformer(data), dataToMerge));
+					return function() {
+						return Hub.publish(topic, Hub.util.merge(
+							dataTransformer.apply(null, arguments),
+							dataToMerge)
+						);
 					}
 				}
 				if(typeof dataTransformer === "function") {
-					return function(data) {
-						return Hub.publish(namespace, message,
-								dataTransformer(data));
+					return function() {
+						return Hub.publish(topic,
+							dataTransformer.apply(null, arguments)
+						);
 					}
 				}
 				return function(data) {
-					return Hub.publish(namespace, message,
-							Hub.util.merge(data, dataTransformer));
+					return Hub.publish(topic,
+						Hub.util.merge(data, dataTransformer)
+					);
 				}
 			}
 			return function(data) {
-				return Hub.publish(namespace, message, data);
+				return Hub.publish(topic, data);
+			};
+		},
+		
+		/**
+		 * creates a new error for the given type, description and optional
+		 * context. The description might contain placeholders that get
+		 * replaced by values from the context using Hub.util.substitute
+		 * when calling toString on the error.
+		 * The type and context properties are exposed while the description
+		 * is not.
+		 *
+		 * @param {String} type the type of the error.
+		 * @param {String} description the description of the error.
+		 * @param {Object} context the context for the error.
+		 */
+		Error: function(type, description, context) {
+			function toString() {
+				return Hub.util.substitute(description, this.context);
+			}
+			return {
+				toString: toString,
+				type: type,
+				context: context || {}
 			};
 		},
 		
@@ -873,8 +845,9 @@ Hub = function() {
 				if(source === undefined || source === null) {
 					return target;
 				}
-				var sourceType = Object.prototype.toString.call(source);
-				var targetType = Object.prototype.toString.call(target);
+				var toString = Object.prototype.toString;
+				var sourceType = toString.call(source);
+				var targetType = toString.call(target);
 				if(targetType === sourceType) {
 					if(sourceType === "[object Object]") {
 						for(var k in source) {
@@ -886,18 +859,16 @@ Hub = function() {
 						return target.concat(source);
 					}
 				}
-				Hub.publish("hub.error", "util.merge", {
-					type: "validation",
-					description: targetType === sourceType ?
-							"Cannot merge value {target} with {source}" :
-							"Cannot merge type {targetType} with {sourceType}",
-					context: {
-						target: target,
-						source: source,
-						targetType: targetType,
-						sourceType: sourceType
-					}
-				});
+				invoke("hub.error/util.merge", [new Hub.Error("validation",
+					targetType === sourceType ?
+						"Cannot merge value {target} with {source}" :
+						"Cannot merge type {targetType} with {sourceType}", {
+							target: target,
+							source: source,
+							targetType: targetType,
+							sourceType: sourceType
+						}
+				)]);
 				return target;
 			},
 			
@@ -919,6 +890,52 @@ Hub = function() {
 					newChain = chain(arguments[--l], newChain);
 				}
 				return newChain;
+			},
+			
+			/**
+			 * resolves a dot notation path from an object.
+			 * If the path cannot be resolved, the optional
+			 * return value is returned.
+			 *
+			 * @param {Object|Array} object the object.
+			 * @param {String} path the path.
+			 * @param {*} defaultValue the optional default value.
+			 * @return {*} the resolved value or the default value.
+			 */
+			resolve: function(object, path, defaultValue) {
+				var p = path.indexOf(".");
+				if(p !== -1) {
+					var key = path.substring(0, p);
+					if(key in object) {
+						return arguments.callee(object[key],
+							path.substring(p + 1), defaultValue);
+					}
+					return defaultValue;
+				}
+				return path in object ? object[path] : defaultValue;
+			},
+			
+			/**
+			 * substitutes the given string with the given values by searching
+			 * for placeholders in the form {dot.separated.path}. If a
+			 * placeholder is found, Hub.util.resolve is used to resolve the
+			 * value from the given values object or array.
+			 *
+			 * @param {String} string the string to substitute.
+			 * @param {Object|Array} values the provided values.
+			 * @param {*} defaultValue the optional default value.
+			 * @return {String} the substituted string.
+			 */
+			substitute: function(string, values, defaultValue) {
+				if(defaultValue === undefined) {
+					defaultValue = "";
+				}
+				var replaceFn = values ? function(match, path) {
+					return Hub.util.resolve(values, path, defaultValue);
+				} : function() {
+					return defaultValue;
+				};
+				return string.replace(/\{([a-zA-Z0-9\.]+)\}/g, replaceFn);
 			}
 			
 		}

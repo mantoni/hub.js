@@ -7,46 +7,44 @@ TestCase("subscribe", {
 		Hub.reset();
 	},
 	
-	/*
-	 * basic subscribe functionality.
-	 */
-	testSimpleSubscribe: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
-		Hub.publish("x", "y");
-		assertTrue(called);
+	testFunctionExists: function() {
+		assertFunction(Hub.subscribe);
 	},
 	
-	testShortSubscribe: function() {
-		var called = false;
-		Hub.subscribe("x/y", function() {
-			called = true;
+	testSubscribeInvocation: function() {
+		assertNoException(function() {
+			Hub.subscribe("a");
 		});
-		Hub.publish("x", "y");
-		assertTrue(called);
-	},
-	
-	/*
-	 * ensure a peer can be defined after an existing subscription
-	 * and both get mixed and then invoked in the correct order.
-	 */
-	testSubscribeThenAddPeer: function() {
-		var chain = [];
-		Hub.subscribe("a", "b", function() {
-			chain.push("subscribe");
+		assertNoException(function() {
+			Hub.subscribe("a/b");
 		});
-		Hub.peer("a", function() {
-			return {
-				"b": function() {
-					chain.push("node");
-				}
-			};
+		assertNoException(function() {
+			Hub.subscribe("a/*");
 		});
-		Hub.publish("a", "b");
-		// node first, because it was added last.
-		assertEquals("node,subscribe", chain.join());
+		assertNoException(function() {
+			Hub.subscribe("*/b");
+		});
+		assertNoException(function() {
+			Hub.subscribe("a.*/b");
+		});
+		assertNoException(function() {
+			Hub.subscribe("a/b.*");
+		});
+		assertNoException(function() {
+			Hub.subscribe("a.*/b.*");
+		});
+		assertNoException(function() {
+			Hub.subscribe("*.a/b");
+		});
+		assertNoException(function() {
+			Hub.subscribe("*.a/*.b");
+		});
+		assertNoException(function() {
+			Hub.subscribe("**/b");
+		});
+		assertNoException(function() {
+			Hub.subscribe("a/**");
+		});
 	}
 
 });

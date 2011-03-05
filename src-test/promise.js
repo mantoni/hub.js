@@ -37,10 +37,10 @@ TestCase("promise", {
 	
 	testPublishWithThen: function() {
 		var chain = [];
-		Hub.subscribe("test", "promise", function() {
+		Hub.subscribe("test/promise", function() {
 			chain.push("a");
 		});
-		Hub.publish("test", "promise").then(function() {
+		Hub.publish("test/promise").then(function() {
 			chain.push("b");
 		});
 		assertEquals("a,b", chain.join());
@@ -48,10 +48,10 @@ TestCase("promise", {
 	
 	testThenWithPromisePublish: function() {
 		var chain = [];
-		Hub.subscribe("test", "promise", function() {
+		Hub.subscribe("test/promise", function() {
 			chain.push("a");
 		});
-		Hub.promise().publish("test", "promise").then(function() {
+		Hub.promise().publish("test/promise").then(function() {
 			chain.push("b");
 		}).fulfill();
 		assertEquals("a,b", chain.join());
@@ -59,11 +59,11 @@ TestCase("promise", {
 
 	testThenWithHubPublish: function() {
 		var chain = [];
-		Hub.subscribe("test", "promise", function() {
+		Hub.subscribe("test/promise", function() {
 			chain.push("a");
 		});
 		Hub.promise().then(function() {
-			Hub.publish("test", "promise").then(function() {
+			Hub.publish("test/promise").then(function() {
 				chain.push("b");
 			});
 		}).then(function() {
@@ -77,37 +77,48 @@ TestCase("promise", {
 	 * argument the promise.
 	 */
 	testCallbackReturnString: function() {
-		Hub.subscribe("test", "promise", function() {
+		Hub.subscribe("test/promise", function() {
 			return "Hello";
 		});
 		var result = null;
-		Hub.publish("test", "promise").then(function(data) {
+		Hub.publish("test/promise").then(function(data) {
+			result = data;
+		});
+		assertEquals("Hello", result);
+	},
+
+	testCallbackReturnStringMulticasting: function() {
+		Hub.subscribe("test/promise", function() {
+			return "Hello";
+		});
+		var result = null;
+		Hub.publish("test/*").then(function(data) {
 			result = data;
 		});
 		assertEquals("Hello", result);
 	},
 	
 	testCallbackReturnMerge: function() {
-		Hub.subscribe("test", "promise.a", function() {
+		Hub.subscribe("test/promise.a", function() {
 			return ["Hello"];
 		});
-		Hub.subscribe("test", "promise.b", function() {
+		Hub.subscribe("test/promise.b", function() {
 			return ["World"];
 		});
 		var result = null;
-		Hub.publish("test", "promise.*").then(function(data) {
+		Hub.publish("test/promise.*").then(function(data) {
 			result = data;
 		});
-		assertEquals("[object Array]", Object.prototype.toString.call(result));
+		assertArray(result);
 		assertEquals("Hello World", result.join(" "));
 	},
 	
 	testJoinedPromisesFulfill1First: function() {
 		var p1, p2, done = false;
-		Hub.subscribe("test", "promise.a", function() {
+		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();
 		});
-		Hub.subscribe("test", "promise.b", function() {
+		Hub.subscribe("test/promise.b", function() {
 			p2 = Hub.promise();
 		});
 		var p3 = Hub.publish("test/promise.*").then(function() {
@@ -131,10 +142,10 @@ TestCase("promise", {
 
 	testJoinedPromisesFulfill2First: function() {
 		var p1, p2, done = false;
-		Hub.subscribe("test", "promise.a", function() {
+		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();
 		});
-		Hub.subscribe("test", "promise.b", function() {
+		Hub.subscribe("test/promise.b", function() {
 			p2 = Hub.promise();
 		});
 		var p3 = Hub.publish("test/promise.*").then(function() {
