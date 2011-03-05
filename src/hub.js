@@ -47,11 +47,11 @@ Hub = function() {
 	var nextFn = false;
 	
 	/**
-	 * The data to pass to nextFn.
+	 * The arguments to pass to nextFn.
 	 *
-	 * @type {*}
+	 * @type {Array}
 	 */
-	var nextData;
+	var nextArguments;
 	
 	/**
 	 * An empty array used as an internal value object.
@@ -103,27 +103,27 @@ Hub = function() {
 	 * creates a call chain for the given functions.
 	 */
 	function chain(first, second) {
-		var newChain = function(data) {
+		var newChain = function() {
 			if(!first) {
-				return second(data);
+				return second.apply(null, arguments);
 			}
 			if(!second) {
-				return first(data);
+				return first.apply(null, arguments);
 			}
 			else {
 				var previousFn = nextFn;
 				nextFn = second;
-				nextData = data;
+				nextArguments = arguments;
 				try {
-					var result = first(data);
+					var result = first.apply(null, arguments);
 					if(nextFn) {
-						result = Hub.util.merge(result, second(data));
+						result = Hub.util.merge(result, second.apply(null, arguments));
 					}
 					return result;
 				}
 				finally {
 					nextFn = previousFn;
-					nextData = undefined;
+					nextarguments = undefined;
 				}
 			}
 		};
@@ -703,7 +703,7 @@ Hub = function() {
 		 * current publish call.
 		 */
 		propagate: function() {
-			nextFn(nextData);
+			nextFn.apply(null, nextArguments);
 			nextFn = false;
 		},
 		
