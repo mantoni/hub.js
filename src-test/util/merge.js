@@ -38,7 +38,7 @@ TestCase("util_merge", {
 	
 	testObjectReplaceMergeSame: function() {
 		var error = null;
-		Hub.subscribe("hub.error.warn", "util.merge", function(data) {
+		Hub.subscribe("hub.error.warn/util.merge", function(data) {
 			error = data;
 		});
 		var o = Hub.util.merge({ x: "foo" }, { x: "foo" });

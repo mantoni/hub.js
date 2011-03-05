@@ -147,6 +147,34 @@ TestCase("unsubscribe", {
 		Hub.unsubscribe("x/y", fn);
 		Hub.publish("x/*");
 		assertFalse(fn.called);
+	},
+	
+	"test unsubscribe throws error if callback is not a function": function() {
+		assertException(function() {
+			Hub.unsubscribe("x/y");
+		});
+		assertException(function() {
+			Hub.unsubscribe("x/y", null);
+		});
+		assertException(function() {
+			Hub.unsubscribe("x/y", true);
+		});
+		assertException(function() {
+			Hub.unsubscribe("x/y", {});
+		});
+		assertException(function() {
+			Hub.unsubscribe("x/y", []);
+		});
+	},
+	
+	"test unsubscribe returns true on success": function() {
+		var fn = function() {};
+		Hub.subscribe("x/y", fn);
+		assertTrue(Hub.unsubscribe("x/y", fn));
+	},
+	
+	"test unsubscribe returns false on failure": function() {
+		assertFalse(Hub.unsubscribe("x/y", function() {}));
 	}
 
 	// unsubscribe

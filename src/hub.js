@@ -166,19 +166,6 @@ Hub = function() {
 	}
 	
 	/*
-	 * stores a peer in the given namespace. If there is a peer
-	 * associated with the namespace, the peers get mixed.
-	function storePeer(namespace, peer) {
-		if(namespace in peers) {
-			mix(peers[namespace], peer);
-		}
-		else {
-			peers[namespace] = peer;
-		}
-	}
-	 */
-	
-	/*
 	 * creates a peer for the peer definition with the given name.
 	 */
 	function createPeer(namespace) {
@@ -230,7 +217,7 @@ Hub = function() {
 		};
 	}
 	
-	function createTopicFunction(topic) {
+	function validateTopic(topic) {
 		var type = typeof topic;
 		if(type !== "string") {
 			throw new Error("Topic is not string: " + type);
@@ -241,6 +228,10 @@ Hub = function() {
 		if(!(/^[a-zA-Z0-9\.\{\}\*]+(\/[a-zA-Z0-9\.\{\}\*]+)?$/.test(topic))) {
 			throw new Error("Illegal topic: " + topic);
 		}
+	}
+	
+	function createTopicFunction(topic) {
+		validateTopic(topic);
 		var match;
 		if(topic.indexOf("{") !== -1) {
 			match = substitutionFn(topic);
@@ -549,6 +540,14 @@ Hub = function() {
 		}
 	};
 	
+	// ensures the given argument is a function. Throws an error otherwise.
+	function validateCallback(fn) {
+		var fnType = typeof fn;
+		if(fnType !== "function") {
+			throw new Error("Callback is not function: " + fnType);
+		}
+	}
+	
 	// Return public API:
 	return {
 		
@@ -593,31 +592,33 @@ Hub = function() {
 		},
 		
 		/**
-		 * <p>
-		 * subscribes a callback function to the given namespace and message.
-		 * </p>
-		 * <p>
-		 * The namespace and message pair can be also joined in one string:
-		 * "{namespace}/{message}".
-		 * </p>
+		 * subscribes a callback function to the given topic.
 		 * 
 		 * @param {string} topic the topic.
 		 * @param {function(object)} fn the callback function.
 		 */
 		subscribe: function(topic, fn) {
+			validateTopic(topic);
+			validateCallback(fn);
 			var topicFn = subscribers[topic];
 			subscribers[topic] = topicFn && topicFn !== emptyFn ?
 					chain(fn, topicFn) : fn;
 		},
 		
 		/**
+		 * unsubscribes a callback function from the given topic.
+		 *
 		 * @param {string} topic the topic.
 		 * @param {function(object)} fn the callback function.
+		 * @return {Boolean} false if the callback was not registered,
+		 *			otherwise true.
 		 */
 		unsubscribe: function(topic, fn) {
+			validateCallback(fn);
 			var topicFn = subscribers[topic];
 			if(!topicFn) {
-				return;
+				validateTopic(topic);
+				return false;
 			}
 			for(var t in subscribers) {
 				var re = pathMatcher(t);
@@ -631,6 +632,7 @@ Hub = function() {
 					}
 				}
 			}
+			return true;
 		},
 		
 		/**
@@ -680,7 +682,8 @@ Hub = function() {
 		publish: function(topic) {
 			var previousPromise = promise;
 			promise = false;
-			var args = Array.prototype.slice.call(arguments, 1);
+			var args = arguments.length > 1 ?
+					Array.prototype.slice.call(arguments, 1) : emptyArray;
 			var result = invoke(topic, args);
 			if(result !== undefined) {
 				var p = createPromise(true, result);
