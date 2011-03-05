@@ -98,7 +98,7 @@ Hub = function() {
 	 * @type {number}
 	 */	
 	var now;
-		
+			
 	/**
 	 * creates a call chain for the given functions.
 	 */
@@ -231,6 +231,16 @@ Hub = function() {
 	}
 	
 	function createTopicFunction(topic) {
+		var type = typeof topic;
+		if(type !== "string") {
+			throw new Error("Topic is not string: " + type);
+		}
+		if(!topic) {
+			throw new Error("Topic is empty");
+		}
+		if(!(/^[a-zA-Z0-9\.\{\}\*]+(\/[a-zA-Z0-9\.\{\}\*]+)?$/.test(topic))) {
+			throw new Error("Illegal topic: " + topic);
+		}
 		var match;
 		if(topic.indexOf("{") !== -1) {
 			match = substitutionFn(topic);

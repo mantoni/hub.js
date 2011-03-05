@@ -11,7 +11,49 @@ TestCase("publish", {
 		assertFunction(Hub.publish);
 	},
 	
-	"test publish invocation with no listeners": function() {
+	"test topic must be string": function() {
+		assertException(function() {
+			Hub.publish(null);
+		});
+		assertException(function() {
+			Hub.publish(undefined);
+		});
+		assertException(function() {
+			Hub.publish(false);
+		});
+		assertException(function() {
+			Hub.publish(true);
+		});
+		assertException(function() {
+			Hub.publish({});
+		});
+		assertException(function() {
+			Hub.publish([]);
+		});
+		assertException(function() {
+			Hub.publish(77);
+		});
+	},
+	
+	"test topic cannot be empty": function() {
+		assertException(function() {
+			Hub.publish("");
+		});
+	},
+	
+	"test illegal topic": function() {
+		assertException(function() {
+			Hub.publish("foo/bar/doo");
+		});
+		assertException(function() {
+			Hub.publish("foo /doo");
+		});
+		assertException(function() {
+			Hub.publish("foo:doo");
+		});
+	},
+	
+	"test legal topic": function() {
 		assertNoException(function() {
 			Hub.publish("a");
 		});
