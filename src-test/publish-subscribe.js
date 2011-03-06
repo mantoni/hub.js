@@ -18,7 +18,7 @@ TestCase("publish_subscribe", {
 		var fn = stubFn();
 		Hub.subscribe("a/b", fn);
 		Hub.publish("x/y");
-		assertUndefined(fn.called);
+		assertFalse(fn.called);
 	},
 	
 	"test publish one argument": function() {

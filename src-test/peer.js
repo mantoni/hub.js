@@ -39,7 +39,7 @@ TestCase("peer", {
 			};
 		});
 		Hub.publish("a.b/c");
-		assertUndefined(fn.called);
+		assertFalse(fn.called);
 		Hub.publish("a.b/c.d");
 		assertTrue(fn.called);
 	},
