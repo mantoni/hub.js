@@ -30,6 +30,9 @@ JSTD_FILENAME="JsTestDriver-$JSTD_VERSION.jar"
 JSTD_DOWNLOAD="http://js-test-driver.googlecode.com/files/$JSTD_FILENAME"
 
 download() {
+	if [ ! -e lib ]; then
+		mkdir lib
+	fi
 	if [ -z `type -P wget` ]; then
 		curl -o "lib/$1" $2
 	else
@@ -168,7 +171,7 @@ case "$1" in
 	"stop" )
 		stop
 	;;
-	*)
+	* )
 		usage
 		exit 1
 esac
