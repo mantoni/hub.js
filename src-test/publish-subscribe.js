@@ -86,6 +86,28 @@ TestCase("publish_subscribe", {
 		assertEquals("a,b", m.join());
 	},
 	
+	"test publish to wildcard, subscribe another, publish again": function() {
+		var fn1 = stubFn();
+		Hub.subscribe("x/a", fn1);
+		Hub.publish("x/*");
+		assertTrue(fn1.called);
+		var fn2 = stubFn();
+		Hub.subscribe("x/b", fn2);
+		fn1.called = false;
+		Hub.publish("x/*");
+		assertTrue(fn1.called);
+		assertTrue(fn2.called);
+	},
+	
+	"test subscribe to wildcard": function() {
+		var fn = stubFn();
+		Hub.subscribe("x/*", fn);
+		Hub.publish("y/a");
+		assertFalse(fn.called);
+		Hub.publish("x/a");
+		assertTrue(fn.called);
+	},
+	
 	"test publish with placeholder in message": function() {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);

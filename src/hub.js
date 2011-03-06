@@ -24,6 +24,7 @@ Hub = function() {
 	 * @type {object}
 	 */
 	var subscribers = {};
+	var wildcardSubscribers = {};
 	
 	/**
 	 * All peer instances that have been created.
@@ -211,6 +212,27 @@ Hub = function() {
 		return match;
 	}
 	
+	function peerFactory(namespace) {
+		return function() {
+			var peer = createPeer(namespace);
+			wirePeer(peer, namespace);
+			Hub.propagate();
+			unwirePeer(peer, namespace);
+		};
+	}
+	
+	function wirePeer(peer, namespace) {
+		for(var message in peer) {
+			Hub.subscribe(namespace + "/" + message, peer[message]);
+		}
+	}
+	
+	function unwirePeer(peer, namespace) {
+		for(var message in peer) {
+			Hub.unsubscribe(namespace + "/" + message, peer[message]);
+		}
+	}
+	
 	function substitutionFn(topic) {
 		return function() {
 			invoke(Hub.util.substitute(topic, arguments), arguments);
@@ -230,29 +252,45 @@ Hub = function() {
 		}
 	}
 	
-	function createTopicFunction(topic) {
+	function createTopicFunction(topic, fn) {
 		validateTopic(topic);
-		var match;
+		var match, re, t;
 		if(topic.indexOf("{") !== -1) {
 			match = substitutionFn(topic);
 		}
 		if(topic.indexOf("*") !== -1) {
-			var re = pathMatcher(topic);
-			for(var t in subscribers) {
+			re = pathMatcher(topic);
+			for(t in subscribers) {
 				if(re.test(t)) {
 					var subscriber = subscribers[t];
 					match = match ? chain(match, subscriber) : subscriber;
 				}
 			}
+			wildcardSubscribers[topic] = re;
 		}
-		return subscribers[topic] = (match || emptyFn);
+		else {
+			for(t in wildcardSubscribers) {
+				re = wildcardSubscribers[t];
+				if(re.test(topic)) {
+					match = match ? chain(match, subscribers[t]) : subscribers[t];
+				}
+			}
+		}
+		return subscribers[topic] = match && fn ? chain(match, fn) : (match || fn || emptyFn);
+	}
+	
+	function unchainSubscriber(topic, fn) {
+		var topicFn = subscribers[topic];
+		if(topicFn === fn) {
+			delete subscribers[topic];
+		}
+		else {
+			topicFn.remove(fn);
+		}
 	}
 	
 	function invoke(topic, args) {
-		var topicFn = subscribers[topic];
-		if(!topicFn) {
-			topicFn = createTopicFunction(topic);
-		}
+		var topicFn = subscribers[topic] || createTopicFunction(topic);
 		try {
 			return topicFn.apply(null, args);
 		}
@@ -401,7 +439,6 @@ Hub = function() {
 			 */
 			publish: function(topic) {
 				if(fulfilled) {
-//					data = Hub.util.merge(value, data);
 					return Hub.publish.apply(Hub, arguments);
 				}
 				var args = [topic];
@@ -409,7 +446,6 @@ Hub = function() {
 					args = args.concat(arguments);
 				}
 				return this.then(function() {
-//					data = Hub.util.merge(value, data);
 					return Hub.publish.apply(Hub, args);
 					// A return value would be meaningless here.
 				});
@@ -573,6 +609,7 @@ Hub = function() {
 		 */
 		reset: function() {
 			subscribers = {};
+			wildcardSubscribers = {};
 			peers = {};
 			for(var k in definitions) {
 				if(k.indexOf("lib.") === -1) {
@@ -598,11 +635,23 @@ Hub = function() {
 		 * @param {function(object)} fn the callback function.
 		 */
 		subscribe: function(topic, fn) {
-			validateTopic(topic);
 			validateCallback(fn);
 			var topicFn = subscribers[topic];
-			subscribers[topic] = topicFn && topicFn !== emptyFn ?
-					chain(fn, topicFn) : fn;
+			if(!topicFn || topicFn === emptyFn) {
+				createTopicFunction(topic, fn);
+			}
+			else {
+				validateTopic(topic);
+				subscribers[topic] = chain(fn, topicFn);
+			}
+			for(var t in wildcardSubscribers) {
+				var re = wildcardSubscribers[t];
+				if(re.test(topic)) {
+					subscribers[t] = chain(fn, subscribers[t]);
+				}
+			}
+//			subscribers[topic] = topicFn && topicFn !== emptyFn ?
+//					chain(fn, topicFn) : fn;
 		},
 		
 		/**
@@ -620,16 +669,11 @@ Hub = function() {
 				validateTopic(topic);
 				return false;
 			}
-			for(var t in subscribers) {
-				var re = pathMatcher(t);
+			unchainSubscriber(topic, fn);
+			for(var t in wildcardSubscribers) {
+				var re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					var topicFn = subscribers[t];
-					if(topicFn === fn) {
-						delete subscribers[t];
-					}
-					else {
-						topicFn.remove(fn);
-					}
+					unchainSubscriber(t, fn);
 				}
 			}
 			return true;
@@ -665,9 +709,10 @@ Hub = function() {
 			definitions[namespace] = config;
 			if(!config.scope || config.scope === Hub.SINGLETON) {
 				var peer = peers[namespace] = createPeer(namespace);
-				for(var message in peer) {
-					Hub.subscribe(namespace + "/" + message, peer[message]);
-				}
+				wirePeer(peer, namespace);
+			}
+			else {
+				Hub.subscribe(namespace + "/**", peerFactory(namespace));
 			}
 		},
 		
