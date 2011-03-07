@@ -82,8 +82,7 @@ TestCase("peer", {
 			};
 		});
 		Hub.publish("a.*/m");
-		// The nodes will be called in the order as they are defined.
-		assertEquals("x,y", chain.join());
+		assertEquals("y,x", chain.join());
 	}
 
 

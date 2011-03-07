@@ -104,42 +104,59 @@ Hub = function() {
 	 * creates a call chain for the given functions.
 	 */
 	function chain(first, second) {
-		var newChain = function() {
-			if(!first) {
-				return second.apply(null, arguments);
+		function add(fn) {
+			if(second === undefined) {
+				second = fn;
 			}
-			if(!second) {
-				return first.apply(null, arguments);
+			else if(first === undefined) {
+				first = fn;
 			}
 			else {
-				var previousFn = nextFn;
-				nextFn = second;
-				nextArguments = arguments;
-				try {
-					var result = first.apply(null, arguments);
-					if(nextFn) {
-						result = Hub.util.merge(result, second.apply(null, arguments));
-					}
-					return result;
-				}
-				finally {
-					nextFn = previousFn;
-					nextarguments = undefined;
-				}
+				first = chain(fn, first);
 			}
-		};
-		newChain.remove = function(fn) {
+		}
+		function remove(fn) {
+			if(fn === second) {
+				second = undefined;
+				return first;
+			}
 			if(fn === first) {
 				first = undefined;
 				return second;
 			}
-			if(fn === second || (typeof second.remove === "function" &&
-					!(second = second.remove(fn)))) {
-				second = undefined;
-				return first;
+			if(first && typeof first.remove === "function" &&
+					!(first = first.remove(fn))) {
+				return second;
 			}
-			return newChain;
+			return this;
 		}
+		var newChain = function() {
+			if(!second) {
+				if(!first) {
+					return;
+				}
+				return first.apply(null, arguments);
+			}
+			if(!first) {
+				return second.apply(null, arguments);
+			}
+			var previousFn = nextFn;
+			nextFn = second;
+			nextArguments = arguments;
+			try {
+				var result = first.apply(null, arguments);
+				if(nextFn) {
+					result = Hub.util.merge(result, second.apply(null, arguments));
+				}
+				return result;
+			}
+			finally {
+				nextFn = previousFn;
+				nextarguments = undefined;
+			}
+		};
+		newChain.add = add;
+		newChain.remove = remove;
 		return newChain;
 	}
 	
@@ -147,7 +164,11 @@ Hub = function() {
 	 * adds a function to the given peer under the specified message.
 	 */
 	function apply(peer, message, fn) {
-		peer[message] = message in peer ? chain(fn, peer[message]) : fn;
+		var c = peer[message];
+		if(!c) {
+			peer[message] = c = chain();
+		}
+		c.add(fn);
 	}
 	
 	/*
@@ -197,20 +218,6 @@ Hub = function() {
 	function getPeer(namespace) {
 		return peers[namespace] || createPeer(topic);
 	}
-		
-	/*
-	 * finds all matching peers for a namespace that contains wildcards.
-	 */
-	function findPeers(namespace) {
-		var match = [];
-		var re = pathMatcher(namespace);
-		for(namespace in definitions) {
-			if(re.test(namespace)) {
-				match.push(getPeer(namespace));
-			}
-		}
-		return match;
-	}
 	
 	function peerFactory(namespace) {
 		return function() {
@@ -254,16 +261,15 @@ Hub = function() {
 	
 	function createTopicFunction(topic, fn) {
 		validateTopic(topic);
-		var match, re, t;
+		var match = chain(), re, t;
 		if(topic.indexOf("{") !== -1) {
-			match = substitutionFn(topic);
+			match.add(substitutionFn(topic));
 		}
 		if(topic.indexOf("*") !== -1) {
 			re = pathMatcher(topic);
 			for(t in subscribers) {
 				if(re.test(t)) {
-					var subscriber = subscribers[t];
-					match = match ? chain(match, subscriber) : subscriber;
+					match.add(subscribers[t]);
 				}
 			}
 			wildcardSubscribers[topic] = re;
@@ -272,22 +278,14 @@ Hub = function() {
 			for(t in wildcardSubscribers) {
 				re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					match = match ? chain(match, subscribers[t]) :
-							subscribers[t];
+					match.add(subscribers[t]);
 				}
 			}
 		}
-		return subscribers[topic] = match && fn ? chain(match, fn) : (match || fn || emptyFn);
-	}
-	
-	function unchainSubscriber(topic, fn) {
-		var topicFn = subscribers[topic];
-		if(topicFn === fn) {
-			delete subscribers[topic];
+		if(fn) {
+			match.add(fn);
 		}
-		else {
-			topicFn.remove(fn);
-		}
+		return subscribers[topic] = match;
 	}
 	
 	function invoke(topic, args) {
@@ -638,21 +636,19 @@ Hub = function() {
 		subscribe: function(topic, fn) {
 			validateCallback(fn);
 			var topicFn = subscribers[topic];
-			if(!topicFn || topicFn === emptyFn) {
+			if(!topicFn) {
 				createTopicFunction(topic, fn);
 			}
 			else {
 				validateTopic(topic);
-				subscribers[topic] = chain(fn, topicFn);
+				topicFn.add(fn);
 			}
 			for(var t in wildcardSubscribers) {
 				var re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					subscribers[t] = chain(fn, subscribers[t]);
+					subscribers[t].add(fn);
 				}
 			}
-//			subscribers[topic] = topicFn && topicFn !== emptyFn ?
-//					chain(fn, topicFn) : fn;
 		},
 		
 		/**
@@ -670,11 +666,11 @@ Hub = function() {
 				validateTopic(topic);
 				return false;
 			}
-			unchainSubscriber(topic, fn);
+			subscribers[topic].remove(fn);
 			for(var t in wildcardSubscribers) {
 				var re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					unchainSubscriber(t, fn);
+					subscribers[t].remove(fn);
 				}
 			}
 			return true;
@@ -942,11 +938,9 @@ Hub = function() {
 			 * @return {Function} the chain function
 			 */
 			chain: function() {
-				var l = arguments.length - 1;
-				var newChain = chain(arguments[l - 1], arguments[l]);
-				l--;
-				while(l) {
-					newChain = chain(arguments[--l], newChain);
+				var newChain = chain();
+				for(var i = arguments.length; i--;) {
+					newChain.add(arguments[i]);
 				}
 				return newChain;
 			},

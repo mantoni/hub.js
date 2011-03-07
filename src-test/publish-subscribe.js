@@ -66,8 +66,8 @@ TestCase("publish_subscribe", {
 			m.push("c");
 		});
 		Hub.publish("x/*");
-		// Called in definition order:
-		assertEquals("a,b", m.join());
+		// b overrides a:
+		assertEquals("b,a", m.join());
 	},
 	
 	"test publish to two subscribers via wildcard namespace": function() {
@@ -82,8 +82,8 @@ TestCase("publish_subscribe", {
 			m.push("c");
 		});
 		Hub.publish("*/a");
-		// Called in definition order:
-		assertEquals("a,b", m.join());
+		// y overrides x:
+		assertEquals("b,a", m.join());
 	},
 	
 	"test publish to wildcard, subscribe another, publish again": function() {

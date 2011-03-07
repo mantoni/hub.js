@@ -100,10 +100,10 @@ TestCase("promise", {
 	
 	testCallbackReturnMerge: function() {
 		Hub.subscribe("test/promise.a", function() {
-			return ["Hello"];
+			return ["World"];
 		});
 		Hub.subscribe("test/promise.b", function() {
-			return ["World"];
+			return ["Hello"];
 		});
 		var result = null;
 		Hub.publish("test/promise.*").then(function(data) {

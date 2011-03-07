@@ -11,17 +11,14 @@ TestCase("unsubscribe", {
 	 * basic unsubscribe functionality.
 	 */
 	testSimpleUnsubscribe: function() {
-		var called = false;
-		var fn = function() {
-			called = true;
-		};
+		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
-		assertTrue(called);
-		called = false;
+		assertTrue(fn.called);
+		fn.called = false;
 		Hub.unsubscribe("x/y", fn);
 		Hub.publish("x/y");
-		assertFalse(called);
+		assertFalse(fn.called);
 	},
 	
 	testUnsubscribeFirstInChainOfTwo: function() {

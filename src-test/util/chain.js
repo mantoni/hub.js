@@ -7,7 +7,7 @@ TestCase("util_chain", {
 		assertFunction(Hub.util.chain);
 	},
 
-	testChainCall: function() {
+	"test chain call": function() {
 		var calls = [];
 		var f1 = function() {
 			calls.push("f1");
@@ -21,7 +21,7 @@ TestCase("util_chain", {
 		assertEquals("Called in argument order", "f1,f2", calls.join());
 	},
 	
-	testStopPropagation: function() {
+	"test stop propagation": function() {
 		var f = stubFn();
 		Hub.util.chain(function() {
 			Hub.stopPropagation();
@@ -29,7 +29,7 @@ TestCase("util_chain", {
 		assertFalse(f.called);
 	},
 	
-	testChainRemoveFirstOfTwo: function() {
+	"test chain remove first of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
@@ -42,7 +42,7 @@ TestCase("util_chain", {
 		assertTrue(f2.called);
 	},
 	
-	testChainRemoveSecondOfTwo: function() {
+	"test chain remove second of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
@@ -55,7 +55,7 @@ TestCase("util_chain", {
 		assertFalse(f2.called);
 	},
 	
-	testChainRemoveFirstOfThree: function() {
+	"test chain remove first of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -70,7 +70,7 @@ TestCase("util_chain", {
 		assertTrue(f3.called);
 	},
 	
-	testChainRemoveSecondOfThree: function() {
+	"test chain remove second of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -85,7 +85,7 @@ TestCase("util_chain", {
 		assertTrue(f3.called);
 	},
 	
-	testChainRemoveThirdOfThree: function() {
+	"test chain remove third of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -100,7 +100,7 @@ TestCase("util_chain", {
 		assertFalse(f3.called);
 	},
 	
-	testChainRemoveFirstNoReassign: function() {
+	"test chain remove first no reassign": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
@@ -110,7 +110,7 @@ TestCase("util_chain", {
 		assertTrue(f2.called);
 	},
 	
-	testChainRemoveSecondNoReassign: function() {
+	"test chain remove second no reassign": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
