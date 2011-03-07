@@ -142,6 +142,29 @@ TestCase("publish_subscribe", {
 		Hub.publish("x/{0}", "y");
 		assertTrue(fn1.called);
 		assertTrue(fn2.called);
+	},
+	
+	"test multicast publish and subscribe": function() {
+		var fnx = stubFn();
+		Hub.subscribe("x/*", fnx);
+		Hub.publish("x/*");
+		assertTrue(fnx.called);
+	},
+	
+	"test multicast subscriber invoked only once": function() {
+		var count = 0;
+		var fn = function() {
+			count++;
+		};
+		var fna = stubFn();
+		var fnb = stubFn();
+		Hub.subscribe("x/a", fna);
+		Hub.subscribe("x/b", fnb);
+		Hub.subscribe("x/*", fn);
+		Hub.publish("x/*");
+		assert(fna.called);
+		assert(fnb.called);
+		assertEquals(1, count);
 	}
 	
 	// publish_subscribe

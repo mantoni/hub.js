@@ -272,7 +272,8 @@ Hub = function() {
 			for(t in wildcardSubscribers) {
 				re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					match = match ? chain(match, subscribers[t]) : subscribers[t];
+					match = match ? chain(match, subscribers[t]) :
+							subscribers[t];
 				}
 			}
 		}
