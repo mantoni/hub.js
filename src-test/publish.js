@@ -7,90 +7,129 @@ TestCase("publish", {
 		Hub.reset();
 	},
 	
-	testPublishShort: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
+	"test function exists": function() {
+		assertFunction(Hub.publish);
+	},
+	
+	"test topic must be string": function() {
+		assertException(function() {
+			Hub.publish(null);
 		});
-		Hub.publish("x/y");
-		assertTrue(called);
+		assertException(function() {
+			Hub.publish(undefined);
+		});
+		assertException(function() {
+			Hub.publish(false);
+		});
+		assertException(function() {
+			Hub.publish(true);
+		});
+		assertException(function() {
+			Hub.publish({});
+		});
+		assertException(function() {
+			Hub.publish([]);
+		});
+		assertException(function() {
+			Hub.publish(77);
+		});
 	},
 	
-	/*
-	 * assert publishing a namespace that is not picked up by anybody does not
-	 * fail.
-	 */
-	testPublishUnknown: function() {
-		Hub.publish("unknown", "message"); // should not throw an error.
-		assertTrue(true); // Just to have at least one assert.
+	"test topic cannot be empty": function() {
+		assertException(function() {
+			Hub.publish("");
+		});
 	},
 	
-	/*
-	 * assert publishing a topic with more than one subscriber works and is
-	 * processed in the right order.
-	 */
-	testPublishMulticast: function() {
-		var chain = [];
+	"test illegal topic": function() {
+		assertException(function() {
+			Hub.publish("foo/bar/doo");
+		});
+		assertException(function() {
+			Hub.publish("foo /doo");
+		});
+		assertException(function() {
+			Hub.publish("foo:doo");
+		});
+	},
+	
+	"test legal topic": function() {
+		assertNoException(function() {
+			Hub.publish("a");
+		});
+		assertNoException(function() {
+			Hub.publish("a/b");
+		});
+		assertNoException(function() {
+			Hub.publish("a/*");
+		});
+		assertNoException(function() {
+			Hub.publish("*/b");
+		});
+		assertNoException(function() {
+			Hub.publish("a.*/b");
+		});
+		assertNoException(function() {
+			Hub.publish("a/b.*");
+		});
+		assertNoException(function() {
+			Hub.publish("a.*/b.*");
+		});
+		assertNoException(function() {
+			Hub.publish("*.a/b");
+		});
+		assertNoException(function() {
+			Hub.publish("*.a/*.b");
+		});
+		assertNoException(function() {
+			Hub.publish("**/b");
+		});
+		assertNoException(function() {
+			Hub.publish("a/**");
+		});
+	},
+	
+	"test publish wildcards": function() {
+		var fn = stubFn();
 		Hub.peer("a.b", function() {
 			return {
-				"m": function() {
-					chain.push("x");
-				}
+				"c.d": fn
 			};
 		});
-		Hub.peer("a.c", function() {
-			return {
-				"m": function() {
-					chain.push("y");
-				}
-			};
-		});
-		Hub.publish("a.*", "m");
-		// The nodes will be called in the order as they are defined.
-		assertEquals("xy", chain.join(""));
+		this.assertInvoked("a.b/c.*", fn);
+		this.assertInvoked("a.b/c.**", fn);
+		this.assertNotInvoked("a.b/*", fn);
+		this.assertInvoked("a.b/**", fn);
+		this.assertInvoked("a.*/c.d", fn);
+		this.assertInvoked("a.**/c.d", fn);
+		this.assertNotInvoked("*/c.d", fn);
+		this.assertInvoked("**/c.d", fn);
 	},
 	
-	testPublishWildcard: function() {
-		var count = 0;
-		Hub.peer("a.b", function() {
-			return {
-				"c.d": function() {
-					count++;
-				}
-			};
-		});
-		Hub.publish("a.b", "c.*");
-		assertEquals("a.b : c.*", 1, count);
-		Hub.publish("a.b", "c.**");
-		assertEquals("a.b : c.**", 2, count);
-		Hub.publish("a.b", "*");
-		assertEquals("a.b : *", 2, count); // no match
-		Hub.publish("a.b", "**");
-		assertEquals("a.b : **", 3, count);
-		
-		Hub.publish("a.*", "c.d");
-		assertEquals("a.* : c.d", 4, count);
-		Hub.publish("a.**", "c.d");
-		assertEquals("a.** : c.d", 5, count);
-		Hub.publish("*", "c.d");
-		assertEquals("* : c.d", 5, count); // no match
-		Hub.publish("**", "c.d");
-		assertEquals("** : c.d", 6, count);
+	assertInvoked: function(topic, fn) {
+		Hub.publish(topic);
+		assertTrue(topic, fn.called);
+		fn.called = false;
 	},
 	
-	testPublishError: function() {
-		Hub.subscribe("test", "publish", function() {
+	assertNotInvoked: function(topic, fn) {
+		Hub.publish(topic);
+		assertFalse(topic, fn.called);
+	},
+	
+	"test publish error": function() {
+		Hub.subscribe("test/publish", function() {
 			throw new Error("d'oh!");
 		});
 		var error = null;
-		Hub.subscribe("hub.error", "publish", function(data) {
+		Hub.subscribe("hub.error/publish", function(data) {
 			error = data;
 		});
-		Hub.publish("test", "publish");
-		assertNotNull("error caught", error);
-		assertEquals("Error in callback for {namespace}/{message}: {error}", error.description);
-		assertEquals("test", error.context.namespace);
-		assertEquals("publish", error.context.message);
+		Hub.publish("test/publish");
+		assertNotNull(error);
+		assertObject(error);
+		assertEquals("Error in callback for topic \"test/publish\": d'oh!", error.toString());
+		assertEquals("test/publish", error.context.topic);
 		assertEquals("d'oh!", error.context.error);
 	}
 

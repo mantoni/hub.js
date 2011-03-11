@@ -15,15 +15,15 @@ runBenchmark("Hub.util.merge", {
 		}
 	},
 	
-	'Hub.util.merge([], [])': function(l) {
-		for(var i = 0; i < l; i++) {
-			Hub.util.merge([], []);
-		}
-	},
-	
 	'Hub.util.merge({}, {})': function(l) {
 		for(var i = 0; i < l; i++) {
 			Hub.util.merge({}, {});
+		}
+	},
+	
+	'Hub.util.merge([], [])': function(l) {
+		for(var i = 0; i < l; i++) {
+			Hub.util.merge([], []);
 		}
 	},
 	

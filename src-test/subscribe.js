@@ -7,46 +7,63 @@ TestCase("subscribe", {
 		Hub.reset();
 	},
 	
-	/*
-	 * basic subscribe functionality.
-	 */
-	testSimpleSubscribe: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
-		Hub.publish("x", "y");
-		assertTrue(called);
+	testFunctionExists: function() {
+		assertFunction(Hub.subscribe);
 	},
 	
-	testShortSubscribe: function() {
-		var called = false;
-		Hub.subscribe("x/y", function() {
-			called = true;
+	testSubscribeInvocation: function() {
+		var fn = stubFn();
+		assertNoException(function() {
+			Hub.subscribe("a", fn);
 		});
-		Hub.publish("x", "y");
-		assertTrue(called);
+		assertNoException(function() {
+			Hub.subscribe("a/b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("a/*", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("*/b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("a.*/b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("a/b.*", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("a.*/b.*", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("*.a/b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("*.a/*.b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("**/b", fn);
+		});
+		assertNoException(function() {
+			Hub.subscribe("a/**", fn);
+		});
 	},
 	
-	/*
-	 * ensure a peer can be defined after an existing subscription
-	 * and both get mixed and then invoked in the correct order.
-	 */
-	testSubscribeThenAddPeer: function() {
-		var chain = [];
-		Hub.subscribe("a", "b", function() {
-			chain.push("subscribe");
+	"test subscribe throws error if callback is not a function": function() {
+		assertException(function() {
+			Hub.subscribe("x/y");
 		});
-		Hub.peer("a", function() {
-			return {
-				"b": function() {
-					chain.push("node");
-				}
-			};
+		assertException(function() {
+			Hub.subscribe("x/y", null);
 		});
-		Hub.publish("a", "b");
-		// node first, because it was added last.
-		assertEquals("node,subscribe", chain.join());
+		assertException(function() {
+			Hub.subscribe("x/y", true);
+		});
+		assertException(function() {
+			Hub.subscribe("x/y", {});
+		});
+		assertException(function() {
+			Hub.subscribe("x/y", []);
+		});
 	}
-
+	
 });

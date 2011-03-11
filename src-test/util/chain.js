@@ -1,9 +1,13 @@
 /*
  * Test cases for Hub.util.chain.
  */
-TestCase("util.chain", {
+TestCase("util_chain", {
+	
+	"test function exists": function() {
+		assertFunction(Hub.util.chain);
+	},
 
-	testChainCall: function() {
+	"test chain call": function() {
 		var calls = [];
 		var f1 = function() {
 			calls.push("f1");
@@ -17,15 +21,15 @@ TestCase("util.chain", {
 		assertEquals("Called in argument order", "f1,f2", calls.join());
 	},
 	
-	testStopPropagation: function() {
+	"test stop propagation": function() {
 		var f = stubFn();
 		Hub.util.chain(function() {
 			Hub.stopPropagation();
 		}, f)();
-		assertUndefined(f.called);
+		assertFalse(f.called);
 	},
 	
-	testChainRemoveFirstOfTwo: function() {
+	"test chain remove first of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
@@ -34,11 +38,11 @@ TestCase("util.chain", {
 		assertFunction(chain);
 		assertUndefined(chain.remove);
 		chain();
-		assertUndefined(f1.called);
+		assertFalse(f1.called);
 		assertTrue(f2.called);
 	},
 	
-	testChainRemoveSecondOfTwo: function() {
+	"test chain remove second of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
@@ -48,10 +52,10 @@ TestCase("util.chain", {
 		assertUndefined(chain.remove);
 		chain();
 		assertTrue(f1.called);
-		assertUndefined(f2.called);
+		assertFalse(f2.called);
 	},
 	
-	testChainRemoveFirstOfThree: function() {
+	"test chain remove first of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -61,12 +65,12 @@ TestCase("util.chain", {
 		assertFunction(chain);
 		assertFunction(chain.remove);
 		chain();
-		assertUndefined(f1.called);
+		assertFalse(f1.called);
 		assertTrue(f2.called);
 		assertTrue(f3.called);
 	},
 	
-	testChainRemoveSecondOfThree: function() {
+	"test chain remove second of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -74,14 +78,14 @@ TestCase("util.chain", {
 		assertFunction(chain.remove);
 		chain = chain.remove(f2);
 		assertFunction(chain);
-		//assertFunction(chain.remove);
+		assertFunction(chain.remove);
 		chain();
 		assertTrue(f1.called);
-		assertUndefined(f2.called);
+		assertFalse(f2.called);
 		assertTrue(f3.called);
 	},
 	
-	testChainRemoveThirdOfThree: function() {
+	"test chain remove third of three": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
@@ -89,31 +93,31 @@ TestCase("util.chain", {
 		assertFunction(chain.remove);
 		chain = chain.remove(f3);
 		assertFunction(chain);
-		//assertFunction(chain.remove);
+		assertFunction(chain.remove);
 		chain();
 		assertTrue(f1.called);
 		assertTrue(f2.called);
-		assertUndefined(f3.called);
+		assertFalse(f3.called);
 	},
 	
-	testChainRemoveFirstNoReassign: function() {
+	"test chain remove first no reassign": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
 		chain.remove(f1);
 		chain();
-		assertUndefined(f1.called);
+		assertFalse(f1.called);
 		assertTrue(f2.called);
 	},
 	
-	testChainRemoveSecondNoReassign: function() {
+	"test chain remove second no reassign": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
 		chain.remove(f2);
 		chain();
 		assertTrue(f1.called);
-		assertUndefined(f2.called);
+		assertFalse(f2.called);
 	}
 	
 });

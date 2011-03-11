@@ -7,68 +7,32 @@ TestCase("forward", {
 		Hub.reset();
 	},
 	
-	testSimpleForwardLong: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
-		Hub.forward("a", "b", "x", "y");
-		Hub.publish("a", "b");
-		assertTrue(called);
-	},
-
 	testSimpleForwardShort: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
+		var fn = stubFn();
+		Hub.subscribe("x/y", fn);
 		Hub.forward("a/b", "x/y");
-		Hub.publish("a", "b");
-		assertTrue(called);
-	},
-	
-	testSimpleForwardShortAndLong: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
-		Hub.forward("a/b", "x", "y");
-		Hub.publish("a", "b");
-		assertTrue(called);
-	},
-	
-	testSimpleForwardLongAndShort: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
-		Hub.forward("a", "b", "x/y");
-		Hub.publish("a", "b");
-		assertTrue(called);
+		Hub.publish("a/b");
+		assertTrue(fn.called);
 	},
 	
 	testMultiForwardSimple: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
+		var fn = stubFn();
+		Hub.subscribe("x/y", fn);
 		Hub.forward({
 			"a/b": "x/y"
 		});
-		Hub.publish("a", "b");
-		assertTrue(called);
+		Hub.publish("a/b");
+		assertTrue(fn.called);
 	},
 	
 	testMultiForwardComplex: function() {
-		var called = false;
-		Hub.subscribe("x", "y", function() {
-			called = true;
-		});
+		var fn = stubFn();
+		Hub.subscribe("x/y", fn);
 		Hub.forward({
-			"a/b": ["x", "y"]
+			"a/b": ["x/y"]
 		});
-		Hub.publish("a", "b");
-		assertTrue(called);
+		Hub.publish("a/b");
+		assertTrue(fn.called);
 	}
 
 });

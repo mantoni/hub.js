@@ -1,6 +1,8 @@
 /*
  * Test cases for Hub.publish timeouts.
 
+THIS TEST CASE KILLS CHROME!
+
 AsyncTestCase("publish-timeout", {
 	
 	tearDown: function() {
@@ -13,7 +15,7 @@ AsyncTestCase("publish-timeout", {
 		});
 		queue.call(function(pool) {
 			var time = new Date().getTime();
-			Hub.publish("a", "b").then(function() {
+			Hub.publish("a/b").then(function() {
 				fail("Unexpected success callback");
 			}, pool.add(function(error) {
 				assertObject(error);
