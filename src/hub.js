@@ -125,9 +125,13 @@ Hub = function() {
 	 */
 	function chain() {
 		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
+		var copy = null;
 		function callChain() {
+			if(!copy) {
+				copy = Array.prototype.slice.call(fns);
+			}
 			var previous = currentCallIterator;
-			currentCallIterator = callIterator(fns, arguments);
+			currentCallIterator = callIterator(copy, arguments);
 			try {
 				while(currentCallIterator()) {
 					// Avoid "empty while" compiler warning.
@@ -140,7 +144,8 @@ Hub = function() {
 		}
 		callChain.add = function(fn) {
 			fns.unshift(fn);
-		}
+			copy = null;
+		};
 		callChain.remove = function(fn) {
 			for(var i = fns.length; i--;) {
 				if(fns[i] === fn) {
@@ -148,7 +153,8 @@ Hub = function() {
 					break;
 				}
 			}
-		}
+			copy = null;
+		};
 		return callChain;
 	}
 	
@@ -251,17 +257,17 @@ Hub = function() {
 		}
 	}
 	
-	function createTopicFunction(topic, fn) {
+	function createCallChain(topic, fn) {
 		validateTopic(topic);
-		var match = chain(), re, t;
+		var callChain = chain(), re, t;
 		if(fn) {
-			match.add(fn);
+			callChain.add(fn);
 		}
 		if(topic.indexOf("*") !== -1) {
 			re = pathMatcher(topic);
 			for(t in subscribers) {
 				if(re.test(t)) {
-					match.add(subscribers[t]);
+					callChain.add(subscribers[t]);
 				}
 			}
 			wildcardSubscribers[topic] = re;
@@ -270,18 +276,18 @@ Hub = function() {
 			for(t in wildcardSubscribers) {
 				re = wildcardSubscribers[t];
 				if(re.test(topic)) {
-					match.add(subscribers[t]);
+					callChain.add(subscribers[t]);
 				}
 			}
 		}
 		if(topic.indexOf("{") !== -1) {
-			match.add(substitutionFn(topic));
+			callChain.add(substitutionFn(topic));
 		}
-		return subscribers[topic] = match;
+		return subscribers[topic] = callChain;
 	}
 	
 	function invoke(topic, args) {
-		var topicFn = subscribers[topic] || createTopicFunction(topic);
+		var topicFn = subscribers[topic] || createCallChain(topic);
 		try {
 			return topicFn.apply(null, args);
 		}
@@ -629,7 +635,7 @@ Hub = function() {
 			validateCallback(fn);
 			var topicFn = subscribers[topic];
 			if(!topicFn) {
-				createTopicFunction(topic, fn);
+				createCallChain(topic, fn);
 			}
 			else {
 				topicFn.add(fn);

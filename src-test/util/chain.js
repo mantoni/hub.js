@@ -83,6 +83,19 @@ TestCase("util_chain", {
 		assertTrue(f1.called);
 		assertTrue(f2.called);
 		assertFalse(f3.called);
+	},
+	
+	"test chain modification while iterating": function() {
+		var calls = 0;
+		var sf = stubFn();
+		var chain = Hub.util.chain();
+		chain.add(function() {
+			calls++;
+			chain.add(sf);
+		});
+		chain();
+		assertEquals(1, calls);
+		assertFalse(sf.called);
 	}
 	
 });
