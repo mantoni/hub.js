@@ -33,10 +33,7 @@ TestCase("util_chain", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
-		assertFunction(chain.remove);
-		chain = chain.remove(f1);
-		assertFunction(chain);
-		assertUndefined(chain.remove);
+		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
 		assertTrue(f2.called);
@@ -46,10 +43,7 @@ TestCase("util_chain", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var chain = Hub.util.chain(f1, f2);
-		assertFunction(chain.remove);
-		chain = chain.remove(f2);
-		assertFunction(chain);
-		assertUndefined(chain.remove);
+		chain.remove(f2);
 		chain();
 		assertTrue(f1.called);
 		assertFalse(f2.called);
@@ -60,10 +54,7 @@ TestCase("util_chain", {
 		var f2 = stubFn();
 		var f3 = stubFn();
 		var chain = Hub.util.chain(f1, f2, f3);
-		assertFunction(chain.remove);
-		chain = chain.remove(f1);
-		assertFunction(chain);
-		assertFunction(chain.remove);
+		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
 		assertTrue(f2.called);
@@ -75,10 +66,7 @@ TestCase("util_chain", {
 		var f2 = stubFn();
 		var f3 = stubFn();
 		var chain = Hub.util.chain(f1, f2, f3);
-		assertFunction(chain.remove);
-		chain = chain.remove(f2);
-		assertFunction(chain);
-		assertFunction(chain.remove);
+		chain.remove(f2);
 		chain();
 		assertTrue(f1.called);
 		assertFalse(f2.called);
@@ -90,34 +78,11 @@ TestCase("util_chain", {
 		var f2 = stubFn();
 		var f3 = stubFn();
 		var chain = Hub.util.chain(f1, f2, f3);
-		assertFunction(chain.remove);
-		chain = chain.remove(f3);
-		assertFunction(chain);
-		assertFunction(chain.remove);
+		chain.remove(f3);
 		chain();
 		assertTrue(f1.called);
 		assertTrue(f2.called);
 		assertFalse(f3.called);
-	},
-	
-	"test chain remove first no reassign": function() {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var chain = Hub.util.chain(f1, f2);
-		chain.remove(f1);
-		chain();
-		assertFalse(f1.called);
-		assertTrue(f2.called);
-	},
-	
-	"test chain remove second no reassign": function() {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var chain = Hub.util.chain(f1, f2);
-		chain.remove(f2);
-		chain();
-		assertTrue(f1.called);
-		assertFalse(f2.called);
 	}
 	
 });

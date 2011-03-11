@@ -41,18 +41,11 @@ Hub = function() {
 	var definitions = {};
 	
 	/**
-	 * The next function to execute in the current chain or false.
+	 * The call iterator for the current call chain.
 	 *
 	 * @type {Function}
 	 */
-	var nextFn = false;
-	
-	/**
-	 * The arguments to pass to nextFn.
-	 *
-	 * @type {Array}
-	 */
-	var nextArguments;
+	var currentCallIterator;
 	
 	/**
 	 * An empty array used as an internal value object.
@@ -99,65 +92,64 @@ Hub = function() {
 	 * @type {number}
 	 */	
 	var now;
-			
+	
 	/**
-	 * creates a call chain for the given functions.
+	 * returns an iterator function that iterates over an array of functions
+	 * invoking each with the given arguments. The iterator advances to the
+	 * next function after each call and returns true. If there are no
+	 * functions left, the iterator function returns false. To stop the
+	 * iterator, set the "stop" property to true. The iterator uses
+	 * Hub.util.merge to merge the results of all invoked functions and makes
+	 * the result accessible via the "result" property.
+	 *
+	 * @param {Array} fns the functions to iterate over.
+	 * @param {Array} args the arguments to pass to each function.
+	 * @return {Boolean} true if there are more functions to iterate,
+	 * 						otherwise false.
 	 */
-	function chain(first, second) {
-		function add(fn) {
-			if(second === undefined) {
-				second = fn;
+	function callIterator(fns, args) {
+		var index = 0;
+		function iterator() {
+			if(index < fns.length && !iterator.stop) {
+				iterator.result = Hub.util.merge(iterator.result,
+					fns[index++].apply(null, args));
+				return true;
 			}
-			else if(first === undefined) {
-				first = fn;
-			}
-			else {
-				first = chain(fn, first);
-			}
-		}
-		function remove(fn) {
-			if(fn === second) {
-				second = undefined;
-				return first;
-			}
-			if(fn === first) {
-				first = undefined;
-				return second;
-			}
-			if(first && typeof first.remove === "function" &&
-					!(first = first.remove(fn))) {
-				return second;
-			}
-			return this;
-		}
-		var newChain = function() {
-			if(!second) {
-				if(!first) {
-					return;
-				}
-				return first.apply(null, arguments);
-			}
-			if(!first) {
-				return second.apply(null, arguments);
-			}
-			var previousFn = nextFn;
-			nextFn = second;
-			nextArguments = arguments;
+			return false;
+		};
+		return iterator;
+	}
+	
+	/*
+	 * See Hub.util.chain.
+	 */
+	function chain() {
+		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
+		function callChain() {
+			var previous = currentCallIterator;
+			currentCallIterator = callIterator(fns, arguments);
 			try {
-				var result = first.apply(null, arguments);
-				if(nextFn) {
-					result = Hub.util.merge(result, second.apply(null, arguments));
-				}
-				return result;
+				while(currentCallIterator()) {
+					// Avoid "empty while" compiler warning.
+				};
+				return currentCallIterator.result;
 			}
 			finally {
-				nextFn = previousFn;
-				nextarguments = undefined;
+				currentCallIterator = previous;
 			}
-		};
-		newChain.add = add;
-		newChain.remove = remove;
-		return newChain;
+		}
+		callChain.add = function(fn) {
+			fns.unshift(fn);
+		}
+		callChain.remove = function(fn) {
+			for(var i = fns.length; i--;) {
+				if(fns[i] === fn) {
+					fns.splice(i, 1);
+					break;
+				}
+			}
+		}
+		return callChain;
 	}
 	
 	/*
@@ -262,8 +254,8 @@ Hub = function() {
 	function createTopicFunction(topic, fn) {
 		validateTopic(topic);
 		var match = chain(), re, t;
-		if(topic.indexOf("{") !== -1) {
-			match.add(substitutionFn(topic));
+		if(fn) {
+			match.add(fn);
 		}
 		if(topic.indexOf("*") !== -1) {
 			re = pathMatcher(topic);
@@ -282,8 +274,8 @@ Hub = function() {
 				}
 			}
 		}
-		if(fn) {
-			match.add(fn);
+		if(topic.indexOf("{") !== -1) {
+			match.add(substitutionFn(topic));
 		}
 		return subscribers[topic] = match;
 	}
@@ -640,7 +632,6 @@ Hub = function() {
 				createTopicFunction(topic, fn);
 			}
 			else {
-				validateTopic(topic);
 				topicFn.add(fn);
 			}
 			for(var t in wildcardSubscribers) {
@@ -740,7 +731,7 @@ Hub = function() {
 		 * stops message propagation for the current publish call.
 		 */
 		stopPropagation: function() {
-			nextFn = false;
+			currentCallIterator.stop = true;
 		},
 		
 		/**
@@ -748,8 +739,7 @@ Hub = function() {
 		 * current publish call.
 		 */
 		propagate: function() {
-			nextFn.apply(null, nextArguments);
-			nextFn = false;
+			currentCallIterator();
 		},
 		
 		/**
@@ -931,19 +921,15 @@ Hub = function() {
 			 * creates a call chain for the given functions. The returned
 			 * chain is a function itself which will invoke all functions in
 			 * the given order.
-			 * The chain implements remove(Function) which removes one of
-			 * the functions from the chain.
+			 * The chain implements add(Function) and remove(Function) to add
+			 * and remove functions from the chain.
+			 * Chain iteration can be aborted via Hub.stopPropagation() or
+			 * explicitly triggered via Hub.propagate().
 			 * 
 			 * @param {...Function} the functions to chain
 			 * @return {Function} the chain function
 			 */
-			chain: function() {
-				var newChain = chain();
-				for(var i = arguments.length; i--;) {
-					newChain.add(arguments[i]);
-				}
-				return newChain;
-			},
+			chain: chain,
 			
 			/**
 			 * resolves a dot notation path from an object.
