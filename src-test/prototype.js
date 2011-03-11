@@ -1,6 +1,6 @@
 /*
  * Test cases for prototype scoped peers.
- */
+
 TestCase("prototype", {
 	
 	tearDown: function() {
@@ -35,4 +35,4 @@ TestCase("prototype", {
 		assert(fn.called);
 	}
 	
-});
+}); */
