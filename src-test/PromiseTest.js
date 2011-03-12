@@ -1,23 +1,19 @@
 /*
  * Test cases for promise support.
  */
-TestCase("promise", {
+TestCase("PromiseTest", {
 	
 	tearDown: function() {
 		Hub.reset();
 	},
 	
-	testFulfillPromise: function() {
-		var promise = Hub.promise();
-		var called = false;
-		promise.then(function() {
-			called = true;
-		});
-		promise.fulfill();
-		assertTrue(called);
+	"test fulfill promise": function() {
+		var fn = stubFn();
+		Hub.promise().then(fn).fulfill();
+		assert(fn.called);
 	},
 	
-	testPromiseQueue: function() {
+	"test promise queue": function() {
 		var chain = [];
 		// then-then-fulfill:
 		Hub.promise().then(function() {
@@ -35,7 +31,7 @@ TestCase("promise", {
 		assertEquals("a,b,c,d", chain.join());
 	},
 	
-	testPublishWithThen: function() {
+	"test publish with then": function() {
 		var chain = [];
 		Hub.subscribe("test/promise", function() {
 			chain.push("a");
@@ -46,7 +42,7 @@ TestCase("promise", {
 		assertEquals("a,b", chain.join());
 	},
 	
-	testThenWithPromisePublish: function() {
+	"test then with promise publish": function() {
 		var chain = [];
 		Hub.subscribe("test/promise", function() {
 			chain.push("a");
@@ -56,8 +52,44 @@ TestCase("promise", {
 		}).fulfill();
 		assertEquals("a,b", chain.join());
 	},
+	
+	"test return value is not used as parameter on publish": function() {
+		Hub.subscribe("test/promise", function() {
+			return "Test";
+		});
+		var value = "replaced with undefined";
+		Hub.subscribe("test/other", function(arg) {
+			value = arg;
+		});
+		Hub.promise().publish("test/promise").publish("test/other").fulfill();
+		assertUndefined(value);
+	},
 
-	testThenWithHubPublish: function() {
+	"test return value is used as parameter on publishValue": function() {
+		Hub.subscribe("test/promise", function() {
+			return "Test";
+		});
+		var value = "replaced with return value";
+		Hub.subscribe("test/other", function(arg) {
+			value = arg;
+		});
+		Hub.publish("test/promise").publishValue("test/other");
+		assertEquals("Test", value);
+	},
+
+	"test return value is used as parameter on publishValue (explicit fulfill)": function() {
+		Hub.subscribe("test/promise", function() {
+			return "Test";
+		});
+		var value = "replaced with return value";
+		Hub.subscribe("test/other", function(arg) {
+			value = arg;
+		});
+		Hub.promise().publish("test/promise").publishValue("test/other").fulfill();
+		assertEquals("Test", value);
+	},
+
+	"test then with hub publish": function() {
 		var chain = [];
 		Hub.subscribe("test/promise", function() {
 			chain.push("a");
@@ -76,7 +108,7 @@ TestCase("promise", {
 	 * the return value of a subscriber callback is passed as the data
 	 * argument the promise.
 	 */
-	testCallbackReturnString: function() {
+	"test callback return string": function() {
 		Hub.subscribe("test/promise", function() {
 			return "Hello";
 		});
@@ -87,7 +119,7 @@ TestCase("promise", {
 		assertEquals("Hello", result);
 	},
 
-	testCallbackReturnStringMulticasting: function() {
+	"test callback return string multicasting": function() {
 		Hub.subscribe("test/promise", function() {
 			return "Hello";
 		});
@@ -98,7 +130,7 @@ TestCase("promise", {
 		assertEquals("Hello", result);
 	},
 	
-	testCallbackReturnMerge: function() {
+	"test callback return merge": function() {
 		Hub.subscribe("test/promise.a", function() {
 			return ["World"];
 		});
@@ -113,7 +145,7 @@ TestCase("promise", {
 		assertEquals("Hello World", result.join(" "));
 	},
 	
-	testJoinedPromisesFulfill1First: function() {
+	"test joined promises fulfill #1 first": function() {
 		var p1, p2, done = false;
 		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();
@@ -140,7 +172,7 @@ TestCase("promise", {
 		assertTrue(done);
 	},
 
-	testJoinedPromisesFulfill2First: function() {
+	"test joined promises fulfill #2 first": function() {
 		var p1, p2, done = false;
 		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();

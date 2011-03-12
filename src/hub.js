@@ -37,45 +37,6 @@
 	 */
 	var emptyArray = [];
 	
-	/**
-	 * The current promise. Also indicates whether currently executing
-	 * Hub.publish.
-	 *
-	 * @type {object}
-	 */
-	var promise = true;
-	
-	/**
-	 * All promises currently monitored for timeouts.
-	 *
-	 * @type {object}
-	 */
-	var monitored = {};
-	
-	/**
-	 * All path matcher regular expressions.
-	 *
-	 * @type {object}
-	 */
-	var pathMatchers = {};
-	
-	/**
-	 * @type {number}
-	 */	
-	var monitorTimeout;
-	/**
-	 * @type {number}
-	 */	
-	var onceTimeout;
-	/**
-	 * @type {number}
-	 */	
-	var promiseCounter = 0;
-	/**
-	 * @type {number}
-	 */	
-	var now;
-		
 	/*
 	 * adds a function to the given peer under the specified message.
 	 */
@@ -119,13 +80,9 @@
 	}
 	
 	function pathMatcher(name) {
-		var matcher = pathMatchers[name];
-		if(matcher) {
-			return matcher;
-		}
 		var exp = name.replace(/\./g, "\\.").replace(
 			/\*\*/g, "[a-zA-Z0-9\\.]+").replace(/\*/g, "[a-zA-Z0-9]+");
-		return pathMatchers[name] = new RegExp("^" + exp + "$");
+		return new RegExp("^" + exp + "$");
 	}
 	
 	/*
@@ -222,275 +179,6 @@
 		}
 	}
 	
-	// internal observer for monitored promises.
-	function checkMonitored() {
-		onceTimeout = undefined;
-		now = new Date().getTime();
-		var next = -1;
-		for(var id in monitored) {
-			var spec = monitored[id];
-			var expires = spec[0];
-			if(expires <= now) {
-				spec[1].reject({
-					type: "timeout"
-				});
-				delete monitored[id];
-			}
-			else {
-				next = next === -1 ? expires : Math.min(expires, next);
-			}
-		}
-		if(next !== -1) {
-			monitorTimeout = setTimeout(checkMonitored, next);
-		}
-		now = undefined;
-	}
-	
-	/*
-	 * monitors the given promise which causes the promise to time out after
-	 * the specified timeout.
-	 *
-	 * @param {Object} p the promise to monitor.
-	 * @param {Number} timeout the timeout in milliseconds.
-	 * @return {Number} the monitor identifier.
-	 */
-	function monitor(p, timeout) {
-		if(!now) {
-			now = new Date().getTime();
-		}
-		var id = ++promiseCounter;
-		monitored[id] = [now + timeout, p];
-		if(!onceTimeout) {
-			clearTimeout(monitorTimeout);
-			onceTimeout = setTimeout(checkMonitored, 15);
-		}
-		return id;
-	}
-	
-	/*
-	 * removes the promise monitor for the given monitor identifier. The
-	 * identifier is returned from monitor(promise, timeout).
-	 *
-	 * @param {Number} the monitor identifier.
-	 */
-	function unmonitor(id) {
-		delete monitored[id];
-	}
-	
-	/*
-	 * <p>
-	 * invoke the given callback and pass in the data. If an error occurs
-	 * during execution, an error message is published on the hub.
-	 * </p>
-	 * <p>
-	 * Used by promises to invoke the success or error callbacks.
-	 * </p>
-	 *
-	 * @param {Function} callback the callback function.
-	 * @param {*} value the value to pass to the callback.
-	 */
-	function invokePromiseCallback(callback, value) {
-		if(callback) {
-			try {
-				callback(value);
-			}
-			catch(e) {
-				invoke("hub.error/promise.callback", [new Hub.Error("error",
-					"Error in promise callback: ${error}", {
-						error: e.message
-					})]);
-			}
-		}
-	}
-	
-	/*
-	 * called by a promises fulfill() and reject() methods if the promise was
-	 * already fulfilled. Publishes an error message on the hub.
-	 */
-	function promiseAlreadyFulfilled() {
-		invoke("hub.error/promise.fulfilled", [new Hub.Error("validation",
-			"Promise already fulfilled")]);
-	}
-	
-	/*
-	 * creates a new promise.
-	 *
-	 * @param {Boolean} fulfilled whether the promise is initially fulfilled.
-	 * @param {*} value the initial value.
-	 * @param {Number} timeout the optional timeout.
-	 * @return {Object} the new promise.
-	 */
-	function createPromise(fulfilled, value, timeout) {
-		var callbacks = [];
-		var errorCallbacks = [];
-		var success = true;
-		var timeoutId;
-		var p;
-		// Public API:
-		p = {
-			/**
-			 * @param {Function} callback the success callback.
-			 * @param {Function} errorCallback the error callback.
-			 * @return {Object} this promise.
-			 */
-			then: function(callback, errorCallback) {
-				if(fulfilled) {
-					invokePromiseCallback(success ? callback : errorCallback, value);
-				}
-				else {
-					if(callback) {
-						callbacks.push(callback);
-					}
-					if(errorCallback) {
-						errorCallbacks.push(errorCallback);
-					}
-				}
-				return this;
-			},
-			/**
-			 * @param {String} topic the topic.
-			 * @param {*} arguments the arguments.
-			 * @return {Object} this promise.
-			 */
-			publish: function(topic) {
-				if(fulfilled) {
-					return Hub.publish.apply(Hub, arguments);
-				}
-				var args = [topic];
-				if(arguments.length > 1) {
-					args = args.concat(arguments);
-				}
-				return this.then(function() {
-					return Hub.publish.apply(Hub, args);
-					// A return value would be meaningless here.
-				});
-			},
-			/**
-			 * @param {*} value the value.
-			 * @return {Object} this promise.
-			 */
-			fulfill: function(data) {
-				if(fulfilled) {
-					promiseAlreadyFulfilled();
-				}
-				else {
-					fulfilled = true;
-					unmonitor(timeoutId);
-					value = Hub.util.merge(value, data);
-					while(callbacks.length) {
-						invokePromiseCallback(callbacks.shift(), value);
-					}
-				}
-				return this;
-			},
-			/**
-			 * @param {*} error the error data.
-			 * @return {Object} this promise.
-			 */
-			reject: function(error) {
-				if(fulfilled) {
-					promiseAlreadyFulfilled();
-				}
-				else {
-					fulfilled = true;
-					success = false;
-					unmonitor(timeoutId);
-					while(callbacks.length) {
-						invokePromiseCallback(errorCallbacks.shift(), error);
-					}
-				}
-				return this;
-			},
-			/**
-			 * @return {Boolean} whether this promise was fulfilled.
-			 */
-			fulfilled: function() {
-				return fulfilled;
-			}
-		};
-		if(!fulfilled) {
-			timeoutId = monitor(p, timeout || 60000);
-		}
-		return p;
-	}
-	
-	/**
-	 * joins the given promises together in a new promise. This means the
-	 * returned promise is fulfilled if the given promises are fulfilled. If
-	 * both promises succeed then the returned promise succeeds as well with
-	 * the data ob the promises being merged. If one of the given promises
-	 * failes, then the returned promise fails as well with the data set to
-	 * the data of the failing promise, or the merged data if both promises
-	 * failed.
-	 *
-	 * @param {Object} p1 the first promise
-	 * @param {Object} p2 the second promise
-	 * @return {Object} the joined promise
-	 */
-	function joinPromises(p1, p2) {
-		var mergedData;
-		var count = 0;
-		var wrapper = createPromise(false, undefined);
-		var success = true;
-		/*
-		 * checks whether the promise is done and calls fulfill or reject on
-		 * the wrapper.
-		 */
-		function checkDone() {
-			if(++count === 2) {
-				(success ? wrapper.fulfill : wrapper.reject)(mergedData);
-			}
-		}
-		function onSuccess(data) {
-			if(success) {
-				mergedData = Hub.util.merge(mergedData, data);
-			}
-			checkDone();
-		}
-		function onError(data) {
-			if(success) {
-				success = false;
-				mergedData = data;
-			}
-			else {
-				mergedData = Hub.util.merge(mergedData, data);
-			}
-			checkDone();
-		}
-		p1.then(onSuccess, onError);
-		p2.then(onSuccess, onError);
-		return wrapper;
-	}
-	
-	// Helper function to replace the given proxy with a new promise.
-	function replacePromiseProxy(proxy) {
-		var real = createPromise(true);
-		proxy.then = real.then;
-		proxy.publish = real.publish;
-		return real;
-	}
-	
-	/*
-	 * PromiseProxy is a lightweight object that creates the actual promise
-	 * on demand.
-	 */
-	var PromiseProxy = function() {};
-	// Same API as actual promise:
-	PromiseProxy.prototype = {
-		then: function(success, error) {
-			return replacePromiseProxy(this).then(success, error);
-		},
-		publish: function(namespace, message, data) {
-			return replacePromiseProxy(this).publish(namespace, message, data);
-		},
-		fulfill: function(data) {
-			throw new Error("Hub - promise already fulfilled");
-		},
-		fulfilled: function() {
-			return true;
-		}
-	};
-	
 	// ensures the given argument is a function. Throws an error otherwise.
 	function validateCallback(fn) {
 		var fnType = typeof fn;
@@ -530,16 +218,6 @@
 				delete definitions[k];
 			}
 		}
-		if(onceTimeout) {
-			clearTimeout(onceTimeout);
-			onceTimeout = undefined;
-		}
-		if(monitorTimeout) {
-			clearTimeout(monitorTimeout);
-			monitorTimeout = undefined;
-		}
-		now = undefined;
-		monitored = {};
 	};
 	
 	/**
@@ -628,50 +306,17 @@
 	};
 	
 	/**
-	 * publishes a topic along with optional arguments.
-	 * The topic consists of a namespace and a message in the form:
+	 * invokes the call chain associated with a topic with optional arguments.
+	 * The topic combines a namespace and a message in the form:
 	 * "{namespace}/{message}".
 	 * 
-	 * @param {String} topic the topic
-	 * @param {...Object} args the arguments to pass
+	 * @param {String} topic the topic.
+	 * @param {...Object} args the arguments to pass.
 	 */
-	Hub.publish = function(topic) {
-		var previousPromise = promise;
-		promise = false;
+	Hub.invoke = function(topic) {
 		var args = arguments.length > 1 ?
 				Array.prototype.slice.call(arguments, 1) : emptyArray;
-		var result = invoke(topic, args);
-		if(result !== undefined) {
-			var p = createPromise(true, result);
-			promise = promise ? joinPromises(promise, p) : p;
-		}
-		var returnPromise = promise;
-		promise = previousPromise;
-		return returnPromise || new PromiseProxy();
-	};
-	
-	/**
-	 * returns a promise.
-	 *
-	 * @param {Number} timeout the optional timeout for the promise
-	 * @return {Object} the promise
-	 */
-	Hub.promise = function(timeout) {
-		var newPromise = createPromise(false, undefined, timeout);
-		if(promise === true) {
-			// This means we are not within a publish call.
-			return newPromise;
-		}
-		/*
-		 * This means we are within a publish call now. If promise is false it
-		 * means we do not have a promise yet. Otherwise there is an existing
-		 * promise already which we can join with the new one.
-		 */
-		if(promise === false) {
-			return promise = newPromise;
-		}
-		promise = joinPromises(promise, newPromise);
-		return newPromise;
+		return invoke(topic, args);
 	};
 	
 	/**

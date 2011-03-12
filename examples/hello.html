@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Hello - hub.js examples</title>
-		<script type="text/javascript" src="../src/hub.js"></script>
+		<script type="text/javascript" src="../dist/hub-0.1-SNAPSHOT.js"></script>
 	</head>
 	<body>
 		<script type="text/javascript">
@@ -10,7 +10,7 @@
 			Hub.peer("greeter", function() {
 				return {
 					"greet": function(name) {
-						document.write("Hi " + name + "!");
+						document.write("Hello " + name + "!");
 					}
 				};
 			});
@@ -18,12 +18,12 @@
 			Hub.peer("input", function() {
 				return {
 					"name": function() {
-						return prompt("Your name?");
+						return prompt("Hello ...", "Hub");
 					}
 				};
 			});
 			
-			Hub.publish("input", "name").publish("greeter", "greet");
+			Hub.publish("input/name").publishValue("greeter/greet");
 		-->
 		</script>
 	</body>

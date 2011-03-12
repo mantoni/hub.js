@@ -28,7 +28,7 @@
 	 * @param {Array} fns the functions to iterate over.
 	 * @param {Array} args the arguments to pass to each function.
 	 * @return {Boolean} true if there are more functions to iterate,
-	 * 						otherwise false.
+	 * otherwise false.
 	 */
 	function callIterator(fns, args) {
 		var index = 0;
@@ -39,7 +39,7 @@
 				return true;
 			}
 			return false;
-		};
+		}
 		return iterator;
 	}
 	
@@ -52,8 +52,8 @@
 	 * Chain iteration can be aborted via Hub.stopPropagation() or
 	 * explicitly triggered via Hub.propagate().
 	 * 
-	 * @param {...Function} the functions to chain
-	 * @return {Function} the chain function
+	 * @param {...Function} the functions to chain.
+	 * @return {Function} the chain function.
 	 */
 	function chain() {
 		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
@@ -67,7 +67,7 @@
 			try {
 				while(currentCallIterator()) {
 					// Avoid "empty while" compiler warning.
-				};
+				}
 				return currentCallIterator.result;
 			}
 			finally {

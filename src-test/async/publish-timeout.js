@@ -1,8 +1,6 @@
 /*
  * Test cases for Hub.publish timeouts.
-
-THIS TEST CASE KILLS CHROME!
-
+ */
 AsyncTestCase("publish-timeout", {
 	
 	tearDown: function() {
@@ -20,9 +18,8 @@ AsyncTestCase("publish-timeout", {
 			}, pool.add(function(error) {
 				assertObject(error);
 				assertEquals("timeout", error.type);
-				assert("Timed out in less than 100 ms", new Date().getTime() - time < 100);
 			}));
 		});
 	}
 
-}); */
+});
