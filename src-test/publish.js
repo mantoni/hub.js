@@ -128,7 +128,7 @@ TestCase("publish", {
 		Hub.publish("test/publish");
 		assertNotNull(error);
 		assertObject(error);
-		assertEquals("Error in callback for topic \"test/publish\": d'oh!", error.toString());
+		assertEquals("Error in call chain for topic \"test/publish\": d'oh!", error.toString());
 		assertEquals("test/publish", error.context.topic);
 		assertEquals("d'oh!", error.context.error);
 	}

@@ -17,33 +17,6 @@
 	var currentCallIterator;
 	
 	/**
-	 * returns an iterator function that iterates over an array of functions
-	 * invoking each with the given arguments. The iterator advances to the
-	 * next function after each call and returns true. If there are no
-	 * functions left, the iterator function returns false. To stop the
-	 * iterator, set the "stop" property to true. The iterator uses
-	 * Hub.util.merge to merge the results of all invoked functions and makes
-	 * the result accessible via the "result" property.
-	 *
-	 * @param {Array} fns the functions to iterate over.
-	 * @param {Array} args the arguments to pass to each function.
-	 * @return {Boolean} true if there are more functions to iterate,
-	 * otherwise false.
-	 */
-	function callIterator(fns, args) {
-		var index = 0;
-		function iterator() {
-			if(index < fns.length && !iterator.stop) {
-				iterator.result = Hub.util.merge(iterator.result,
-					fns[index++].apply(null, args));
-				return true;
-			}
-			return false;
-		}
-		return iterator;
-	}
-	
-	/**
 	 * creates a call chain for the given functions. The returned
 	 * chain is a function itself which will invoke all functions in
 	 * the given order.
@@ -57,18 +30,35 @@
 	 */
 	function chain() {
 		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
-		var copy = null;
+		var nextIndex = -1;
 		function callChain() {
-			if(!copy) {
-				copy = Array.prototype.slice.call(fns);
+			/*
+			 * is an iterator function that iterates over the internal array of
+			 * functions invoking each with the arguments of this function. The
+			 * iterator advances to the next function after each call and
+			 * returns true. If there are no functions left, the iterator
+			 * function returns false. To stop the iterator, the "stop" property
+			 * can be set to true. The iterator uses Hub.util.merge to merge the
+			 * results of all invoked functions.
+			 */
+			var args = arguments;
+			var result;
+			function iterator() {
+				if(nextIndex < fns.length && !iterator.stop) {
+					result = Hub.util.merge(result,
+						fns[nextIndex++].apply(null, args));
+					return true;
+				}
+				return false;
 			}
 			var previous = currentCallIterator;
-			currentCallIterator = callIterator(copy, arguments);
+			currentCallIterator = iterator;
+			nextIndex = 0;
 			try {
 				while(currentCallIterator()) {
 					// Avoid "empty while" compiler warning.
 				}
-				return currentCallIterator.result;
+				return result;
 			}
 			finally {
 				currentCallIterator = previous;
@@ -76,16 +66,95 @@
 		}
 		callChain.add = function(fn) {
 			fns.unshift(fn);
-			copy = null;
+			if(nextIndex !== -1) {
+				nextIndex++;
+			}
+		};
+		callChain.addAll = function(fs, topic) {
+			fns = fs.concat(fns);
+			if(nextIndex !== -1) {
+				nextIndex += fs.length;
+			}
+		};
+		callChain.insert = function(index, fn) {
+			fns.splice(index, 0, fn);
+			if(index < nextIndex) {
+				nextIndex++;
+			}
 		};
 		callChain.remove = function(fn) {
+			if(typeof fn === "number") {
+				fns.splice(fn, 1);
+				if(fn < nextIndex) {
+					nextIndex--;
+				}
+				return fn;
+			}
 			for(var i = fns.length; i--;) {
 				if(fns[i] === fn) {
 					fns.splice(i, 1);
-					break;
+					if(i < nextIndex) {
+						nextIndex--;
+					}
+					return i;
 				}
 			}
-			copy = null;
+			return -1;
+		};
+		callChain.all = function() {
+			return fns;
+		};
+		return callChain;
+	}
+	
+	function compareTopics(left, right) {
+		var lw = left.indexOf("*");
+		var rw = right.indexOf("*");
+		var ls = left.indexOf("/");
+		var rs = right.indexOf("/");
+		if(lw < ls) {
+			if(rw > rs) {
+				return -1;
+			}
+		}
+		else {
+			if(rw < rs) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+	
+	function topicChain() {
+		var callChain = chain();
+		var remove = callChain.remove;
+		var topics = [];
+		callChain.add = function(fn, topic) {
+			if(topic.indexOf("*") === -1) {
+				callChain.insert(topics.length, fn);
+				return;
+			}
+			for(var i = 0, l = topics.length; i < l; i++) {
+				if(compareTopics(topic, topics[i]) <= 0) {
+					topics.splice(i, 0, topic);
+					callChain.insert(i, fn);
+					return;
+				}
+			}
+			callChain.insert(topics.length, fn);
+			topics.push(topic);
+		};
+		callChain.addAll = function(fns, topic) {
+			for(var i = 0, l = fns.length; i < l; i++) {
+				callChain.add(fns[i], topic);
+			}
+		};
+		callChain.remove = function(fn) {
+			var index = remove(fn);
+			if(index !== -1 && index < topics.length) {
+				topics.splice(index, 1);
+			}
+			return index;
 		};
 		return callChain;
 	}
@@ -106,5 +175,6 @@
 	};
 	
 	Hub.util.chain = chain;
+	Hub.util.topicChain = topicChain;
 	
 }());

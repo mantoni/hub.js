@@ -89,7 +89,7 @@
 	 * returns a peer instance for the definition with the given topic.
 	 */
 	function getPeer(namespace) {
-		return peers[namespace] || createPeer(topic);
+		return peers[namespace] || createPeer(namespace);
 	}
 	
 	function peerFactory(namespace) {
@@ -132,39 +132,47 @@
 		}
 	}
 	
-	function createCallChain(topic, fn) {
+	function wildcardSubscriber(topic) {
+		return wildcardSubscribers[topic] || (wildcardSubscribers[topic] = {
+			re: pathMatcher(topic),
+			chain: Hub.util.chain()
+		});
+	}
+	
+	function buildCallChain(topic) {
 		validateTopic(topic);
-		var callChain = Hub.util.chain(), re, t;
-		if(fn) {
-			callChain.add(fn);
-		}
-		if(topic.indexOf("*") !== -1) {
-			re = pathMatcher(topic);
-			for(t in subscribers) {
-				if(re.test(t)) {
-					callChain.add(subscribers[t]);
-				}
-			}
-			wildcardSubscribers[topic] = re;
-		}
-		else {
-			for(t in wildcardSubscribers) {
-				re = wildcardSubscribers[t];
-				if(re.test(topic)) {
-					callChain.add(subscribers[t]);
-				}
+		var callChain = subscribers[topic] = Hub.util.topicChain();
+		for(var t in wildcardSubscribers) {
+			var sub = wildcardSubscribers[t];
+			if(sub.re.test(topic)) {
+				callChain.addAll(sub.chain.all(), t);
 			}
 		}
-		if(topic.indexOf("{") !== -1) {
-			callChain.add(substitutionFn(topic));
-		}
-		return subscribers[topic] = callChain;
+		return callChain;
 	}
 	
 	function invoke(topic, args) {
-		var topicFn = subscribers[topic] || createCallChain(topic);
+		var callChain = subscribers[topic];
+		if(!callChain) {
+			if(topic.indexOf("{") !== -1) {
+				callChain = subscribers[topic] = substitutionFn(topic);
+			}
+			else if(topic.indexOf("*") === -1) {
+				callChain = buildCallChain(topic);
+			}
+			else {
+				var sub = wildcardSubscriber(topic);
+				var re = sub.re;
+				callChain = sub.chain;
+				for(var t in subscribers) {
+					if(re.test(t)) {
+						callChain.addAll(subscribers[t].all(), t);
+					}
+				}
+			}
+		}
 		try {
-			return topicFn.apply(null, args);
+			return callChain.apply(null, args);
 		}
 		catch(e) {
 			var errorTopic = "hub.error/publish";
@@ -172,7 +180,7 @@
 				throw e;
 			}
 			invoke(errorTopic, [new Hub.Error("error",
-				"Error in callback for topic \"{topic}\": {error}", {
+				"Error in call chain for topic \"{topic}\": {error}", {
 					topic: topic, error: e.message
 				})]
 			);
@@ -228,19 +236,22 @@
 	 */
 	Hub.subscribe = function(topic, fn) {
 		validateCallback(fn);
-		var topicFn = subscribers[topic];
-		if(!topicFn) {
-			createCallChain(topic, fn);
-		}
-		else {
-			topicFn.add(fn);
-		}
-		for(var t in wildcardSubscribers) {
-			var re = wildcardSubscribers[t];
-			if(re.test(topic)) {
-				subscribers[t].add(fn);
+		var callChain = subscribers[topic];
+		if(!callChain) {
+			if(topic.indexOf("*") !== -1) {
+				var sub = wildcardSubscriber(topic);
+				sub.chain.add(fn);
+				var re = sub.re;
+				for(var t in subscribers) {
+					if(re.test(t)) {
+						subscribers[t].add(fn, topic);
+					}
+				}
+				return;
 			}
+			callChain = buildCallChain(topic);
 		}
+		callChain.add(fn, topic);
 	};
 	
 	/**
@@ -260,9 +271,9 @@
 		}
 		subscribers[topic].remove(fn);
 		for(var t in wildcardSubscribers) {
-			var re = wildcardSubscribers[t];
-			if(re.test(topic)) {
-				subscribers[t].remove(fn);
+			var sub = wildcardSubscribers[t];
+			if(sub.re.test(topic)) {
+				sub.chain.remove(fn);
 			}
 		}
 		return true;
@@ -297,7 +308,7 @@
 		config.factory = factory;
 		definitions[namespace] = config;
 		if(!config.scope || config.scope === Hub.SINGLETON) {
-			var peer = peers[namespace] = createPeer(namespace);
+			var peer = getPeer(namespace);
 			wirePeer(peer, namespace);
 		}
 		else {
