@@ -14,27 +14,16 @@ TestCase("mixin", {
 	 */
 	testMixinCallOrder: function() {
 		var chain = [];
-		Hub.peer("parent",
-			function() {
-				return {
-					"test": function() {
-						chain.push("parent");
-					}
-				};
+		Hub.peer("parent", {
+			"test": function() {
+				chain.push("parent");
 			}
-		);
-		Hub.peer("child",
-			{
-				is: "parent"
-			},
-			function() {
-				return {
-					"test": function() {
-						chain.push("child");
-					}
-				};
+		});
+		Hub.peer("child", "parent", {
+			"test": function() {
+				chain.push("child");
 			}
-		);
+		});
 		// child is called first, then the "super" implementation.
 		Hub.publish("child/test");
 		assertEquals("child,parent", chain.join());
@@ -47,28 +36,17 @@ TestCase("mixin", {
 	 */
 	testStopPropagation: function() {
 		var chain = [];
-		Hub.peer("parent",
-			function() {
-				return {
-					"test": function() {
-						chain.push("parent");
-					}
-				};
+		Hub.peer("parent", {
+			"test": function() {
+				chain.push("parent");
 			}
-		);
-		Hub.peer("child",
-			{
-				is: "parent"
-			},
-			function() {
-				return {
-					"test": function() {
-						chain.push("child");
-						Hub.stopPropagation();
-					}
-				};
+		});
+		Hub.peer("child", "parent", {
+			"test": function() {
+				chain.push("child");
+				Hub.stopPropagation();
 			}
-		);
+		});
 		Hub.publish("child/test");
 		assertEquals("child", chain.join());
 	},
@@ -80,28 +58,17 @@ TestCase("mixin", {
 	 */
 	testPropagate: function() {
 		var chain = [];
-		Hub.peer("parent",
-			function() {
-				return {
-					"test": function() {
-						chain.push("parent");
-					}
-				};
+		Hub.peer("parent", {
+			"test": function() {
+				chain.push("parent");
 			}
-		);
-		Hub.peer("child",
-			{
-				is: "parent"
-			},
-			function() {
-				return {
-					"test": function() {
-						Hub.propagate();
-						chain.push("child");
-					}
-				};
+		});
+		Hub.peer("child", "parent", {
+			"test": function() {
+				Hub.propagate();
+				chain.push("child");
 			}
-		);
+		});
 		// explicit "super" invocation changes call order here.
 		Hub.publish("child/test");
 		assertEquals("parent,child", chain.join());

@@ -8,11 +8,9 @@ TestCase("peer", {
 	},
 	
 	"test defining a node twice fails": function() {
-		Hub.peer("definedTwice", function() {
-			return {};
-		});
+		Hub.peer("definedTwice", {});
 		try {
-			Hub.peer("definedTwice", function() {});
+			Hub.peer("definedTwice", {});
 		} catch(e) {
 			assertEquals("Hub - peer already defined: definedTwice", e.message);
 			return;
@@ -20,12 +18,10 @@ TestCase("peer", {
 		fail("Exception expected");
 	},
 	
-	"test a simple node definition with one listener works": function() {
+	"test a simple peer definition with one listener works": function() {
 		var fn = stubFn();
-		Hub.peer("simple", function() {
-			return {
-				"message": fn
-			};
+		Hub.peer("simple", {
+			"message": fn
 		});
 		Hub.publish("simple/message");
 		assertTrue(fn.called);
@@ -33,10 +29,8 @@ TestCase("peer", {
 	
 	"test dot separated namespaces used for peer and listener": function() {
 		var fn = stubFn();
-		Hub.peer("a.b", function() {
-			return {
-				"c.d": fn
-			};
+		Hub.peer("a.b", {
+			"c.d": fn
 		});
 		Hub.publish("a.b/c");
 		assertFalse(fn.called);
@@ -53,12 +47,10 @@ TestCase("peer", {
 		Hub.subscribe("a/b", function() {
 			chain.push("subscribe");
 		});
-		Hub.peer("a", function() {
-			return {
-				"b": function() {
-					chain.push("node");
-				}
-			};
+		Hub.peer("a", {
+			"b": function() {
+				chain.push("node");
+			}
 		});
 		Hub.publish("a/b");
 		// node first, because it was added last.
@@ -67,19 +59,15 @@ TestCase("peer", {
 	
 	"test peer multicasting": function() {
 		var chain = [];
-		Hub.peer("a.b", function() {
-			return {
-				"m": function() {
-					chain.push("x");
-				}
-			};
+		Hub.peer("a.b", {
+			"m": function() {
+				chain.push("x");
+			}
 		});
-		Hub.peer("a.c", function() {
-			return {
-				"m": function() {
-					chain.push("y");
-				}
-			};
+		Hub.peer("a.c", {
+			"m": function() {
+				chain.push("y");
+			}
 		});
 		Hub.publish("a.*/m");
 		assertEquals("y,x", chain.join());

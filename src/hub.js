@@ -67,14 +67,14 @@
 	/*
 	 * creates a peer for the peer definition with the given name.
 	 */
-	function createPeer(namespace) {
-		var peer = {}, definition = definitions[namespace];
+	function createPeer(definition) {
+		var peer = {};
 		if(definition) {
-			var is = argArray(definition.is);
+			var is = definition.is;
 			for(var i = 0, mixin; mixin = is[i++];) {
 				mix(peer, getPeer(mixin));
 			}
-			mix(peer, definition.factory());
+			mix(peer, definition.instance || definition.factory());
 		}
 		return peer;
 	}
@@ -89,12 +89,12 @@
 	 * returns a peer instance for the definition with the given topic.
 	 */
 	function getPeer(namespace) {
-		return peers[namespace] || createPeer(namespace);
+		return peers[namespace] || createPeer(definitions[namespace]);
 	}
 	
 	function peerFactory(namespace) {
 		return function() {
-			var peer = createPeer(namespace);
+			var peer = createPeer(definitions[namespace]);
 			wirePeer(peer, namespace);
 			Hub.propagate();
 			unwirePeer(peer, namespace);
@@ -133,10 +133,10 @@
 	}
 	
 	function wildcardSubscriber(topic) {
-		return wildcardSubscribers[topic] || (wildcardSubscribers[topic] = {
+		return wildcardSubscribers[topic] = {
 			re: pathMatcher(topic),
 			chain: Hub.util.chain()
-		});
+		};
 	}
 	
 	function buildCallChain(topic) {
@@ -161,12 +161,18 @@
 				callChain = buildCallChain(topic);
 			}
 			else {
-				var sub = wildcardSubscriber(topic);
-				var re = sub.re;
-				callChain = sub.chain;
-				for(var t in subscribers) {
-					if(re.test(t)) {
-						callChain.addAll(subscribers[t].all(), t);
+				var sub = wildcardSubscribers[topic];
+				if(sub) {
+					callChain = sub.chain;
+				}
+				else {
+					sub = wildcardSubscriber(topic);
+					var re = sub.re;
+					callChain = sub.chain;
+					for(var t in subscribers) {
+						if(re.test(t)) {
+							callChain.addAll(subscribers[t].all(), t);
+						}
 					}
 				}
 			}
@@ -198,22 +204,6 @@
 	// Public API:
 	
 	/**
-	 * the SINGLETON scope.
-	 * 
-	 * @type {string}
-	 * @const
-	 */
-	Hub.SINGLETON = "SINGLETON";
-	
-	/**
-	 * the PROTOTYPE scope.
-	 * 
-	 * @type {string}
-	 * @const
-	 */
-	Hub.PROTOTYPE = "PROTOTYPE";
-	
-	/**
 	 * resets the Hub to it's initial state. Primarily required for unit
 	 * testing.
 	 */
@@ -239,17 +229,27 @@
 		var callChain = subscribers[topic];
 		if(!callChain) {
 			if(topic.indexOf("*") !== -1) {
-				var sub = wildcardSubscriber(topic);
+				var sub = wildcardSubscribers[topic];
+				if(!sub) {
+					sub = wildcardSubscriber(topic);
+				}
 				sub.chain.add(fn);
 				var re = sub.re;
 				for(var t in subscribers) {
 					if(re.test(t)) {
 						subscribers[t].add(fn, topic);
+						sub.chain.addAll(subscribers[t].all(), t);
 					}
 				}
 				return;
 			}
 			callChain = buildCallChain(topic);
+		}
+		for(var t in wildcardSubscribers) {
+			var sub = wildcardSubscribers[t];
+			if(sub.re.test(topic)) {
+				sub.chain.add(fn, topic);
+			}
 		}
 		callChain.add(fn, topic);
 	};
@@ -293,27 +293,31 @@
 	 * Hub.PROTOTYPE. Defaults to Hub.SINGLETON.</li>
 	 * </ul>
 	 * 
-	 * @param {String} namespace the namespace of the peer
-	 * @param {Object} config the optional peer configuration
+	 * @param {String} namespace the namespace for the peer
+	 * @param {String|Array} is the optional list of peer names to mix
 	 * @param {Function} factory the factory for the map of listeners
 	 */
-	Hub.peer = function(namespace, config, factory) {
+	Hub.peer = function(namespace, is, factory) {
 		if(definitions[namespace]) {
 			throw new Error("Hub - peer already defined: " + namespace);
 		}
-		if(typeof config === "function") {
-			factory = config;
-			config = {};
+		if(!factory) {
+			factory = is;
+			is = null;
 		}
-		config.factory = factory;
-		definitions[namespace] = config;
-		if(!config.scope || config.scope === Hub.SINGLETON) {
-			var peer = getPeer(namespace);
-			wirePeer(peer, namespace);
-		}
-		else {
+		var definition = {
+			is: argArray(is)
+		};
+		if(typeof factory === "function") {
+			definition.factory = factory;
 			Hub.subscribe(namespace + "/**", peerFactory(namespace));
 		}
+		else {
+			definition.instance = factory;
+			var peer = peers[namespace] = createPeer(definition);
+			wirePeer(peer, namespace);
+		}
+		definitions[namespace] = definition;
 	};
 	
 	/**

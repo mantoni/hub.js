@@ -165,6 +165,18 @@ TestCase("publish_subscribe", {
 		assert(fna.called);
 		assert(fnb.called);
 		assertEquals(3, count);
+	},
+	
+	"test multicast publish twice": function() {
+		var count = 0;
+		var fn = function() {
+			count++;
+		};
+		Hub.subscribe("x/a", fn);
+		Hub.publish("x/*");
+		assertEquals(1, count);
+		Hub.publish("x/*");
+		assertEquals(2, count);
 	}
 	
 	// publish_subscribe
