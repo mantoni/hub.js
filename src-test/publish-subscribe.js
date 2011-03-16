@@ -151,7 +151,7 @@ TestCase("publish_subscribe", {
 		assertTrue(fnx.called);
 	},
 	
-	"test multicast subscriber invoked multiple times": function() {
+	"test multicast subscriber invoked once": function() {
 		var count = 0;
 		var fn = function() {
 			count++;
@@ -164,7 +164,7 @@ TestCase("publish_subscribe", {
 		Hub.publish("x/*");
 		assert(fna.called);
 		assert(fnb.called);
-		assertEquals(3, count);
+		assertEquals(1, count);
 	},
 	
 	"test multicast publish twice": function() {

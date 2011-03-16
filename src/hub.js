@@ -132,53 +132,69 @@
 		}
 	}
 	
-	function wildcardSubscriber(topic) {
-		return wildcardSubscribers[topic] = {
-			re: pathMatcher(topic),
-			chain: Hub.util.chain()
-		};
+	function getWildcardSubscriber(topic) {
+		var o = wildcardSubscribers[topic];
+		if(!o) {
+			o = wildcardSubscribers[topic] = {
+				re: pathMatcher(topic),
+				chain: Hub.util.chain()
+			};
+			addAllToMatchingChain(subscribers, o.chain, o.re, null);
+		}
+		return o;
 	}
 	
-	function buildCallChain(topic) {
-		validateTopic(topic);
-		var callChain = subscribers[topic] = Hub.util.topicChain();
-		for(var t in wildcardSubscribers) {
-			var sub = wildcardSubscribers[t];
-			if(sub.re.test(topic)) {
-				callChain.addAll(sub.chain.all(), t);
+	function addToMatchingChain(map, fn, re, topic) {
+		for(var t in map) {
+			var o = map[t];
+			if((re || o.re).test(topic)) {
+				o.chain.add(fn, topic);
 			}
 		}
-		return callChain;
+	}
+	
+	function addAllToMatchingChain(map, chain, re, topic) {
+		for(var t in map) {
+			var o = map[t];
+			if((re || o.re).test(topic || t)) {
+				(chain || o.chain).addAll(o.chain.all(), t);
+			}
+		}
+	}
+	
+	function storeChain(topic, chain) {
+		subscribers[topic] = {
+			chain: chain
+		};
+		return chain;
+	}
+	
+	function createTopicChain(topic) {
+		validateTopic(topic);
+		var chain = storeChain(topic, Hub.util.topicChain());
+		addAllToMatchingChain(wildcardSubscribers, chain, null, topic);
+		return chain;
 	}
 	
 	function invoke(topic, args) {
-		var callChain = subscribers[topic];
-		if(!callChain) {
+		var chain;
+		var o = subscribers[topic];
+		if(o) {
+			chain = o.chain;
+		}
+		else {
 			if(topic.indexOf("{") !== -1) {
-				callChain = subscribers[topic] = substitutionFn(topic);
+				chain = storeChain(topic, substitutionFn(topic));
 			}
 			else if(topic.indexOf("*") === -1) {
-				callChain = buildCallChain(topic);
+				chain = createTopicChain(topic);
 			}
 			else {
-				var sub = wildcardSubscribers[topic];
-				if(sub) {
-					callChain = sub.chain;
-				}
-				else {
-					sub = wildcardSubscriber(topic);
-					var re = sub.re;
-					callChain = sub.chain;
-					for(var t in subscribers) {
-						if(re.test(t)) {
-							callChain.addAll(subscribers[t].all(), t);
-						}
-					}
-				}
+				chain = getWildcardSubscriber(topic).chain;
 			}
 		}
 		try {
-			return callChain.apply(null, args);
+			return chain.apply(null, args);
 		}
 		catch(e) {
 			var errorTopic = "hub.error/publish";
@@ -226,32 +242,25 @@
 	 */
 	Hub.subscribe = function(topic, fn) {
 		validateCallback(fn);
-		var callChain = subscribers[topic];
-		if(!callChain) {
-			if(topic.indexOf("*") !== -1) {
-				var sub = wildcardSubscribers[topic];
-				if(!sub) {
-					sub = wildcardSubscriber(topic);
-				}
-				sub.chain.add(fn);
-				var re = sub.re;
-				for(var t in subscribers) {
-					if(re.test(t)) {
-						subscribers[t].add(fn, topic);
-						sub.chain.addAll(subscribers[t].all(), t);
-					}
-				}
+		var isWildcard = topic.indexOf("*") !== -1;
+		var t, re, chain;
+		var o = subscribers[topic];
+		if(o) {
+			chain = o.chain;
+		}
+		else {
+			if(isWildcard) {
+				o = getWildcardSubscriber(topic);
+				o.chain.add(fn);
+				addToMatchingChain(subscribers, fn, o.re, topic);
 				return;
 			}
-			callChain = buildCallChain(topic);
+			chain = createTopicChain(topic);
 		}
-		for(var t in wildcardSubscribers) {
-			var sub = wildcardSubscribers[t];
-			if(sub.re.test(topic)) {
-				sub.chain.add(fn, topic);
-			}
+		if(!isWildcard) {
+			addToMatchingChain(wildcardSubscribers, fn, null, topic);
 		}
-		callChain.add(fn, topic);
+		chain.add(fn, topic);
 	};
 	
 	/**
@@ -264,12 +273,12 @@
 	 */
 	Hub.unsubscribe = function(topic, fn) {
 		validateCallback(fn);
-		var topicFn = subscribers[topic];
-		if(!topicFn) {
+		var o = subscribers[topic];
+		if(!o) {
 			validateTopic(topic);
 			return false;
 		}
-		subscribers[topic].remove(fn);
+		o.chain.remove(fn);
 		for(var t in wildcardSubscribers) {
 			var sub = wildcardSubscribers[t];
 			if(sub.re.test(topic)) {

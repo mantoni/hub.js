@@ -7,22 +7,22 @@ TestCase("forward", {
 		Hub.reset();
 	},
 	
-	testSimpleForwardShort: function() {
+	"test simple forward short": function() {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.forward("a/b", "x/y");
 		Hub.publish("a/b");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
-	testMultiForwardSimple: function() {
+	"test multi forward simple": function() {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.forward({
 			"a/b": "x/y"
 		});
 		Hub.publish("a/b");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	testMultiForwardComplex: function() {
@@ -32,7 +32,7 @@ TestCase("forward", {
 			"a/b": ["x/y"]
 		});
 		Hub.publish("a/b");
-		assertTrue(fn.called);
+		assert(fn.called);
 	}
 
 });

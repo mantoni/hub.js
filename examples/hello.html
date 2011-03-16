@@ -7,23 +7,19 @@
 	<body>
 		<script type="text/javascript">
 		<!--
-			Hub.peer("greeter", function() {
-				return {
-					"greet": function(name) {
-						document.write("Hello " + name + "!");
-					}
-				};
+			Hub.peer("say", {
+				"hello": function(name) {
+					document.write("Hello " + name + "!");
+				}
 			});
 
-			Hub.peer("input", function() {
-				return {
-					"name": function() {
-						return prompt("Hello ...", "Hub");
-					}
-				};
+			Hub.peer("input", {
+				"name": function() {
+					return prompt("Hello ...", "Hub");
+				}
 			});
 			
-			Hub.publish("input/name").publishValue("greeter/greet");
+			Hub.publish("input/name").publishValue("say/hello");
 		-->
 		</script>
 	</body>

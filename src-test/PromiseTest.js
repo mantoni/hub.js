@@ -145,6 +145,17 @@ TestCase("PromiseTest", {
 		assertEquals("Hello World", result.join(" "));
 	},
 	
+	"test publishValue": function() {
+		Hub.subscribe("test/promise.a", function() {
+			return "Check";
+		});
+		var fn = stubFn();
+		Hub.subscribe("test/promise.b", fn);
+		Hub.publish("test/promise.a").publishValue("test/promise.b");
+		assert(fn.called);
+		assertEquals(["Check"], fn.args);
+	},
+	
 	"test joined promises fulfill #1 first": function() {
 		var p1, p2, done = false;
 		Hub.subscribe("test/promise.a", function() {
