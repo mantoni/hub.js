@@ -12,7 +12,7 @@ TestCase("mixin", {
 	 * first and the parent second. This follows the idea of
 	 * overwriting.
 	 */
-	testMixinCallOrder: function() {
+	"test mixin call order": function() {
 		var chain = [];
 		Hub.peer("parent", {
 			"test": function() {
@@ -34,7 +34,7 @@ TestCase("mixin", {
 	 * in the current chain. So in this test case, the parents "test"
 	 * is not invoked.
 	 */
-	testStopPropagation: function() {
+	"test stop propagation": function() {
 		var chain = [];
 		Hub.peer("parent", {
 			"test": function() {
@@ -56,7 +56,7 @@ TestCase("mixin", {
 	 * next function in the call chain. This also means that the
 	 * next function is not implicitly invoked afterwards anymore.
 	 */
-	testPropagate: function() {
+	"test propagate": function() {
 		var chain = [];
 		Hub.peer("parent", {
 			"test": function() {

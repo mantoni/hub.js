@@ -42,10 +42,9 @@
 			 * results of all invoked functions.
 			 */
 			var args = arguments;
-			var result;
 			function iterator() {
 				if(nextIndex < fns.length && !iterator.stop) {
-					result = Hub.util.merge(result,
+					iterator.result = Hub.util.merge(iterator.result,
 						fns[nextIndex++].apply(null, args));
 					return true;
 				}
@@ -55,25 +54,28 @@
 			currentCallIterator = iterator;
 			nextIndex = 0;
 			try {
-				while(currentCallIterator()) {
+				while(iterator()) {
 					// Avoid "empty while" compiler warning.
 				}
-				return result;
+				return iterator.result;
 			}
 			finally {
 				currentCallIterator = previous;
 			}
 		}
 		callChain.add = function(fn) {
-			fns.unshift(fn);
-			if(nextIndex !== -1) {
-				nextIndex++;
+			if(typeof fn.all === "function") {
+				var all = fn.all();
+				fns = all.concat(fns);
+				if(nextIndex !== -1) {
+					nextIndex += all.length;
+				}
 			}
-		};
-		callChain.addAll = function(fs, topic) {
-			fns = fs.concat(fns);
-			if(nextIndex !== -1) {
-				nextIndex += fs.length;
+			else {
+				fns.unshift(fn);
+				if(nextIndex !== -1) {
+					nextIndex++;
+				}
 			}
 		};
 		callChain.insert = function(index, fn) {
@@ -130,23 +132,26 @@
 		var remove = callChain.remove;
 		var topics = [];
 		callChain.add = function(fn, topic) {
-			if(topic.indexOf("*") === -1) {
-				callChain.insert(topics.length, fn);
-				return;
-			}
-			for(var i = 0, l = topics.length; i < l; i++) {
-				if(compareTopics(topic, topics[i]) <= 0) {
-					topics.splice(i, 0, topic);
-					callChain.insert(i, fn);
-					return;
+			if(typeof fn.all === "function") {
+				var all = fn.all();
+				for(var i = all.length - 1; i >= 0; i--) {
+					callChain.add(all[i], topic);
 				}
 			}
-			callChain.insert(topics.length, fn);
-			topics.push(topic);
-		};
-		callChain.addAll = function(fns, topic) {
-			for(var i = 0, l = fns.length; i < l; i++) {
-				callChain.add(fns[i], topic);
+			else {
+				if(topic.indexOf("*") === -1) {
+					callChain.insert(topics.length, fn);
+					return;
+				}
+				for(var i = 0, l = topics.length; i < l; i++) {
+					if(compareTopics(topic, topics[i]) <= 0) {
+						topics.splice(i, 0, topic);
+						callChain.insert(i, fn);
+						return;
+					}
+				}
+				callChain.insert(topics.length, fn);
+				topics.push(topic);
 			}
 		};
 		callChain.remove = function(fn) {
@@ -172,6 +177,7 @@
 	 */
 	Hub.propagate = function() {
 		currentCallIterator();
+		return currentCallIterator.result;
 	};
 	
 	Hub.util.chain = chain;

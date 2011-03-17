@@ -96,20 +96,30 @@
 		return function() {
 			var peer = createPeer(definitions[namespace]);
 			wirePeer(peer, namespace);
-			Hub.propagate();
-			unwirePeer(peer, namespace);
+			try {
+				return Hub.propagate();
+			}
+			finally {
+				unwirePeer(peer, namespace);
+			}
 		};
 	}
 	
 	function wirePeer(peer, namespace) {
 		for(var message in peer) {
-			Hub.subscribe(namespace + "/" + message, peer[message]);
+			var fn = peer[message];
+			if(typeof fn === "function") {
+				Hub.subscribe(namespace + "/" + message, fn);
+			}
 		}
 	}
 	
 	function unwirePeer(peer, namespace) {
 		for(var message in peer) {
-			Hub.unsubscribe(namespace + "/" + message, peer[message]);
+			var fn = peer[message];
+			if(typeof fn === "function") {
+				Hub.unsubscribe(namespace + "/" + message, fn);
+			}
 		}
 	}
 	
@@ -157,7 +167,7 @@
 		for(var t in map) {
 			var o = map[t];
 			if((re || o.re).test(topic || t)) {
-				(chain || o.chain).addAll(o.chain.all(), t);
+				(chain || o.chain).add(o.chain, t);
 			}
 		}
 	}
