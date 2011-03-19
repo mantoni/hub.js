@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.publish.
  */
-TestCase("publish", {
+TestCase("PublishTest", {
 	
 	tearDown: function() {
 		Hub.reset();

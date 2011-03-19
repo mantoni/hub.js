@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.subscribe.
  */
-TestCase("subscribe", {
+TestCase("SubscribeTest", {
 	
 	tearDown: function() {
 		Hub.reset();

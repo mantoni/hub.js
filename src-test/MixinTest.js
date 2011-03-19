@@ -1,7 +1,7 @@
 /*
  * Test cases for mixins.
  */
-TestCase("mixin", {
+TestCase("MixinTest", {
 	
 	tearDown: function() {
 		Hub.reset();

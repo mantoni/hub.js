@@ -1,7 +1,7 @@
 /*
  * Test cases for prototype scoped peers.
  */
-TestCase("prototype", {
+TestCase("PrototypeTest", {
 	
 	tearDown: function() {
 		Hub.reset();

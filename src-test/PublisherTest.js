@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.publisher.
  */
-TestCase("publisher", {
+TestCase("PublisherTest", {
 	
 	tearDown: function() {
 		Hub.reset();
@@ -80,6 +80,32 @@ TestCase("publisher", {
 		});
 		fn.apply(null, Array.prototype.slice.call(arguments, 1));
 		return result;
+	},
+	
+	"test create api": function() {
+		var api = Hub.publisher({
+			ab: "a/b",
+			xy: "x/y",
+		});
+		assertFunction(api);
+		assertFunction(api.ab);
+		assertFunction(api.xy);
+		var ab = stubFn();
+		var xy = stubFn();
+		Hub.subscribe("a/b", ab);
+		Hub.subscribe("x/y", xy);
+		api();
+		assert(ab.called);
+		assert(xy.called);
+		ab.called = false;
+		xy.called = false;
+		api.ab();
+		assert(ab.called);
+		assertFalse(xy.called);
+		ab.called = false;
+		api.xy();
+		assertFalse(ab.called);
+		assert(xy.called);
 	}
 
 });

@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.propagate.
  */
-TestCase("propagate", {
+TestCase("PropagateTest", {
 	
 	tearDown: function() {
 		Hub.reset();

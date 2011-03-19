@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.forward.
  */
-TestCase("forward", {
+TestCase("ForwardTest", {
 	
 	tearDown: function() {
 		Hub.reset();

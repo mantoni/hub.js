@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.peer.
  */
-TestCase("peer", {
+TestCase("PeerTest", {
 	
 	tearDown: function() {
 		Hub.reset();

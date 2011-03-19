@@ -1,7 +1,7 @@
 /*
  * Test cases for publish and subscribe.
  */
-TestCase("publish_subscribe", {
+TestCase("PublishSubscribeTest", {
 	
 	tearDown: function() {
 		Hub.reset();
@@ -178,7 +178,5 @@ TestCase("publish_subscribe", {
 		Hub.publish("x/*");
 		assertEquals(2, count);
 	}
-	
-	// publish_subscribe
 	
 });

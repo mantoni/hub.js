@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.unsubscribe.
  */
-TestCase("unsubscribe", {
+TestCase("UnsubscribeTest", {
 	
 	tearDown: function() {
 		Hub.reset();
