@@ -121,14 +121,14 @@
 			},
 			
 			/**
-			 * publishes the given topic with the current value of this
+			 * publishes the given topic with the current result of this
 			 * promise as the argument. The return value of the call will
-			 * replace the current value of this promise.
+			 * replace the current result of this promise.
 			 *
 			 * @param {String} topic the topic.
 			 * @return {Object} this promise.
 			 */
-			publishValue: function(topic) {
+			publishResult: function(topic) {
 				if(fulfilled) {
 					value = Hub.invoke(topic, value);
 					return this;
@@ -245,7 +245,7 @@
 		var real = createPromise(true);
 		proxy.then = real.then;
 		proxy.publish = real.publish;
-		proxy.publishValue = real.publishValue;
+		proxy.publishResult = real.publishResult;
 		return real;
 	}
 	
@@ -262,8 +262,8 @@
 		publish: function() {
 			return replacePromiseProxy(this).publish.apply(null, arguments);
 		},
-		publishValue: function(namespace, message, data) {
-			return replacePromiseProxy(this).publishValue.apply(null, arguments);
+		publishResult: function(namespace, message, data) {
+			return replacePromiseProxy(this).publishResult.apply(null, arguments);
 		},
 		fulfill: function() {
 			throw new Error("Hub - promise already fulfilled");

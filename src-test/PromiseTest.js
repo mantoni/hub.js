@@ -65,7 +65,7 @@ TestCase("PromiseTest", {
 		assertUndefined(value);
 	},
 
-	"test return value is used as parameter on publishValue": function() {
+	"test return value is used as parameter on publishResult": function() {
 		Hub.subscribe("test/promise", function() {
 			return "Test";
 		});
@@ -73,11 +73,11 @@ TestCase("PromiseTest", {
 		Hub.subscribe("test/other", function(arg) {
 			value = arg;
 		});
-		Hub.publish("test/promise").publishValue("test/other");
+		Hub.publish("test/promise").publishResult("test/other");
 		assertEquals("Test", value);
 	},
 
-	"test return value is used as parameter on publishValue (explicit fulfill)": function() {
+	"test return value is used as parameter on publishResult (explicit fulfill)": function() {
 		Hub.subscribe("test/promise", function() {
 			return "Test";
 		});
@@ -85,7 +85,7 @@ TestCase("PromiseTest", {
 		Hub.subscribe("test/other", function(arg) {
 			value = arg;
 		});
-		Hub.promise().publish("test/promise").publishValue("test/other").fulfill();
+		Hub.promise().publish("test/promise").publishResult("test/other").fulfill();
 		assertEquals("Test", value);
 	},
 
@@ -145,13 +145,13 @@ TestCase("PromiseTest", {
 		assertEquals("Hello World", result.join(" "));
 	},
 	
-	"test publishValue": function() {
+	"test publishResult": function() {
 		Hub.subscribe("test/promise.a", function() {
 			return "Check";
 		});
 		var fn = stubFn();
 		Hub.subscribe("test/promise.b", fn);
-		Hub.publish("test/promise.a").publishValue("test/promise.b");
+		Hub.publish("test/promise.a").publishResult("test/promise.b");
 		assert(fn.called);
 		assertEquals(["Check"], fn.args);
 	},
