@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.util.chain.
  */
-TestCase("util_chain", {
+TestCase("ChainTest", {
 	
 	"test function exists": function() {
 		assertFunction(Hub.util.chain);

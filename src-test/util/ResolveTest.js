@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.util.resolve.
  */
-TestCase("util_resolve", {
+TestCase("ResolveTest", {
 	
 	"test function exists": function() {
 		assertFunction(Hub.util.resolve);

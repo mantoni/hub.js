@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.util.substitute.
  */
-TestCase("util_substitute", {
+TestCase("SubstituteTest", {
 	
 	"test function exists": function() {
 		assertFunction(Hub.util.substitute);

@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.publish timeouts.
  */
-AsyncTestCase("publish-timeout", {
+AsyncTestCase("PublishTimeoutTest", {
 	
 	tearDown: function() {
 		Hub.reset();

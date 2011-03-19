@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.util.merge.
  */
-TestCase("util_merge", {
+TestCase("MergeTest", {
 	
 	testEmptyObject: function() {
 		var o = Hub.util.merge({}, {});

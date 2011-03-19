@@ -1,7 +1,7 @@
 /*
  * Test cases for Hub.peer in combination with a promise.
  */
-AsyncTestCase("peer_and_promise", {
+AsyncTestCase("PeerAndPromiseTest", {
 	
 	tearDown: function() {
 		Hub.reset();
