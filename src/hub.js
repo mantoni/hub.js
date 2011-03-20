@@ -396,31 +396,49 @@
 	 * @return {Function} the forwarder function
 	 */
 	Hub.publisher = function(topic, dataTransformer, dataToMerge) {
-		if(dataTransformer) {
-			if(dataToMerge) {
-				return function() {
-					return Hub.publish(topic, Hub.util.merge(
-						dataTransformer.apply(null, arguments),
-						dataToMerge)
-					);
+		if(typeof topic === "string") {
+			if(dataTransformer) {
+				if(dataToMerge) {
+					return function() {
+						return Hub.publish(topic, Hub.util.merge(
+							dataTransformer.apply(null, arguments),
+							dataToMerge)
+						);
+					}
 				}
-			}
-			if(typeof dataTransformer === "function") {
-				return function() {
+				if(typeof dataTransformer === "function") {
+					return function() {
+						return Hub.publish(topic,
+							dataTransformer.apply(null, arguments)
+						);
+					}
+				}
+				return function(data) {
 					return Hub.publish(topic,
-						dataTransformer.apply(null, arguments)
+						Hub.util.merge(data, dataTransformer)
 					);
+				};
+			}
+			return function() {
+				if(arguments.length) {
+					return Hub.publish.apply(Hub, [topic].concat(
+						Array.prototype.slice.call(arguments)));
 				}
-			}
-			return function(data) {
-				return Hub.publish(topic,
-					Hub.util.merge(data, dataTransformer)
-				);
-			}
+				return Hub.publish(topic);
+			};
 		}
-		return function(data) {
-			return Hub.publish(topic, data);
-		};
+		var api = Hub.util.chain();
+		for(var key in topic) {
+			var value = topic[key];
+			if(typeof value === "string") {
+				api[key] = Hub.publisher(value);
+			}
+			else {
+				api[key] = Hub.publisher.apply(Hub, value);
+			}
+			api.add(api[key]);
+		}
+		return api;
 	};
 	
 	/**
