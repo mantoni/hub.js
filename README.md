@@ -35,3 +35,9 @@ Create a new command in the bundle editor that saves the current file, takes no 
     $TM_PROJECT_DIRECTORY/build.sh ct
 
 This will compile and test in one go.
+
+
+Links:
+------
+
+* [Google Group](http://groups.google.com/group/hub-js)
