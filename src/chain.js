@@ -60,6 +60,7 @@
 				return iterator.result;
 			}
 			finally {
+				chain.aborted = currentCallIterator.stop;
 				currentCallIterator = previous;
 			}
 		}

@@ -72,6 +72,12 @@ TestCase("MixinTest", {
 		// explicit "super" invocation changes call order here.
 		Hub.publish("child/test");
 		assertEquals("parent,child", chain.join());
+	},
+	
+	"test unknown mixin throws error": function() {
+		assertException(function() {
+			Hub.peer("child", "parent", {});
+		});
 	}
 
 });

@@ -69,13 +69,11 @@
 	 */
 	function createPeer(definition) {
 		var peer = {};
-		if(definition) {
-			var is = definition.is;
-			for(var i = 0, mixin; mixin = is[i++];) {
-				mix(peer, getPeer(mixin));
-			}
-			mix(peer, definition.instance || definition.factory());
+		var is = definition.is;
+		for(var i = 0, mixin; mixin = is[i++];) {
+			mix(peer, getPeer(mixin));
 		}
+		mix(peer, definition.instance || definition.factory());
 		return peer;
 	}
 	
@@ -85,42 +83,39 @@
 		return new RegExp("^" + exp + "$");
 	}
 	
+	function interceptor(topic, chain) {
+		return function() {
+			var globalChain = getChain(topic);
+			var result = invokeChain(topic, globalChain, arguments);
+			if(globalChain.aborted) {
+				return result;
+			}
+			return Hub.util.merge(result, invokeChain(topic, chain, arguments));
+		};
+	}
+	
 	/*
 	 * returns a peer instance for the definition with the given topic.
 	 */
 	function getPeer(namespace) {
-		return peers[namespace] || createPeer(definitions[namespace]);
-	}
-	
-	function peerFactory(namespace) {
-		return function() {
-			var peer = createPeer(definitions[namespace]);
-			wirePeer(peer, namespace);
-			try {
-				return Hub.propagate();
-			}
-			finally {
-				unwirePeer(peer, namespace);
-			}
-		};
-	}
-	
-	function wirePeer(peer, namespace) {
+		var peer = peers[namespace];
+		if(peer) {
+			return peer;
+		}
+		var definition = definitions[namespace];
+		if(!definition) {
+			throw new Error("Peer is not defined: " + namespace);
+		}
+		peer = createPeer(definition);
+		var api = {};
 		for(var message in peer) {
-			var fn = peer[message];
-			if(typeof fn === "function") {
-				Hub.subscribe(namespace + "/" + message, fn);
+			var chain = peer[message];
+			if(typeof chain === "function") {
+				api[message] = interceptor(namespace + "/" + message, chain);
 			}
 		}
-	}
-	
-	function unwirePeer(peer, namespace) {
-		for(var message in peer) {
-			var fn = peer[message];
-			if(typeof fn === "function") {
-				Hub.unsubscribe(namespace + "/" + message, fn);
-			}
-		}
+		peer.api = api;
+		return peer;
 	}
 	
 	function substitutionFn(topic) {
@@ -186,23 +181,22 @@
 		return chain;
 	}
 	
-	function invoke(topic, args) {
+	function getChain(topic) {
 		var chain;
 		var o = subscribers[topic];
 		if(o) {
-			chain = o.chain;
+			return o.chain;
 		}
-		else {
-			if(topic.indexOf("{") !== -1) {
-				chain = storeChain(topic, substitutionFn(topic));
-			}
-			else if(topic.indexOf("*") === -1) {
-				chain = createTopicChain(topic);
-			}
-			else {
-				chain = getWildcardSubscriber(topic).chain;
-			}
+		if(topic.indexOf("{") !== -1) {
+			return storeChain(topic, substitutionFn(topic));
 		}
+		if(topic.indexOf("*") === -1) {
+			return createTopicChain(topic);
+		}
+		return getWildcardSubscriber(topic).chain;
+	}
+	
+	function invokeChain(topic, chain, args) {
 		try {
 			return chain.apply(null, args);
 		}
@@ -217,6 +211,10 @@
 				})]
 			);
 		}
+	}
+	
+	function invoke(topic, args) {
+		return invokeChain(topic, getChain(topic), args);
 	}
 	
 	// ensures the given argument is a function. Throws an error otherwise.
@@ -329,15 +327,26 @@
 		};
 		if(typeof factory === "function") {
 			definition.factory = factory;
-			Hub.subscribe(namespace + "/**", peerFactory(namespace));
 		}
 		else {
 			definition.instance = factory;
 			var peer = peers[namespace] = createPeer(definition);
-			wirePeer(peer, namespace);
+			var api = peer.api = {};
+			for(var message in peer) {
+				var chain = peer[message];
+				if(typeof chain === "function") {
+					var topic = namespace + "/" + message;
+					Hub.subscribe(topic, chain);
+					api[message] = Hub.publisher(topic);
+				}
+			}
 		}
 		definitions[namespace] = definition;
 	};
+	
+	Hub.get = function(namespace) {
+		return getPeer(namespace).api;
+	},
 	
 	/**
 	 * invokes the call chain associated with a topic with optional arguments.
