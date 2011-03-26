@@ -120,10 +120,11 @@ TestCase("PublishTest", {
 			throw new Error("d'oh!");
 		});
 		var error = null;
-		Hub.subscribe("hub.error/publish", function(data) {
+		Hub.publish("test/publish").then(function() {
+			fail("Unexpected success");
+		}, function(data) {
 			error = data;
 		});
-		Hub.publish("test/publish");
 		assertNotNull(error);
 		assertObject(error);
 		assertEquals("Error in call chain for topic \"test/publish\": d'oh!", error.toString());

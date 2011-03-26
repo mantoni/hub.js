@@ -145,7 +145,7 @@ TestCase("PromiseTest", {
 		assertEquals("Hello World", result.join(" "));
 	},
 	
-	"test publishResult": function() {
+	"test publish result": function() {
 		Hub.subscribe("test/promise.a", function() {
 			return "Check";
 		});
@@ -208,6 +208,19 @@ TestCase("PromiseTest", {
 		assertTrue(p1.fulfilled());
 		assertTrue(p2.fulfilled());
 		assertTrue(done);
+	},
+	
+	"test exception in subscriber": function() {
+		Hub.subscribe("test/promise", function() {
+			throw new Error("d'oh");
+		});
+		var fn = stubFn();
+		Hub.publish("test/promise").then(function() {
+			fail("Unexpected success");
+		}, fn);
+		assert(fn.called);
+		assertInstanceOf(Hub.Error, fn.args[0]);
+		assertEquals("test/promise", fn.args[0].context.topic);
 	}
 	
 });
