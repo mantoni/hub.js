@@ -62,15 +62,15 @@
 	 * creates a new promise.
 	 *
 	 * @param {Boolean} fulfilled whether the promise is initially fulfilled.
-	 * @param {Boolean} success whether the promise is initially successful.
 	 * @param {*} value the initial value.
 	 * @param {Number} timeout the optional timeout.
 	 * @return {Object} the new promise.
 	 */
-	function createPromise(fulfilled, success, value, timeout) {
+	function createPromise(fulfilled, value, timeout) {
 		var callbacks;
 		var errorCallbacks;
 		var timeout;
+		var success = !(value instanceof Hub.Error);
 		var p;
 		// Public API:
 		p = {
@@ -208,7 +208,7 @@
 	function joinPromises(p1, p2) {
 		var mergedData;
 		var count = 0;
-		var wrapper = createPromise(false, true);
+		var wrapper = createPromise(false);
 		var success = true;
 		/*
 		 * checks whether the promise is done and calls fulfill or reject on
@@ -242,7 +242,7 @@
 	
 	// Helper function to replace the given proxy with a new promise.
 	function replacePromiseProxy(proxy) {
-		var real = createPromise(true, true);
+		var real = createPromise(true);
 		proxy.then = real.then;
 		proxy.publish = real.publish;
 		proxy.publishResult = real.publishResult;
@@ -290,14 +290,12 @@
 	Hub.publish = function(topic) {
 		var previousPromise = promise;
 		promise = false;
-		var success = true;
 		var result;
 		try {
 			result = Hub.invoke.apply(this, arguments);
 		}
 		catch(e) {
 			if(e instanceof Hub.Error) {
-				success = false;
 				result = e;
 			}
 			else {
@@ -305,7 +303,7 @@
 			}
 		}
 		if(typeof result !== "undefined") {
-			var p = createPromise(true, success, result);
+			var p = createPromise(true, result);
 			promise = promise ? joinPromises(promise, p) : p;
 		}
 		var returnPromise = promise;
@@ -320,7 +318,7 @@
 	 * @return {Object} the promise
 	 */
 	Hub.promise = function(timeout) {
-		var newPromise = createPromise(false, true, undefined, timeout);
+		var newPromise = createPromise(false, undefined, timeout);
 		if(promise === true) {
 			// This means we are not within a publish call.
 			return newPromise;
