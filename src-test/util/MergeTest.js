@@ -100,10 +100,12 @@ TestCase("MergeTest", {
 	
 	mergeError: function(target, source) {
 		var error = null;
-		Hub.subscribe("hub.error/util.merge", function(data) {
-			error = data;
-		});
-		Hub.util.merge(target, source);
+		try {
+			Hub.util.merge(target, source);
+		}
+		catch(e) {
+			error = e;
+		}
 		assertNotNull(error);
 		assertObject(error);
 		assertEquals("validation", error.type);

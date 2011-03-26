@@ -92,23 +92,6 @@
 		return chain;
 	}
 	
-/*	function invokeChain(topic, chain, args) {
-		try {
-			return chain.apply(null, args);
-		}
-		catch(e) {
-			var errorTopic = "hub.error/publish";
-			if(topic === errorTopic) {
-				throw e;
-			}
-			invoke(errorTopic, [new Hub.Error("error",
-				"Error in call chain for topic \"{topic}\": {error}", {
-					topic: topic, error: e.message
-				})]
-			);
-		}
-	}
-*/	
 	function invoke(topic, args) {
 		var chain = Hub.subscriberChain(topic);
 		try {
@@ -361,7 +344,7 @@
 				return target.concat(source);
 			}
 		}
-		invoke("hub.error/util.merge", [new Hub.Error("validation",
+		throw new Hub.Error("validation",
 			targetType === sourceType ?
 				"Cannot merge value {target} with {source}" :
 				"Cannot merge type {targetType} with {sourceType}", {
@@ -370,8 +353,7 @@
 					targetType: targetType,
 					sourceType: sourceType
 				}
-		)]);
-		return target;
+		);
 	};
 	
 	/**
