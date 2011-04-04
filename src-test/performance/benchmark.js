@@ -7,12 +7,22 @@ function runBenchmark(title, tests) {
 	
 	function run(ttime, fn) {
 		var time = new Date().getTime();
-		fn(iterations);
+		try {
+			fn(iterations);
+		}
+		catch(e) {
+			ttime.appendChild(document.createTextNode("FAILURE"));
+			ttime.title = e.message;
+			ttime.style.color = "red";
+			return;
+		}
+		finally {
+			Hub.reset();
+		}
 		var now = new Date().getTime();
 		var diff = now - time;
 		benchmarkSum += diff;
 		ttime.appendChild(document.createTextNode(formatNumber(String(diff))));
-		Hub.reset();
 	}
 	
 	function reloader(ttime, fn) {

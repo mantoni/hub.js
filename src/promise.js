@@ -295,12 +295,11 @@
 			result = Hub.invoke.apply(this, arguments);
 		}
 		catch(e) {
-			if(e instanceof Hub.Error) {
-				result = e;
+			if(promise && e instanceof Hub.Error) {
+				promise.reject(e);
+				return promise;
 			}
-			else {
-				throw e;
-			}
+			throw e;
 		}
 		if(typeof result !== "undefined") {
 			var p = createPromise(true, result);

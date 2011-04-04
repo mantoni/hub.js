@@ -27,9 +27,14 @@ runBenchmark("Hub.util.merge", {
 		}
 	},
 	
-	'Hub.util.merge({}, [])': function(l) {
+	'Hub.util.merge({}, []) + try-catch': function(l) {
 		for(var i = 0; i < l; i++) {
-			Hub.util.merge({}, []);
+			try {
+				Hub.util.merge({}, []);
+			}
+			catch(e) {
+				// exception is expected.
+			}
 		}
 	},
 	

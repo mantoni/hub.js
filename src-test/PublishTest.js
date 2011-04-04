@@ -113,23 +113,6 @@ TestCase("PublishTest", {
 	assertNotInvoked: function(topic, fn) {
 		Hub.publish(topic);
 		assertFalse(topic, fn.called);
-	},
-	
-	"test publish error": function() {
-		Hub.subscribe("test/publish", function() {
-			throw new Error("d'oh!");
-		});
-		var error = null;
-		Hub.publish("test/publish").then(function() {
-			fail("Unexpected success");
-		}, function(data) {
-			error = data;
-		});
-		assertNotNull(error);
-		assertObject(error);
-		assertEquals("Error in call chain for topic \"test/publish\": d'oh!", error.toString());
-		assertEquals("test/publish", error.context.topic);
-		assertEquals("d'oh!", error.context.error);
 	}
 
 });
