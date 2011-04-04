@@ -7,6 +7,10 @@ TestCase("ChainTest", {
 		assertFunction(Hub.util.chain);
 	},
 
+	"test function returns function": function() {
+		assertFunction(Hub.util.chain(function() {}));
+	},
+
 	"test chain call": function() {
 		var calls = [];
 		var f1 = function() {
@@ -15,9 +19,7 @@ TestCase("ChainTest", {
 		var f2 = function() {
 			calls.push("f2");
 		};
-		var chain = Hub.util.chain(f1, f2);
-		assertFunction(chain);
-		chain();
+		Hub.util.chain(f1, f2)();
 		assertEquals("Called in argument order", "f1,f2", calls.join());
 	},
 	

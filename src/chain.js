@@ -14,7 +14,18 @@
 	 *
 	 * @type {Function}
 	 */
-	var currentCallIterator;
+	var iterator;
+	var aborted = false;
+	var result;
+	var args;
+	
+	function next() {
+		if(aborted || !iterator.hasNext) {
+			return false;
+		}
+		result = Hub.util.merge(result, iterator().apply(null, args));
+		return true;
+	}
 	
 	/**
 	 * creates a call chain for the given functions. The returned
@@ -30,74 +41,74 @@
 	 */
 	function chain() {
 		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
-		var nextIndex = -1;
+		var running = false;
 		function callChain() {
-			/*
-			 * is an iterator function that iterates over the internal array of
-			 * functions invoking each with the arguments of this function. The
-			 * iterator advances to the next function after each call and
-			 * returns true. If there are no functions left, the iterator
-			 * function returns false. To stop the iterator, the "stop" property
-			 * can be set to true. The iterator uses Hub.util.merge to merge the
-			 * results of all invoked functions.
-			 */
-			var args = arguments;
-			function iterator() {
-				if(nextIndex < fns.length && !iterator.stop) {
-					iterator.result = Hub.util.merge(iterator.result,
-						fns[nextIndex++].apply(null, args));
-					return true;
-				}
-				return false;
-			}
-			var previous = currentCallIterator;
-			currentCallIterator = iterator;
-			nextIndex = 0;
+			var previousIterator = iterator;
+			var previousAborted = aborted;
+			var previousResult = result;
+			var previousArgs = args;
+			result = undefined;
 			try {
-				while(iterator()) {
+				iterator = Hub.iterator(fns);
+				args = arguments;
+				while(next()) {
 					// Avoid "empty while" compiler warning.
 				}
-				return iterator.result;
+				return result;
 			}
 			finally {
-				chain.aborted = currentCallIterator.stop;
-				currentCallIterator = previous;
+				iterator = previousIterator;
+				chain.aborted = aborted;
+				aborted = previousAborted;
+				result = previousResult;
+				args = previousArgs;
+				running = false;
 			}
 		}
 		callChain.add = function(fn) {
 			if(typeof fn.all === "function") {
 				var all = fn.all();
-				fns = all.concat(fns);
-				if(nextIndex !== -1) {
-					nextIndex += all.length;
+				if(running) {
+					for(var i = 0, l = all.length; i < l; i++) {
+						iterator.insert(i, all[i]);
+					}
 				}
+				else {
+					fns = all.concat(fns);
+				}
+			}
+			else if(running) {
+				iteartor.insert(0, fn);
 			}
 			else {
 				fns.unshift(fn);
-				if(nextIndex !== -1) {
-					nextIndex++;
-				}
 			}
 		};
 		callChain.insert = function(index, fn) {
-			fns.splice(index, 0, fn);
-			if(index < nextIndex) {
-				nextIndex++;
+			if(running) {
+				iterator.insert(index, fn);
+			}
+			else {
+				fns.splice(index, 0, fn);
 			}
 		};
 		callChain.remove = function(fn) {
 			if(typeof fn === "number") {
-				fns.splice(fn, 1);
-				if(fn < nextIndex) {
-					nextIndex--;
+				if(running) {
+					iterator.remove(fn);
+				}
+				else {
+					fns.splice(fn, 1);
 				}
 				return fn;
 			}
 			for(var i = fns.length; i--;) {
 				if(fns[i] === fn) {
-					fns.splice(i, 1);
-					if(i < nextIndex) {
-						nextIndex--;
+					if(running) {
+						iterator.remove(i);
+					}
+					else {
+						fns.splice(i, 1);
 					}
 					return i;
 				}
@@ -169,7 +180,7 @@
 	 * stops message propagation for the current call chain.
 	 */
 	Hub.stopPropagation = function() {
-		currentCallIterator.stop = true;
+		aborted = true;
 	};
 	
 	/**
@@ -177,8 +188,7 @@
 	 * call chain.
 	 */
 	Hub.propagate = function() {
-		currentCallIterator();
-		return currentCallIterator.result;
+		next();
 	};
 	
 	Hub.util.chain = chain;
