@@ -29,6 +29,28 @@ TestCase("ChainNestingTest", {
 		});
 		var cb = Hub.util.chain(ca, f);
 		cb();
+	},
+	
+	"test nested chain result merge": function() {
+		var c1 = Hub.util.chain(function() {
+			return [1];
+		});
+		var c2 = Hub.util.chain(function() {
+			return [2];
+		});
+		assertEquals([1, 2], Hub.util.chain(c1, c2)());
+	},
+	
+	"test nested chain receives arguments": function() {
+		var args = [];
+		var c1 = Hub.util.chain(function(a) {
+			args.push(a);
+		});
+		var c2 = Hub.util.chain(function(a) {
+			args.push(a);
+		});
+		Hub.util.chain(c1, c2)("x");
+		assertEquals(["x", "x"], args);
 	}
 	
 });

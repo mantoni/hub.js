@@ -48,8 +48,8 @@
 			if(!iteratorStack.length) {
 				aborted = false;
 				args = arguments;
-				result = undefined;
 			}
+			result = undefined;
 			try {
 				iterator = Hub.iterator(fns);
 				iteratorStack.push(iterator);
@@ -69,18 +69,7 @@
 			}
 		}
 		callChain.add = function(fn) {
-			if(typeof fn.all === "function") {
-				var all = fn.all();
-				if(iterator) {
-					for(var i = 0, l = all.length; i < l; i++) {
-						iterator.insert(i, all[i]);
-					}
-				}
-				else {
-					fns = all.concat(fns);
-				}
-			}
-			else if(iterator) {
+			if(iterator) {
 				iterator.insert(0, fn);
 			}
 			else {
@@ -118,9 +107,6 @@
 			}
 			return -1;
 		};
-		callChain.all = function() {
-			return fns;
-		};
 		return callChain;
 	}
 	
@@ -147,27 +133,19 @@
 		var remove = callChain.remove;
 		var topics = [];
 		callChain.add = function(fn, topic) {
-			if(typeof fn.all === "function") {
-				var all = fn.all();
-				for(var i = all.length - 1; i >= 0; i--) {
-					callChain.add(all[i], topic);
-				}
+			if(topic.indexOf("*") === -1) {
+				callChain.insert(topics.length, fn);
+				return;
 			}
-			else {
-				if(topic.indexOf("*") === -1) {
-					callChain.insert(topics.length, fn);
+			for(var i = 0, l = topics.length; i < l; i++) {
+				if(compareTopics(topic, topics[i]) <= 0) {
+					topics.splice(i, 0, topic);
+					callChain.insert(i, fn);
 					return;
 				}
-				for(var i = 0, l = topics.length; i < l; i++) {
-					if(compareTopics(topic, topics[i]) <= 0) {
-						topics.splice(i, 0, topic);
-						callChain.insert(i, fn);
-						return;
-					}
-				}
-				callChain.insert(topics.length, fn);
-				topics.push(topic);
 			}
+			callChain.insert(topics.length, fn);
+			topics.push(topic);
 		};
 		callChain.remove = function(fn) {
 			var index = remove(fn);
