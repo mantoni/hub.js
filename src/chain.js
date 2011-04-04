@@ -9,19 +9,20 @@
  */
 (function() {
 	
-	/**
-	 * The call iterator for the current call chain.
-	 *
-	 * @type {Function}
-	 */
-	var iterator;
 	var aborted = false;
-	var result;
 	var args;
+	var result;
+	var iteratorStack = [];
 	
 	function next() {
-		if(aborted || !iterator.hasNext) {
+		var size = iteratorStack.length;
+		if(!size) {
 			return false;
+		}
+		var iterator = iteratorStack[size - 1];
+		if(!iterator.hasNext) {
+			iteratorStack.pop();
+			return next();
 		}
 		result = Hub.util.merge(result, iterator().apply(null, args));
 		return true;
@@ -41,34 +42,36 @@
 	 */
 	function chain() {
 		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
-		var running = false;
+		var iterator = false;
 		function callChain() {
-			var previousIterator = iterator;
-			var previousAborted = aborted;
-			var previousResult = result;
-			var previousArgs = args;
-			result = undefined;
+			chain.aborted = false;
+			if(!iteratorStack.length) {
+				aborted = false;
+				args = arguments;
+				result = undefined;
+			}
 			try {
 				iterator = Hub.iterator(fns);
-				args = arguments;
+				iteratorStack.push(iterator);
 				while(next()) {
 					// Avoid "empty while" compiler warning.
 				}
-				return result;
 			}
 			finally {
-				iterator = previousIterator;
 				chain.aborted = aborted;
-				aborted = previousAborted;
-				result = previousResult;
-				args = previousArgs;
-				running = false;
+				iterator = false;
+			}
+			if(!iteratorStack.length) {
+				var returnValue = result;
+				result = undefined;
+				args = undefined;
+				return returnValue;
 			}
 		}
 		callChain.add = function(fn) {
 			if(typeof fn.all === "function") {
 				var all = fn.all();
-				if(running) {
+				if(iterator) {
 					for(var i = 0, l = all.length; i < l; i++) {
 						iterator.insert(i, all[i]);
 					}
@@ -77,15 +80,15 @@
 					fns = all.concat(fns);
 				}
 			}
-			else if(running) {
-				iteartor.insert(0, fn);
+			else if(iterator) {
+				iterator.insert(0, fn);
 			}
 			else {
 				fns.unshift(fn);
 			}
 		};
 		callChain.insert = function(index, fn) {
-			if(running) {
+			if(iterator) {
 				iterator.insert(index, fn);
 			}
 			else {
@@ -94,7 +97,7 @@
 		};
 		callChain.remove = function(fn) {
 			if(typeof fn === "number") {
-				if(running) {
+				if(iterator) {
 					iterator.remove(fn);
 				}
 				else {
@@ -104,7 +107,7 @@
 			}
 			for(var i = fns.length; i--;) {
 				if(fns[i] === fn) {
-					if(running) {
+					if(iterator) {
 						iterator.remove(i);
 					}
 					else {
@@ -181,6 +184,7 @@
 	 */
 	Hub.stopPropagation = function() {
 		aborted = true;
+		iteratorStack.length = 0;
 	};
 	
 	/**
