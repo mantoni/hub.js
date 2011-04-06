@@ -28,20 +28,20 @@
 		return true;
 	}
 	
-	/**
-	 * creates a call chain for the given functions. The returned
-	 * chain is a function itself which will invoke all functions in
-	 * the given order.
-	 * The chain implements add(Function) and remove(Function) to add
-	 * and remove functions from the chain.
-	 * Chain iteration can be aborted via Hub.stopPropagation() or
-	 * explicitly triggered via Hub.propagate().
-	 * 
-	 * @param {...Function} the functions to chain.
-	 * @return {Function} the chain function.
-	 */
-	function chain() {
-		var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
+    /**
+     * creates a call chain for the given functions. The returned
+     * chain is a function itself which will invoke all functions in
+     * the given order.
+     * The chain implements add(Function) and remove(Function) to add
+     * and remove functions from the chain.
+     * Chain iteration can be aborted via Hub.stopPropagation() or
+     * explicitly triggered via Hub.propagate().
+     * 
+     * @param {...Function} the functions to chain.
+     * @return {Function} the chain function.
+     */
+    function chain() {
+        var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
 		var iterator = false;
 		function callChain() {
 			chain.aborted = false;
@@ -75,6 +75,7 @@
 			else {
 				fns.unshift(fn);
 			}
+			return callChain;
 		};
 		callChain.insert = function(index, fn) {
 			if(iterator) {
@@ -83,6 +84,7 @@
 			else {
 				fns.splice(index, 0, fn);
 			}
+			return callChain;
 		};
 		callChain.remove = function(fn) {
 			if(typeof fn === "number") {
@@ -107,50 +109,60 @@
 			}
 			return -1;
 		};
+		callChain.get = function(index) {
+			return fns[index];
+		};
 		return callChain;
 	}
 	
 	function compareTopics(left, right) {
-		var lw = left.indexOf("*");
-		var rw = right.indexOf("*");
-		var ls = left.indexOf("/");
-		var rs = right.indexOf("/");
-		if(lw < ls) {
-			if(rw > rs) {
+		var leftStar = left.indexOf("*");
+		var rightStar = right.indexOf("*");
+		if(leftStar === -1) {
+			return rightStar === -1 ? 0 : 1;
+		}
+		if(rightStar === -1) {
+			return -1;
+		}
+		var leftSlash = left.indexOf("/");
+		var rightSlash = right.indexOf("/");
+		if(leftStar < leftSlash) {
+			if(rightStar > rightSlash) {
 				return -1;
 			}
 		}
-		else {
-			if(rw < rs) {
-				return 1;
-			}
+		else if(rightStar < rightSlash) {
+			return 1;
 		}
 		return 0;
 	}
 	
-	function topicChain() {
+	function sortedChain(comparator) {
+		if(!comparator) {
+			throw new Error("comparator is " + comparator);
+		}
 		var callChain = chain();
 		var remove = callChain.remove;
-		var topics = [];
-		callChain.add = function(fn, topic) {
-			if(topic.indexOf("*") === -1) {
-				callChain.insert(topics.length, fn);
-				return;
+		var orders = [];
+		callChain.add = function(fn, order) {
+			if(typeof order === "undefined") {
+				throw new Error("Expected 2 arguments");
 			}
-			for(var i = 0, l = topics.length; i < l; i++) {
-				if(compareTopics(topic, topics[i]) <= 0) {
-					topics.splice(i, 0, topic);
+			for(var i = 0, l = orders.length; i < l; i++) {
+				if(comparator(order, orders[i]) <= 0) {
+					orders.splice(i, 0, order);
 					callChain.insert(i, fn);
-					return;
+					return callChain;
 				}
 			}
-			callChain.insert(topics.length, fn);
-			topics.push(topic);
+			callChain.insert(orders.length, fn);
+			orders.push(order);
+			return callChain;
 		};
 		callChain.remove = function(fn) {
 			var index = remove(fn);
-			if(index !== -1 && index < topics.length) {
-				topics.splice(index, 1);
+			if(index !== -1 && index < orders.length) {
+				orders.splice(index, 1);
 			}
 			return index;
 		};
@@ -174,6 +186,9 @@
 	};
 	
 	Hub.util.chain = chain;
-	Hub.util.topicChain = topicChain;
+	Hub.util.topicChain = function() {
+		return sortedChain(compareTopics);
+	};
+	Hub.util.sortedChain = sortedChain;
 	
 }());

@@ -8,7 +8,42 @@ TestCase("ChainTest", {
 	},
 
 	"test function returns function": function() {
-		assertFunction(Hub.util.chain(function() {}));
+		assertFunction(Hub.util.chain());
+	},
+	
+	"test chain implements add": function() {
+		assertFunction(Hub.util.chain().add);
+	},
+
+	"test add returns chain": function() {
+		var c = Hub.util.chain();
+		assertSame(c, c.add(Hub.noop));
+	},
+
+	"test chain implements insert": function() {
+		assertFunction(Hub.util.chain().insert);
+	},
+
+	"test insert returns chain": function() {
+		var c = Hub.util.chain();
+		assertSame(c, c.insert(0, Hub.noop));
+	},
+	
+	"test chain implements get": function() {
+		var c = Hub.util.chain();
+		assertFunction(c.get);
+	},
+	
+	"test get return value": function() {
+		var c = Hub.util.chain();
+		c.add(function() {
+			return 2;
+		});
+		c.add(function() {
+			return 1;
+		});
+		assertEquals(1, c.get(0)());
+		assertEquals(2, c.get(1)());
 	},
 
 	"test chain call": function() {
