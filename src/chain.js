@@ -115,28 +115,6 @@
 		return callChain;
 	}
 	
-	function compareTopics(left, right) {
-		var leftStar = left.indexOf("*");
-		var rightStar = right.indexOf("*");
-		if(leftStar === -1) {
-			return rightStar === -1 ? 0 : 1;
-		}
-		if(rightStar === -1) {
-			return -1;
-		}
-		var leftSlash = left.indexOf("/");
-		var rightSlash = right.indexOf("/");
-		if(leftStar < leftSlash) {
-			if(rightStar > rightSlash) {
-				return -1;
-			}
-		}
-		else if(rightStar < rightSlash) {
-			return 1;
-		}
-		return 0;
-	}
-	
 	function sortedChain(comparator) {
 		if(!comparator) {
 			throw new Error("comparator is " + comparator);
@@ -186,9 +164,6 @@
 	};
 	
 	Hub.util.chain = chain;
-	Hub.util.topicChain = function() {
-		return sortedChain(compareTopics);
-	};
 	Hub.util.sortedChain = sortedChain;
 	
 }());
