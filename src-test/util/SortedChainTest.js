@@ -4,29 +4,29 @@
 TestCase("ChainSortingTest", {
 	
 	"test sortedChain exists": function() {
-		assertFunction(Hub.util.sortedChain);
+		assertFunction(Hub.sortedChain);
 	},
 	
 	"test sortedChain returns function": function() {
-		assertFunction(Hub.util.sortedChain(Hub.noop));
+		assertFunction(Hub.sortedChain(Hub.noop));
 	},
 	
 	"test sortedChain requires comparator": function() {
 		assertException(function() {
-			Hub.util.sortedChain();
+			Hub.sortedChain();
 		});
 	},
 	
 	"test sortedChain implements add": function() {
-		assertFunction(Hub.util.sortedChain(Hub.noop).add);
+		assertFunction(Hub.sortedChain(Hub.noop).add);
 	},
 	
 	"test sortedChain implements insert": function() {
-		assertFunction(Hub.util.sortedChain(Hub.noop).insert);
+		assertFunction(Hub.sortedChain(Hub.noop).insert);
 	},
 	
 	"test add requires second argument": function() {
-		var chain = Hub.util.sortedChain(Hub.noop);
+		var chain = Hub.sortedChain(Hub.noop);
 		assertException(function() {
 			chain.add(Hub.noop);
 		});
@@ -34,7 +34,7 @@ TestCase("ChainSortingTest", {
 	
 	"test comparator function not invoked on first add": function() {
 		var f = stubFn();
-		Hub.util.sortedChain(f).add(Hub.noop, "x");
+		Hub.sortedChain(f).add(Hub.noop, "x");
 		assertFalse(f.called);
 	},
 	
@@ -61,7 +61,7 @@ TestCase("ChainSortingTest", {
 	},
 	
 	createSimpleChain: function(comparator) {
-		var chain = Hub.util.sortedChain(comparator);
+		var chain = Hub.sortedChain(comparator);
 		return chain.add(function() {
 			return "b";
 		}, "b").add(function() {

@@ -163,7 +163,7 @@
 		next();
 	};
 	
-	Hub.util.chain = chain;
-	Hub.util.sortedChain = sortedChain;
+	Hub.chain = chain;
+	Hub.sortedChain = sortedChain;
 	
 }());

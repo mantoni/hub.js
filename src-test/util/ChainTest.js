@@ -1,41 +1,41 @@
 /*
- * Test cases for Hub.util.chain.
+ * Test cases for Hub.chain.
  */
 TestCase("ChainTest", {
 	
 	"test function exists": function() {
-		assertFunction(Hub.util.chain);
+		assertFunction(Hub.chain);
 	},
 
 	"test function returns function": function() {
-		assertFunction(Hub.util.chain());
+		assertFunction(Hub.chain());
 	},
 	
 	"test chain implements add": function() {
-		assertFunction(Hub.util.chain().add);
+		assertFunction(Hub.chain().add);
 	},
 
 	"test add returns chain": function() {
-		var c = Hub.util.chain();
+		var c = Hub.chain();
 		assertSame(c, c.add(Hub.noop));
 	},
 
 	"test chain implements insert": function() {
-		assertFunction(Hub.util.chain().insert);
+		assertFunction(Hub.chain().insert);
 	},
 
 	"test insert returns chain": function() {
-		var c = Hub.util.chain();
+		var c = Hub.chain();
 		assertSame(c, c.insert(0, Hub.noop));
 	},
 	
 	"test chain implements get": function() {
-		var c = Hub.util.chain();
+		var c = Hub.chain();
 		assertFunction(c.get);
 	},
 	
 	"test get return value": function() {
-		var c = Hub.util.chain();
+		var c = Hub.chain();
 		c.add(function() {
 			return 2;
 		});
@@ -54,13 +54,13 @@ TestCase("ChainTest", {
 		var f2 = function() {
 			calls.push("f2");
 		};
-		Hub.util.chain(f1, f2)();
+		Hub.chain(f1, f2)();
 		assertEquals("Called in argument order", "f1,f2", calls.join());
 	},
 	
 	"test stop propagation": function() {
 		var f = stubFn();
-		Hub.util.chain(function() {
+		Hub.chain(function() {
 			Hub.stopPropagation();
 		}, f)();
 		assertFalse(f.called);
@@ -69,7 +69,7 @@ TestCase("ChainTest", {
 	"test chain remove first of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
-		var chain = Hub.util.chain(f1, f2);
+		var chain = Hub.chain(f1, f2);
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
@@ -79,7 +79,7 @@ TestCase("ChainTest", {
 	"test chain remove second of two": function() {
 		var f1 = stubFn();
 		var f2 = stubFn();
-		var chain = Hub.util.chain(f1, f2);
+		var chain = Hub.chain(f1, f2);
 		chain.remove(f2);
 		chain();
 		assertTrue(f1.called);
@@ -90,7 +90,7 @@ TestCase("ChainTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.util.chain(f1, f2, f3);
+		var chain = Hub.chain(f1, f2, f3);
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
@@ -102,7 +102,7 @@ TestCase("ChainTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.util.chain(f1, f2, f3);
+		var chain = Hub.chain(f1, f2, f3);
 		chain.remove(f2);
 		chain();
 		assertTrue(f1.called);
@@ -114,7 +114,7 @@ TestCase("ChainTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.util.chain(f1, f2, f3);
+		var chain = Hub.chain(f1, f2, f3);
 		chain.remove(f3);
 		chain();
 		assertTrue(f1.called);
@@ -125,7 +125,7 @@ TestCase("ChainTest", {
 	"test chain modification while iterating": function() {
 		var calls = 0;
 		var sf = stubFn();
-		var chain = Hub.util.chain();
+		var chain = Hub.chain();
 		chain.add(function() {
 			calls++;
 			chain.add(sf);

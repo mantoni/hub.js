@@ -35,7 +35,7 @@
 	function apply(peer, message, fn) {
 		var c = peer[message];
 		if(!c) {
-			peer[message] = c = Hub.util.chain();
+			peer[message] = c = Hub.chain();
 		}
 		c.add(fn);
 	}

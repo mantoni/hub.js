@@ -53,7 +53,7 @@
 		if(!o) {
 			o = wildcardSubscribers[topic] = {
 				re: pathMatcher(topic),
-				chain: Hub.util.chain()
+				chain: Hub.chain()
 			};
 			addAllToMatchingChain(subscribers, o.chain, o.re, null);
 		}
@@ -87,7 +87,7 @@
 	
 	function createTopicChain(topic) {
 		validateTopic(topic);
-		var chain = Hub.util.sortedChain(Hub.config.topicComparator);
+		var chain = Hub.sortedChain(Hub.config.topicComparator);
 		storeChain(topic, chain);
 		addAllToMatchingChain(wildcardSubscribers, chain, null, topic);
 		return chain;
@@ -307,7 +307,7 @@
 				return Hub.publish(topic);
 			};
 		}
-		var api = Hub.util.chain();
+		var api = Hub.chain();
 		for(var key in topic) {
 			var value = topic[key];
 			if(typeof value === "string") {

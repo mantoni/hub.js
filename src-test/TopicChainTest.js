@@ -4,7 +4,7 @@
 TestCase("TopicChainTest", {
 	
 	setUp: function() {
-		this.chain = Hub.util.sortedChain(Hub.config.topicComparator);
+		this.chain = Hub.sortedChain(Hub.config.topicComparator);
 	},
 	
 	"test none aspect topics are called in reverse insert order": function() {

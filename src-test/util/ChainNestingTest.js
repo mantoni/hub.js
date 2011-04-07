@@ -5,51 +5,51 @@ TestCase("ChainNestingTest", {
 	
 	"test nested chain function is called": function() {
 		var f = stubFn();
-		var ca = Hub.util.chain(f);
-		var cb = Hub.util.chain(ca);
+		var ca = Hub.chain(f);
+		var cb = Hub.chain(ca);
 		cb();
 		assert(f.called);
 	},
 	
 	"test nested chain function aborts parent": function() {
-		var ca = Hub.util.chain(function() {
+		var ca = Hub.chain(function() {
 			Hub.stopPropagation();
 		});
 		var f = stubFn();
-		var cb = Hub.util.chain(ca, f);
+		var cb = Hub.chain(ca, f);
 		cb();
 		assertFalse(f.called);
 	},
 	
 	"test nested chain function propagates to parent": function() {
 		var f = stubFn();
-		var ca = Hub.util.chain(function() {
+		var ca = Hub.chain(function() {
 			Hub.propagate();
 			assert(f.called);
 		});
-		var cb = Hub.util.chain(ca, f);
+		var cb = Hub.chain(ca, f);
 		cb();
 	},
 	
 	"test nested chain result merge": function() {
-		var c1 = Hub.util.chain(function() {
+		var c1 = Hub.chain(function() {
 			return [1];
 		});
-		var c2 = Hub.util.chain(function() {
+		var c2 = Hub.chain(function() {
 			return [2];
 		});
-		assertEquals([1, 2], Hub.util.chain(c1, c2)());
+		assertEquals([1, 2], Hub.chain(c1, c2)());
 	},
 	
 	"test nested chain receives arguments": function() {
 		var args = [];
-		var c1 = Hub.util.chain(function(a) {
+		var c1 = Hub.chain(function(a) {
 			args.push(a);
 		});
-		var c2 = Hub.util.chain(function(a) {
+		var c2 = Hub.chain(function(a) {
 			args.push(a);
 		});
-		Hub.util.chain(c1, c2)("x");
+		Hub.chain(c1, c2)("x");
 		assertEquals(["x", "x"], args);
 	}
 	
