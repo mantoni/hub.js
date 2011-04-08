@@ -50,15 +50,8 @@
 	}
 	
 	function interceptor(topic, chain) {
-		return function() {
-			var subscriberChain = Hub.subscriberChain(topic);
-			var result = subscriberChain.apply(null, arguments);
-			if(subscriberChain.aborted) {
-				// TODO not covered by any test
-				return result;
-			}
-			return Hub.util.merge(result, chain.apply(null, arguments));
-		};
+		return Hub.multiChain(Hub.noop, [
+			Hub.subscriberChain(topic), chain]);
 	}
 	
 	/*

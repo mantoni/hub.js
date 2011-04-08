@@ -44,7 +44,7 @@
         var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
 		var iterator = false;
 		function callChain() {
-			chain.aborted = false;
+			callChain.aborted = false;
 			if(!iteratorStack.length) {
 				aborted = false;
 				args = arguments;
@@ -58,7 +58,7 @@
 				}
 			}
 			finally {
-				chain.aborted = aborted;
+				callChain.aborted = aborted;
 				iterator = false;
 			}
 			if(!iteratorStack.length) {
@@ -109,7 +109,13 @@
 			}
 			return -1;
 		};
+		callChain.size = function() {
+			return fns.length;
+		};
 		callChain.get = function(index) {
+			if(index < 0 || index > fns.length) {
+				throw new Error("Index out of bounds");
+			}
 			return fns[index];
 		};
 		return callChain;
@@ -147,6 +153,43 @@
 		return callChain;
 	}
 	
+	function multiChain(selector, chains) {
+		if(typeof selector !== "function") {
+			throw new Error("First argument not function");
+		}
+		if(!chains) {
+			chains = [];
+		}
+		function resolve(property) {
+			return chains[selector(property)];
+		}
+		function callChain() {
+			var result;
+			for(var i = 0, l = chains.length; i < l; i++) {
+				var chain = chains[i];
+				result = Hub.util.merge(result, chain.apply(null, arguments));
+				if(chain.aborted) {
+					break;
+				}
+			}
+			return result;
+		}
+		callChain.add = function(property, fn) {
+			resolve(property).add(fn);
+			return callChain;
+		};
+		callChain.remove = function(property, fn) {
+			return resolve(property).remove(fn);
+		};
+		callChain.get = function(property, index) {
+			return resolve(property).get(index);
+		};
+		callChain.size = function(property) {
+			return resolve(property).size();
+		};
+		return callChain;
+	}
+	
 	/**
 	 * stops message propagation for the current call chain.
 	 */
@@ -165,5 +208,6 @@
 	
 	Hub.chain = chain;
 	Hub.sortedChain = sortedChain;
+	Hub.multiChain = multiChain;
 	
 }());
