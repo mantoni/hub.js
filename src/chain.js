@@ -175,7 +175,7 @@
 			return result;
 		}
 		callChain.add = function(property, fn) {
-			resolve(property).add(fn);
+			resolve(property).add(fn, property);
 			return callChain;
 		};
 		callChain.remove = function(property, fn) {
