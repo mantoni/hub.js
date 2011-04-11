@@ -174,15 +174,18 @@
 			}
 			return result;
 		}
-		callChain.add = function(property, fn) {
+		callChain.add = function(fn, property) {
 			resolve(property).add(fn, property);
 			return callChain;
 		};
-		callChain.remove = function(property, fn) {
+		callChain.remove = function(fn, property) {
 			return resolve(property).remove(fn);
 		};
-		callChain.get = function(property, index) {
+		callChain.get = function(index, property) {
 			return resolve(property).get(index);
+		};
+		callChain.getChain = function(index) {
+			return chains[index];
 		};
 		callChain.size = function(property) {
 			return resolve(property).size();

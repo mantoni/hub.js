@@ -69,19 +69,19 @@ TestCase("MultiChainTest", {
 	
 	"test add uses conditional": function() {
 		var chain = this.createChain(Hub.chain());
-		chain.add("foo", Hub.noop);
+		chain.add(Hub.noop, "foo");
 		assert(this.condition.called);
 	},
 	
 	"test remove uses conditional": function() {
 		var chain = this.createChain(Hub.chain(Hub.noop));
-		chain.remove("foo", Hub.noop);
+		chain.remove(Hub.noop, "foo");
 		assert(this.condition.called);
 	},
 
 	"test get uses conditional": function() {
 		var chain = this.createChain(Hub.chain());
-		chain.get("foo", 0);
+		chain.get(0, "foo");
 		assert(this.condition.called);
 	},
 	
@@ -93,19 +93,19 @@ TestCase("MultiChainTest", {
 	
 	"test add returns chain": function() {
 		var chain = this.createChain(Hub.chain());
-		assertSame(chain, chain.add("foo", Hub.noop));
+		assertSame(chain, chain.add(Hub.noop, "foo"));
 	},
 	
 	"test initial chains": function() {
 		var fn = stubFn();
 		var chain = this.createChain(Hub.chain(fn));
-		assertSame(fn, chain.get("foo", 0));
+		assertSame(fn, chain.get(0, "foo"));
 	},
 	
 	"test get with unknown property name throws exception": function() {
 		var chain = this.createChain(Hub.chain(Hub.noop));
 		assertException(function() {
-			Hub.multiChain(Hub.noop).get("unknown", 0);
+			Hub.multiChain(Hub.noop).get(0, "unknown");
 		});
 	},
 	
@@ -125,15 +125,27 @@ TestCase("MultiChainTest", {
 		var fn = stubFn();
 		var subChain = Hub.chain(Hub.noop, fn);
 		var chain = this.createChain(subChain);
-		chain.remove("foo", fn);
+		chain.remove(fn, "foo");
 		assertEquals(1, subChain.size());
 	},
 	
 	"test add increases size of underlying chain": function() {
 		var subChain = Hub.chain(Hub.noop);
 		var chain = this.createChain(subChain);
-		chain.add("foo", stubFn());
+		chain.add(stubFn(), "foo");
 		assertEquals(2, subChain.size());
+	},
+	
+	"test implements getChain": function() {
+		assertFunction(Hub.multiChain(Hub.noop).getChain);
+	},
+	
+	"test getChain returns chain by index": function() {
+		var fn1 = stubFn();
+		var fn2 = stubFn();
+		var chain = Hub.multiChain(Hub.noop, [fn1, fn2]);
+		assertSame(fn1, chain.getChain(0));
+		assertSame(fn2, chain.getChain(1));
 	}
 	
 });

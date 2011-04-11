@@ -12,7 +12,7 @@ TestCase("ChainCombinationTest", {
 		var chain = Hub.multiChain(stubFn(0), [{
 			add: fn
 		}]);
-		chain.add("test", Hub.noop);
+		chain.add(Hub.noop, "test");
 		assert(fn.called);
 		assertEquals({ 0: Hub.noop, 1: "test"}, fn.args);
 	}
