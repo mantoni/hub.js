@@ -91,9 +91,7 @@ TestCase("PublishTest", {
 	
 	"test publish wildcards": function() {
 		var fn = stubFn();
-		Hub.peer("a.b", {
-			"c.d": fn
-		});
+		Hub.subscribe("a.b/c.d", fn);
 		this.assertInvoked("a.b/c.*", fn);
 		this.assertInvoked("a.b/c.**", fn);
 		this.assertNotInvoked("a.b/*", fn);
