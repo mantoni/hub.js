@@ -17,7 +17,7 @@ TestCase("ChainTest", {
 
 	"test add returns chain": function() {
 		var c = Hub.chain();
-		assertSame(c, c.add(Hub.noop));
+		assertSame(c, c.add(stubFn()));
 	},
 
 	"test chain implements insert": function() {
@@ -26,7 +26,7 @@ TestCase("ChainTest", {
 
 	"test insert returns chain": function() {
 		var c = Hub.chain();
-		assertSame(c, c.insert(0, Hub.noop));
+		assertSame(c, c.insert(0, stubFn()));
 	},
 	
 	"test chain implements get": function() {
@@ -146,19 +146,20 @@ TestCase("ChainTest", {
 	
 	"test size reflects added function": function() {
 		var chain = Hub.chain();
-		chain.add(Hub.noop);
+		chain.add(stubFn());
 		assertEquals(1, chain.size());
 	},
 	
 	"test size initialized with number of initial functions": function() {
-		var chain = Hub.chain(Hub.noop, Hub.noop);
+		var chain = Hub.chain(stubFn(), stubFn());
 		assertEquals(2, chain.size());
 	},
 	
 	"test size reflects removed functions": function() {
-		var chain = Hub.chain(Hub.noop);
+		var fn = stubFn();
+		var chain = Hub.chain(fn);
 		assertEquals(1, chain.size());
-		chain.remove(Hub.noop);
+		chain.remove(fn);
 		assertEquals(0, chain.size());
 	}
 	

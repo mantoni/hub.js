@@ -10,6 +10,5 @@
  * Defines the Hub and Hub.util namespaces.
  */
 Hub = {
-	util: {},
-	noop: function() {}
+	util: {}
 };
