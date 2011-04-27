@@ -41,7 +41,8 @@
      * @return {Function} the chain function.
      */
     function chain() {
-        var fns = arguments.length ? Array.prototype.slice.call(arguments) : [];
+        var fns = arguments.length ?
+			Array.prototype.slice.call(arguments) : [];
 		var iterator = false;
 		function callChain() {
 			callChain.aborted = false;
@@ -121,74 +122,135 @@
 		return callChain;
 	}
 	
-	function sortedChain(comparator) {
-		if(!comparator) {
-			throw new Error("comparator is " + comparator);
-		}
-		var callChain = chain();
-		var remove = callChain.remove;
-		var orders = [];
-		callChain.add = function(fn, order) {
-			if(typeof order === "undefined") {
-				throw new Error("Expected 2 arguments");
-			}
-			for(var i = 0, l = orders.length; i < l; i++) {
-				if(comparator(order, orders[i]) <= 0) {
-					orders.splice(i, 0, order);
-					callChain.insert(i, fn);
-					return callChain;
-				}
-			}
-			callChain.insert(orders.length, fn);
-			orders.push(order);
-			return callChain;
-		};
-		callChain.remove = function(fn) {
-			var index = remove(fn);
-			if(index !== -1 && index < orders.length) {
-				orders.splice(index, 1);
-			}
-			return index;
-		};
-		return callChain;
+	function pathMatcher(name) {
+		var exp = name.replace(/\./g, "\\.").replace(
+			/\*\*/g, "([a-zA-Z0-9\\.#]+|##)").replace(
+			/\*/g, "([a-zA-Z0-9\\*]+)").replace(/#/g, "\\*");
+		return new RegExp("^" + exp + "$");
 	}
 	
-	function multiChain(selector, chains) {
-		if(typeof selector !== "function") {
-			throw new Error("First argument not function");
+	var ROOT_TOPIC = "**/**";
+	
+	function topicChain(chainTopic) {
+		if(!chainTopic) {
+			chainTopic = ROOT_TOPIC;
 		}
-		if(!chains) {
-			chains = [];
-		}
-		function resolve(property) {
-			return chains[selector(property)];
-		}
-		function callChain() {
-			var result;
-			for(var i = 0, l = chains.length; i < l; i++) {
-				var chain = chains[i];
-				result = Hub.util.merge(result, chain.apply(null, arguments));
-				if(chain.aborted) {
+		var chainTopicMatcher = pathMatcher(chainTopic);
+		var fns = chain();
+		var children = [];
+		var callChain = function(topic, args, queue) {
+			if(!topic) {
+				topic = chainTopic;
+			}
+			if(topic !== ROOT_TOPIC && !chainTopicMatcher.test(topic)) {
+				if(topic.indexOf("*") === -1 ||
+						!pathMatcher(topic).test(chainTopic)) {
+					return;
+				}
+				topic = ROOT_TOPIC;
+			}
+			var result = fns.apply(null, args);
+			if(fns.aborted) {
+				callChain.aborted = true;
+				return result;
+			}
+			if(!queue) {
+				queue = children.slice();
+			}
+			else {
+				for(var i = 0, l = children.length; i < l; i++) {
+					queue.push(children[i]);
+				}
+			}
+			while(queue.length) {
+				var child = queue.shift();
+				result = Hub.util.merge(result, child(topic, args, queue));
+				if(child.aborted) {
+					callChain.aborted = true;
 					break;
 				}
 			}
 			return result;
-		}
-		callChain.add = function(fn, property) {
-			resolve(property).add(fn, property);
-			return callChain;
 		};
-		callChain.remove = function(fn, property) {
-			return resolve(property).remove(fn);
+		callChain.matches = function(topic) {
+			return chainTopicMatcher.test(topic);
 		};
-		callChain.get = function(index, property) {
-			return resolve(property).get(index);
+		callChain.getTopic = function() {
+			return chainTopic;
 		};
-		callChain.getChain = function(index) {
-			return chains[index];
+		callChain.add = function(fn, topic, topicMatcher) {
+			if(chainTopic === topic) {
+				fns.add(fn);
+				return;
+			}
+			var newChild;
+			for(var i = 0, l = children.length; i < l; i++) {
+				var child = children[i];
+				if(child.matches(topic)) {
+					child.add(fn, topic, topicMatcher);
+					return;
+				}
+				if(!topicMatcher) {
+					topicMatcher = pathMatcher(topic);
+				}
+				if(topicMatcher.test(child.getTopic())) {
+					newChild = topicChain(topic);
+					newChild.addChild(child);
+					newChild.add(fn, topic, topicMatcher);
+					children[i] = newChild;
+					return;
+				}
+			}
+			newChild = topicChain(topic);
+			newChild.add(fn, topic);
+			if(topic.indexOf("*") === -1) {
+				children.unshift(newChild);
+			}
+			else {
+				for(var i = 0, l = children.length; i < l; i++) {
+					var childTopic = children[i].getTopic();
+					var result = Hub.topicComparator(childTopic, topic);
+					if(result !== -1) {
+						children.splice(i, 0, newChild);
+						return;
+					}
+				}
+				children.push(newChild);
+			}
 		};
-		callChain.size = function(property) {
-			return resolve(property).size();
+		callChain.addChild = function(child) {
+			children.unshift(child);
+		};
+		callChain.getChild = function(topic, topicMatcher) {
+			if(chainTopic === topic) {
+				return this;
+			}
+			if(!topicMatcher) {
+				topicMatcher = pathMatcher(topic);
+			}
+			if(topicMatcher.test(chainTopic)) {
+				return this;
+			}
+			for(var i = 0, l = children.length; i < l; i++) {
+				var result = children[i].getChild(topic, topicMatcher);
+				if(result) {
+					return result;
+				}
+			}
+		};
+		callChain.remove = function(fn, topic) {
+			if(chainTopic === topic) {
+				return fns.remove(fn) !== -1;
+			}
+			for(var i = 0, l = children.length; i < l; i++) {
+				var child = children[i];
+				if(child.matches(topic)) {
+					if(child.remove(fn, topic)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		};
 		return callChain;
 	}
@@ -209,8 +271,40 @@
 		next();
 	};
 	
+	/**
+	 * compares two topics. Returns 0 if the topics have the same priority,
+	 * -1 if the first given topic is "smaller"" the second one and 1 if
+	 * the first topic is "larger" than the second one. This means that a
+	 * subscriber for the "smaller" topic gets invoked before a subscriber
+	 * for the "larger" topic.
+	 *
+	 * @param {String} left the first topic.
+	 * @param {String} right the second topic.
+	 * @return {Number} 0, 1 or -1.
+	 */
+	Hub.topicComparator = function(left, right) {
+		var leftStar = left.indexOf("*");
+		var rightStar = right.indexOf("*");
+		if(leftStar === -1) {
+			return rightStar === -1 ? 0 : 1;
+		}
+		if(rightStar === -1) {
+			return -1;
+		}
+		var leftSlash = left.indexOf("/");
+		var rightSlash = right.indexOf("/");
+		if(leftStar < leftSlash) {
+			if(rightStar > rightSlash) {
+				return -1;
+			}
+		}
+		else if(rightStar < rightSlash) {
+			return 1;
+		}
+		return 0;
+	};
+
 	Hub.chain = chain;
-	Hub.sortedChain = sortedChain;
-	Hub.multiChain = multiChain;
+	Hub.topicChain = topicChain;
 	
 }());

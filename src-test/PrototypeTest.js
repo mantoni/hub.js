@@ -4,12 +4,13 @@
 TestCase("PrototypeTest", {
 	
 	setUp: function() {
-		this.fn = stubFn();
+		var fn = stubFn();
 		Hub.peer("test", function() {
 			return {
 				stub: fn
 			};
 		});
+		this.fn = fn;
 	},
 	
 	tearDown: function() {
@@ -24,6 +25,28 @@ TestCase("PrototypeTest", {
 	"test publisher does not invoke method on prototype peer": function() {
 		Hub.publisher("test/stub")();
 		assertFalse(this.fn.called);
+	},
+	
+	"test get and invoke method": function() {
+		Hub.get("test").stub();
+		assert(this.fn.called);
+	},
+	
+	"test wildcard subscriber is invoked 1": function() {
+		var fn = stubFn();
+		Hub.subscribe("test/*", fn);
+		Hub.get("test").stub();
+		assert(this.fn.called);
+		assert(fn.called);
+	},
+	
+	"test wildcard subscriber is invoked 2": function() {
+		var fn = stubFn();
+		var instance = Hub.get("test");
+		Hub.subscribe("test/*", fn);
+		instance.stub();
+		assert(this.fn.called);
+		assert(fn.called);
 	}
 	
 });

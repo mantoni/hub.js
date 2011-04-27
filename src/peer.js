@@ -49,9 +49,19 @@
 		}
 	}
 	
+	/*
+	 * returns a function that publishes the given topic on the Hub and then
+	 * invokes the provided chain if the topic was not aborted on the Hub.
+	 */
 	function interceptor(topic, chain) {
-		return Hub.multiChain(Hub.noop, [
-			Hub.subscriberChain(topic), chain]);
+		return function() {
+			var args = Array.prototype.slice.call(arguments);
+			var result = Hub.publish.apply(Hub, [topic].concat(args));
+			if(!Hub.aborted()) {
+				result = Hub.util.merge(result, chain.apply(null, arguments));
+			}
+			return result;
+		};
 	}
 	
 	/*
@@ -139,6 +149,20 @@
 		definitions[namespace] = definition;
 	};
 	
+	/**
+	 * <p>
+	 * returns the API of the peer with the given namespace. The returned
+	 * object implements all messages of the peer as methods that can be
+	 * directly invoked.
+	 * </p>
+	 * <p>
+	 * If the peer with the given namespace is a prototype peer, a new
+	 * instance is created.
+	 * </p>
+	 *
+	 * @param {String} namespace the namespace.
+	 * @return {Object} the API of the peer.
+	 */
 	Hub.get = function(namespace) {
 		return getPeer(namespace).api;
 	};

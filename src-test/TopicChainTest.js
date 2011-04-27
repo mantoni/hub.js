@@ -1,70 +1,133 @@
 /*
- * Test cases for topic chains.
+ * Test cases for Hub.topicChain.
  */
 TestCase("TopicChainTest", {
 	
-	setUp: function() {
-		this.chain = Hub.sortedChain(Hub.topicComparator);
+	tearDown: function() {
+		Hub.reset();
 	},
 	
-	"test none aspect topics are called in reverse insert order": function() {
-		var calls = [];
-		this.chain.add(function() {
-			calls.push("a");
-		}, "topic/a");
-		this.chain.add(function() {
-			calls.push("b");
-		}, "topic/b");
-		this.chain();
-		assertEquals("b,a", calls.join());
+	"test method exists": function() {
+		assertFunction(Hub.topicChain);
 	},
-
-	"test aspect is called before none aspect 1": function() {
-		var calls = [];
-		this.chain.add(function() {
-			calls.push("a");
-		}, "topic/*");
-		this.chain.add(function() {
-			calls.push("b");
-		}, "topic/b");
-		this.chain();
-		assertEquals("a,b", calls.join());
+	
+	"test implements add and remove": function() {
+		var chain = Hub.topicChain();
+		assertFunction(chain.add);
+		assertFunction(chain.remove);
 	},
-
-	"test aspect is called before none aspect 2": function() {
-		var calls = [];
-		this.chain.add(function() {
-			calls.push("b");
-		}, "topic/b");
-		this.chain.add(function() {
-			calls.push("a");
-		}, "topic/*");
-		this.chain();
-		assertEquals("a,b", calls.join());
+	
+	"test invoke calls added function": function() {
+		var fn = stubFn();
+		var chain = Hub.topicChain();
+		chain.add(fn, "**/**");
+		chain("**/**");
+		assert(fn.called);
 	},
-
-	"test aspect sorting 1": function() {
-		var calls = [];
-		this.chain.add(function() {
-			calls.push("a");
-		}, "a/*");
-		this.chain.add(function() {
-			calls.push("b");
-		}, "*/b");
-		this.chain();
-		assertEquals("b,a", calls.join());
+	
+	"test insert 1": function() {
+		this.verifyInsertOrder(["foo/*", "*/bar"], ["*/bar", "foo/*"]);
 	},
-
-	"test aspect sorting 2": function() {
+	
+	"test insert 2": function() {
+		this.verifyInsertOrder(["foo/bar", "foo/*", "*/bar"],
+			["*/bar", "foo/*", "foo/bar"]);
+	},
+	
+	"test insert 3": function() {
+		this.verifyInsertOrder(["foo/*", "foo/bar", "*/bar"],
+			["*/bar", "foo/*", "foo/bar"]);
+	},
+	
+	"test insert 4": function() {
+		this.verifyInsertOrder(["*/bar", "foo/bar", "foo/*"],
+			["*/bar", "foo/*", "foo/bar"]);
+	},
+	
+	"test insert 5": function() {
+		this.verifyInsertOrder(["foo/bar", "*/bar", "foo/*"],
+			["*/bar", "foo/*", "foo/bar"]);
+	},
+	
+	"test insert 7": function() {
+		this.verifyInsertOrder(["*/b", "*/y", "a/b", "x/y"],
+			["*/y", "*/b", "x/y", "a/b"]);
+	},
+	
+	"test insert two equal": function() {
+		this.verifyInsertOrder(["a/b", "x/y"], ["x/y", "a/b"]);
+	},
+	
+	"test insert two wildcard": function() {
+		this.verifyInsertOrder(["a/*", "x/*"], ["x/*", "a/*"]);
+	},
+	
+	verifyInsertOrder: function(inserts, expected) {
+		var chain = Hub.topicChain();
 		var calls = [];
-		this.chain.add(function() {
-			calls.push("b");
-		}, "*/b");
-		this.chain.add(function() {
-			calls.push("a");
-		}, "a/*");
-		this.chain();
-		assertEquals("b,a", calls.join());
+		function caller(name) {
+			return function() {
+				calls.push(name);
+			};
+		}
+		for(var i = 0, l = inserts.length; i < l; i++) {
+			chain.add(caller(inserts[i]), inserts[i]);
+		}
+		chain("**/**");
+		assertEquals(expected.join(), calls.join());
+	},
+	
+	"test call invokes only matching": function() {
+		var chain = Hub.topicChain();
+		var fn1 = stubFn();
+		var fn2 = stubFn();
+		chain.add(fn1, "a/b");
+		chain.add(fn2, "x/y");
+		chain("x/y");
+		assertFalse(fn1.called);
+		assert(fn2.called);
+	},
+	
+	"test invoke without topic falls back to chain topic": function() {
+		var chain = Hub.topicChain("a/b");
+		var fn1 = stubFn();
+		var fn2 = stubFn();
+		chain.add(fn1, "a/b");
+		chain.add(fn2, "x/y");
+		chain();
+		assert(fn1.called);
+		assertFalse(fn2.called);
+	},
+	
+	"test implements getChild": function() {
+		assertFunction(Hub.topicChain().getChild);
+	},
+	
+	"test getChild with same topic as chain topic": function() {
+		var chain = Hub.topicChain("a/b");
+		assertSame(chain, chain.getChild("a/b"));
+	},
+	
+	"test chain returned by getChild does not invoke parent": function() {
+		var chain = Hub.topicChain();
+		var fn1 = stubFn();
+		var fn2 = stubFn();
+		chain.add(fn1, "a/*");
+		chain.add(fn2, "a/b");
+		var child = chain.getChild("a/b");
+		child();
+		assertFalse(fn1.called);
+		assert(fn2.called);
+	},
+	
+	"test getChain with undefined child topic": function() {
+		var chain = Hub.topicChain();
+		var fn = stubFn();
+		chain.add(fn, "a/b");
+		var child = chain.getChild("a/*");
+		assertFunction(child);
+		child();
+		assert(fn.called);
 	}
-
+	
 });

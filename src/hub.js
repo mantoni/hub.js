@@ -9,30 +9,16 @@
 (function() {
 	
 	/**
-	 * topic to subscriber functions.
+	 * The root topic chain.
 	 *
-	 * @type {object}
+	 * @type {Function}
 	 */
-	var subscribers = {};
-	var wildcardSubscribers = {};
-	
-	/**
-	 * An empty array used as an internal value object.
-	 *
-	 * @type {Array}
-	 */
-	var emptyArray = [];
+	var rootChain = Hub.topicChain();
 	
 	function pathMatcher(name) {
 		var exp = name.replace(/\./g, "\\.").replace(
 			/\*\*/g, "[a-zA-Z0-9\\.]+").replace(/\*/g, "[a-zA-Z0-9]+");
 		return new RegExp("^" + exp + "$");
-	}
-	
-	function substitutionFn(topic) {
-		return function() {
-			invoke(Hub.util.substitute(topic, arguments), arguments);
-		};
 	}
 	
 	function validateTopic(topic) {
@@ -48,64 +34,6 @@
 		}
 	}
 	
-	function getWildcardSubscriber(topic) {
-		var o = wildcardSubscribers[topic];
-		if(!o) {
-			o = wildcardSubscribers[topic] = {
-				re: pathMatcher(topic),
-				chain: Hub.chain()
-			};
-			addAllToMatchingChain(subscribers, o.chain, o.re, null);
-		}
-		return o;
-	}
-	
-	function addToMatchingChain(map, fn, re, topic) {
-		for(var t in map) {
-			var o = map[t];
-			if((re || o.re).test(topic)) {
-				o.chain.add(fn, topic);
-			}
-		}
-	}
-	
-	function addAllToMatchingChain(map, chain, re, topic) {
-		for(var t in map) {
-			var o = map[t];
-			if((re || o.re).test(topic || t)) {
-				chain.add(o.chain, t);
-			}
-		}
-	}
-	
-	function storeChain(topic, chain) {
-		subscribers[topic] = {
-			chain: chain
-		};
-		return chain;
-	}
-	
-	function createTopicChain(topic) {
-		validateTopic(topic);
-		var chain = Hub.sortedChain(Hub.topicComparator);
-		storeChain(topic, chain);
-		addAllToMatchingChain(wildcardSubscribers, chain, null, topic);
-		return chain;
-	}
-	
-	function invoke(topic, args) {
-		var chain = Hub.subscriberChain(topic);
-		try {
-			return chain.apply(null, args);
-		}
-		catch(e) {
-			throw new Hub.Error("error",
-				"Error in call chain for topic \"{topic}\": {error}", {
-					topic: topic, error: e.message
-				});
-		}
-	}
-	
 	// ensures the given argument is a function. Throws an error otherwise.
 	function validateCallback(fn) {
 		var fnType = typeof fn;
@@ -117,45 +45,11 @@
 	// Public API:
 	
 	/**
-	 * compares two topics. Returns 0 if the topics have the same priority,
-	 * -1 if the first given topic is "smaller"" the second one and 1 if
-	 * the first topic is "larger" than the second one. This means that a
-	 * subscriber for the "smaller" topic gets invoked before a subscriber
-	 * for the "larger" topic.
-	 *
-	 * @param {String} left the first topic.
-	 * @param {String} right the second topic.
-	 * @return {Number} 0, 1 or -1.
-	 */
-	Hub.topicComparator = function(left, right) {
-		var leftStar = left.indexOf("*");
-		var rightStar = right.indexOf("*");
-		if(leftStar === -1) {
-			return rightStar === -1 ? 0 : 1;
-		}
-		if(rightStar === -1) {
-			return -1;
-		}
-		var leftSlash = left.indexOf("/");
-		var rightSlash = right.indexOf("/");
-		if(leftStar < leftSlash) {
-			if(rightStar > rightSlash) {
-				return -1;
-			}
-		}
-		else if(rightStar < rightSlash) {
-			return 1;
-		}
-		return 0;
-	};
-	
-	/**
 	 * resets the Hub to it's initial state. Primarily required for unit
 	 * testing.
 	 */
 	Hub.reset = function() {
-		subscribers = {};
-		wildcardSubscribers = {};
+		rootChain = Hub.topicChain();
 		Hub.resetPeers();
 	};
 	
@@ -167,25 +61,8 @@
 	 */
 	Hub.subscribe = function(topic, fn) {
 		validateCallback(fn);
-		var isWildcard = topic.indexOf("*") !== -1;
-		var t, re, chain;
-		var o = subscribers[topic];
-		if(o) {
-			chain = o.chain;
-		}
-		else {
-			if(isWildcard) {
-				o = getWildcardSubscriber(topic);
-				o.chain.add(fn);
-				addToMatchingChain(subscribers, fn, o.re, topic);
-				return;
-			}
-			chain = createTopicChain(topic);
-		}
-		if(!isWildcard) {
-			addToMatchingChain(wildcardSubscribers, fn, null, topic);
-		}
-		chain.add(fn, topic);
+		validateTopic(topic);
+		rootChain.add(fn, topic);
 	};
 	
 	/**
@@ -198,34 +75,9 @@
 	 */
 	Hub.unsubscribe = function(topic, fn) {
 		validateCallback(fn);
-		var o = subscribers[topic];
-		if(!o) {
-			validateTopic(topic);
-			return false;
-		}
-		o.chain.remove(fn);
-		for(var t in wildcardSubscribers) {
-			var sub = wildcardSubscribers[t];
-			if(sub.re.test(topic)) {
-				sub.chain.remove(fn);
-			}
-		}
-		return true;
+		validateTopic(topic);
+		return rootChain.remove(fn, topic);
 	};
-	
-	Hub.subscriberChain = function(topic) {
-		var o = subscribers[topic];
-		if(o) {
-			return o.chain;
-		}
-		if(topic.indexOf("{") !== -1) {
-			return storeChain(topic, substitutionFn(topic));
-		}
-		if(topic.indexOf("*") === -1) {
-			return createTopicChain(topic);
-		}
-		return getWildcardSubscriber(topic).chain;
-	}
 	
 	/**
 	 * invokes the call chain associated with a topic with optional arguments.
@@ -236,9 +88,29 @@
 	 * @param {...Object} args the arguments to pass.
 	 */
 	Hub.invoke = function(topic) {
-		var args = arguments.length > 1 ?
-				Array.prototype.slice.call(arguments, 1) : emptyArray;
-		return invoke(topic, args);
+		validateTopic(topic);
+		var args = Array.prototype.slice.call(arguments, 1);
+		if(topic.indexOf("{") !== -1) {
+			topic = Hub.util.substitute(topic, args);
+		}
+		try {
+			return rootChain(topic, args);
+		}
+		catch(e) {
+			throw new Hub.Error("error",
+				"Error in call chain for topic \"{topic}\": {error}", {
+					topic: topic, error: e.message
+				});
+		}
+	};
+	
+	/**
+	 * whether the last publish was aborted or not.
+	 *
+	 * @return {Boolean} true if the last publish was aborted.
+	 */
+	Hub.aborted = function() {
+		return Boolean(rootChain.aborted);
 	};
 	
 	/**

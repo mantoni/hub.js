@@ -12,7 +12,8 @@ TestCase("PeerTest", {
 		try {
 			Hub.peer("definedTwice", {});
 		} catch(e) {
-			assertEquals("Hub - peer already defined: definedTwice", e.message);
+			assertEquals("Hub - peer already defined: definedTwice",
+				e.message);
 			return;
 		}
 		fail("Exception expected");
@@ -39,8 +40,8 @@ TestCase("PeerTest", {
 	},
 	
 	/*
-	 * ensure a peer can be defined after an existing subscription
-	 * and both get mixed and then invoked in the correct order.
+	 * ensure a peer can be defined after an existing subscription and both
+	 * get mixed and then invoked in the correct order.
 	 */
 	"test subscribe then add peer": function() {
 		var chain = [];
@@ -49,12 +50,12 @@ TestCase("PeerTest", {
 		});
 		Hub.peer("a", {
 			"b": function() {
-				chain.push("node");
+				chain.push("peer");
 			}
 		});
 		Hub.publish("a/b");
-		// node first, because it was added last.
-		assertEquals("node,subscribe", chain.join());
+		// "peer" first, because it was added last.
+		assertEquals("peer,subscribe", chain.join());
 	},
 	
 	"test peer multicasting": function() {
@@ -70,8 +71,8 @@ TestCase("PeerTest", {
 			}
 		});
 		Hub.publish("a.*/m");
+		// "y" first, because it was added last.
 		assertEquals("y,x", chain.join());
 	}
-
 
 });
