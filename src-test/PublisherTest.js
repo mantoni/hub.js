@@ -28,25 +28,23 @@ TestCase("PublisherTest", {
 		});
 	},
 	
-	testSimpleForwarder: function() {
+	"test simple publisher": function() {
 		var fn = Hub.publisher("a/b");
-		assertEquals("function", typeof fn);
 		assertEquals("data", this.publishData(fn, "data"));
 	},
 	
-	testShortcut: function() {
+	"test shortcut": function() {
 		var fn = Hub.publisher("a/b");
-		assertEquals("function", typeof fn);
 		assertEquals("data", this.publishData(fn, "data"));
 	},
 	
-	testMergeDataLong: function() {
+	"test merge data long": function() {
 		var fn = Hub.publisher("a/b", {x:"x"});
 		var d = this.publishData(fn, {});
 		assertEquals("x", d.x);
 	},
 	
-	testMergeDataShort: function() {
+	"test merge data short": function() {
 		var fn = Hub.publisher("a/b", {x:"x"});
 		var d = this.publishData(fn, {});
 		assertEquals("x", d.x);

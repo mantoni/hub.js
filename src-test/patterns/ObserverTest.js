@@ -7,8 +7,9 @@ TestCase("ObserverTest", {
 		Hub.reset();
 	},
 
-	"test singleton module": function() {
-
+	"test abserver": function() {
+		
+		// The Observable singleton peer:
 		Hub.peer("Observable", function() {
 			var observers = [];
 			return {
@@ -25,6 +26,8 @@ TestCase("ObserverTest", {
 		
 		var instances = 0;
 		var invocations = 0;
+		
+		// The Observer prototype peer:
 		Hub.peer("Observer", function() {
 			instances++;
 			return {
@@ -38,7 +41,7 @@ TestCase("ObserverTest", {
 		observable.observe(Hub.get("Observer"));
 		assertEquals(1, instances);
 		observable.observe(Hub.get("Observer"));
-		// ^-- same as Hub.publish("Observable/add", Hub.get("Observer"));
+		// ^-- same as Hub.publish("Observable/observe", Hub.get("Observer"));
 		assertEquals(2, instances);
 		assertEquals(0, invocations);
 		observable.notify();

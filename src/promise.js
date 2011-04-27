@@ -99,7 +99,8 @@
 			
 			/**
 			 * publishes the given topic with optional arguments. The return
-			 * value of the call will replace the current value of this promise.
+			 * value of the call will replace the current value of this 
+			 * promise.
 			 *
 			 * @param {String} topic the topic.
 			 * @param {...*} arguments the arguments.
@@ -263,7 +264,8 @@
 			return replacePromiseProxy(this).publish.apply(null, arguments);
 		},
 		publishResult: function(namespace, message, data) {
-			return replacePromiseProxy(this).publishResult.apply(null, arguments);
+			return replacePromiseProxy(this).publishResult.apply(
+				null, arguments);
 		},
 		fulfill: function() {
 			throw new Error("Hub - promise already fulfilled");
@@ -322,14 +324,15 @@
 			// This means we are not within a publish call.
 			return newPromise;
 		}
-		/*
-		 * This means we are within a publish call now. If promise is false it
-		 * means we do not have a promise yet. Otherwise there is an existing
-		 * promise already which we can join with the new one.
-		 */
+		// This means we are within a publish call now.
 		if(promise === false) {
+			// This means we do not have a promise yet.
 			return promise = newPromise;
 		}
+		/*
+		 * This means there is an existing promise already which we can join
+		 * with the new one.
+		 */
 		promise = joinPromises(promise, newPromise);
 		return newPromise;
 	};
