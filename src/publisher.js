@@ -19,7 +19,7 @@ Hub.publisher = function(topic, dataTransformer, dataToMerge) {
 		if(dataTransformer) {
 			if(dataToMerge) {
 				return function() {
-					return Hub.publish(topic, Hub.util.merge(
+					return Hub.publish(topic, Hub.merge(
 						dataTransformer.apply(null, arguments), dataToMerge));
 				}
 			}
@@ -31,7 +31,7 @@ Hub.publisher = function(topic, dataTransformer, dataToMerge) {
 			}
 			return function(data) {
 				return Hub.publish(topic,
-					Hub.util.merge(data, dataTransformer));
+					Hub.merge(data, dataTransformer));
 			};
 		}
 		return function() {

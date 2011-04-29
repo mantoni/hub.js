@@ -151,7 +151,7 @@
 				else {
 					fulfilled = true;
 					clearTimeout(timeout);
-					value = Hub.util.merge(value, data);
+					value = Hub.merge(value, data);
 					while(callbacks.length) {
 						invokePromiseCallback(callbacks.shift(), value);
 					}
@@ -222,7 +222,7 @@
 		}
 		function onSuccess(data) {
 			if(success) {
-				mergedData = Hub.util.merge(mergedData, data);
+				mergedData = Hub.merge(mergedData, data);
 			}
 			checkDone();
 		}
@@ -232,7 +232,7 @@
 				mergedData = data;
 			}
 			else {
-				mergedData = Hub.util.merge(mergedData, data);
+				mergedData = Hub.merge(mergedData, data);
 			}
 			checkDone();
 		}

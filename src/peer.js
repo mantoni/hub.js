@@ -58,7 +58,7 @@
 			var args = Array.prototype.slice.call(arguments);
 			var result = Hub.publish.apply(Hub, [topic].concat(args));
 			if(!Hub.aborted()) {
-				result = Hub.util.merge(result, chain.apply(null, arguments));
+				result = Hub.merge(result, chain.apply(null, arguments));
 			}
 			return result;
 		};

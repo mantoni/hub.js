@@ -6,7 +6,7 @@
 /**
  * substitutes the given string with the given values by searching for
  * placeholders in the form {dot.separated.path}. If a placeholder is found,
- * Hub.util.resolve is used to resolve the value from the given values object
+ * Hub.resolve is used to resolve the value from the given values object
  * or array.
  *
  * @param {String} string the string to substitute.
@@ -14,12 +14,12 @@
  * @param {*} defaultValue the optional default value.
  * @return {String} the substituted string.
  */
-Hub.util.substitute = function(string, values, defaultValue) {
+Hub.substitute = function(string, values, defaultValue) {
 	if(defaultValue === undefined) {
 		defaultValue = "";
 	}
 	var replaceFn = values ? function(match, path) {
-		return Hub.util.resolve(values, path, defaultValue);
+		return Hub.resolve(values, path, defaultValue);
 	} : function() {
 		return defaultValue;
 	};

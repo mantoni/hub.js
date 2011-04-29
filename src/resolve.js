@@ -12,7 +12,7 @@
  * @param {*} defaultValue the optional default value.
  * @return {*} the resolved value or the default value.
  */
-Hub.util.resolve = function(object, path, defaultValue) {
+Hub.resolve = function(object, path, defaultValue) {
 	var p = path.indexOf(".");
 	if(p !== -1) {
 		var key = path.substring(0, p);

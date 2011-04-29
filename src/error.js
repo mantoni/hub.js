@@ -6,7 +6,7 @@
 /**
  * creates a new error for the given type, description and optional context.
  * The description might contain placeholders that get replaced by values from
- * the context using Hub.util.substitute when calling toString on the error.
+ * the context using Hub.substitute when calling toString on the error.
  * The type and context properties are exposed while the description is not.
  *
  * @param {String} type the type of the error.
@@ -17,6 +17,6 @@ Hub.Error = function(type, description, context) {
 	this.type = type;
 	this.context = context;
 	this.toString = function() {
-		return Hub.util.substitute(description, context);
+		return Hub.substitute(description, context);
 	};
 };

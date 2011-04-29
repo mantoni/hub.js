@@ -24,7 +24,7 @@
 			iteratorStack.pop();
 			return next();
 		}
-		result = Hub.util.merge(result, iterator().apply(null, args));
+		result = Hub.merge(result, iterator().apply(null, args));
 		return true;
 	}
 	

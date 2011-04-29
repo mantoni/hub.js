@@ -10,7 +10,7 @@
  * @param {*} source the source value or object.
  * @return {*} the new target value or object.
  */
-Hub.util.merge = function(target, source) {
+Hub.merge = function(target, source) {
 	if(target === undefined || target === null ||
 			target === source) {
 		return source;

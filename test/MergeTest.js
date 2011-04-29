@@ -1,26 +1,26 @@
 /*
- * Test cases for Hub.util.merge.
+ * Test cases for Hub.merge.
  */
 TestCase("MergeTest", {
 	
 	testEmptyObject: function() {
-		var o = Hub.util.merge({}, {});
+		var o = Hub.merge({}, {});
 		assertEquals("[object Object]", Object.prototype.toString.call(o));
 	},
 
 	testEmptyArray: function() {
-		var a = Hub.util.merge([], []);
+		var a = Hub.merge([], []);
 		assertEquals("[object Array]", Object.prototype.toString.call(a));
 	},
 	
 	testSimpleObjectMerge: function() {
-		var o = Hub.util.merge({ foo: "foo" }, { bar: "bar" });
+		var o = Hub.merge({ foo: "foo" }, { bar: "bar" });
 		assertEquals("foo", o.foo);
 		assertEquals("bar", o.bar);
 	},
 	
 	testSimpleArrayMerge: function() {
-		var a = Hub.util.merge(["foo"], ["bar"]);
+		var a = Hub.merge(["foo"], ["bar"]);
 		assertEquals("foo,bar", a.join());
 	},
 	
@@ -41,32 +41,32 @@ TestCase("MergeTest", {
 		Hub.subscribe("hub.error.warn/util.merge", function(data) {
 			error = data;
 		});
-		var o = Hub.util.merge({ x: "foo" }, { x: "foo" });
+		var o = Hub.merge({ x: "foo" }, { x: "foo" });
 		assertEquals("foo", o.x);
 		assertNull(error);
 	},
 	
 	testMergeWithUndefined: function() {
-		assertSame(true, Hub.util.merge(true, undefined));
-		assertSame(true, Hub.util.merge(undefined, true));
-		assertSame(false, Hub.util.merge(false, undefined));
-		assertSame(false, Hub.util.merge(undefined, false));
-		assertEquals("", Hub.util.merge("", undefined));
-		assertEquals("", Hub.util.merge(undefined, ""));
+		assertSame(true, Hub.merge(true, undefined));
+		assertSame(true, Hub.merge(undefined, true));
+		assertSame(false, Hub.merge(false, undefined));
+		assertSame(false, Hub.merge(undefined, false));
+		assertEquals("", Hub.merge("", undefined));
+		assertEquals("", Hub.merge(undefined, ""));
 	},
 	
 	testMergeWithNull: function() {
-		assertSame(true, Hub.util.merge(true, null));
-		assertSame(true, Hub.util.merge(null, true));
-		assertSame(false, Hub.util.merge(false, null));
-		assertSame(false, Hub.util.merge(null, false));
-		assertEquals("", Hub.util.merge("", null));
-		assertEquals("", Hub.util.merge(null, ""));
+		assertSame(true, Hub.merge(true, null));
+		assertSame(true, Hub.merge(null, true));
+		assertSame(false, Hub.merge(false, null));
+		assertSame(false, Hub.merge(null, false));
+		assertEquals("", Hub.merge("", null));
+		assertEquals("", Hub.merge(null, ""));
 	},
 	
 	testBooleanMergeSame: function() {
-		assertSame(true, Hub.util.merge(true, true));
-		assertSame(false, Hub.util.merge(false, false));
+		assertSame(true, Hub.merge(true, true));
+		assertSame(false, Hub.merge(false, false));
 	},
 	
 	testBooleanMergeConflict: function() {
@@ -78,8 +78,8 @@ TestCase("MergeTest", {
 	},
 	
 	testStringMergeSame: function() {
-		assertSame("", Hub.util.merge("", ""));
-		assertSame("a", Hub.util.merge("a", "a"));
+		assertSame("", Hub.merge("", ""));
+		assertSame("a", Hub.merge("a", "a"));
 	},
 	
 	testStringMergeConflict: function() {
@@ -93,7 +93,8 @@ TestCase("MergeTest", {
 	testMergeObjectWithArray: function() {
 		var error = this.mergeError({}, []);
 		assertEquals("validation", error.type);
-		assertEquals("Cannot merge type [object Object] with [object Array]", error.toString());
+		assertEquals("Cannot merge type [object Object] with [object Array]",
+			error.toString());
 		assertEquals("[object Object]", error.context.targetType);
 		assertEquals("[object Array]", error.context.sourceType);
 	},
@@ -101,7 +102,7 @@ TestCase("MergeTest", {
 	mergeError: function(target, source) {
 		var error = null;
 		try {
-			Hub.util.merge(target, source);
+			Hub.merge(target, source);
 		}
 		catch(e) {
 			error = e;

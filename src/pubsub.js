@@ -50,7 +50,7 @@
 			}
 			while(queue.length) {
 				var child = queue.shift();
-				result = Hub.util.merge(result, child(topic, args, queue));
+				result = Hub.merge(result, child(topic, args, queue));
 				if(child.aborted) {
 					callChain.aborted = true;
 					break;
@@ -201,7 +201,7 @@
 		validateTopic(topic);
 		var args = Array.prototype.slice.call(arguments, 1);
 		if(topic.indexOf("{") !== -1) {
-			topic = Hub.util.substitute(topic, args);
+			topic = Hub.substitute(topic, args);
 		}
 		try {
 			return rootChain(topic, args);
