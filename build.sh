@@ -86,7 +86,7 @@ usage() {
 compile() {
 	check_cc
 	echo -n "Compiling hub-$HUB_VERSION.js ... "
-	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js src/head.js --js src/iterator.js --js src/chain.js --js src/peer.js --js src/hub.js --js src/promise.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
+	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js src/head.js --js src/iterator.js --js src/chain.js --js src/pubsub.js --js src/peer.js --js src/hub.js --js src/promise.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi

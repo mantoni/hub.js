@@ -79,122 +79,6 @@
 		return callChain;
 	}
 	
-	function pathMatcher(name) {
-		var exp = name.replace(/\./g, "\\.").replace(
-			/\*\*/g, "([a-zA-Z0-9\\.#]+|##)").replace(
-			/\*/g, "([a-zA-Z0-9\\*]+)").replace(/#/g, "\\*");
-		return new RegExp("^" + exp + "$");
-	}
-	
-	var ROOT_TOPIC = "**/**";
-	
-	function topicChain(chainTopic) {
-		if(!chainTopic) {
-			chainTopic = ROOT_TOPIC;
-		}
-		var chainTopicMatcher = pathMatcher(chainTopic);
-		var fns = chain();
-		var children = [];
-		var callChain = function(topic, args, queue) {
-			if(!topic) {
-				topic = chainTopic;
-			}
-			if(topic !== ROOT_TOPIC && !chainTopicMatcher.test(topic)) {
-				if(topic.indexOf("*") === -1 ||
-						!pathMatcher(topic).test(chainTopic)) {
-					return;
-				}
-				topic = ROOT_TOPIC;
-			}
-			var result = fns.apply(null, args);
-			if(fns.aborted) {
-				callChain.aborted = true;
-				return result;
-			}
-			if(!queue) {
-				queue = children.slice();
-			}
-			else {
-				for(var i = 0, l = children.length; i < l; i++) {
-					queue.push(children[i]);
-				}
-			}
-			while(queue.length) {
-				var child = queue.shift();
-				result = Hub.util.merge(result, child(topic, args, queue));
-				if(child.aborted) {
-					callChain.aborted = true;
-					break;
-				}
-			}
-			return result;
-		};
-		callChain.matches = function(topic) {
-			return chainTopicMatcher.test(topic);
-		};
-		callChain.getTopic = function() {
-			return chainTopic;
-		};
-		callChain.add = function(fn, topic, topicMatcher) {
-			if(chainTopic === topic) {
-				fns.add(fn);
-				return;
-			}
-			var newChild;
-			for(var i = 0, l = children.length; i < l; i++) {
-				var child = children[i];
-				if(child.matches(topic)) {
-					child.add(fn, topic, topicMatcher);
-					return;
-				}
-				if(!topicMatcher) {
-					topicMatcher = pathMatcher(topic);
-				}
-				if(topicMatcher.test(child.getTopic())) {
-					newChild = topicChain(topic);
-					newChild.addChild(child);
-					newChild.add(fn, topic, topicMatcher);
-					children[i] = newChild;
-					return;
-				}
-			}
-			newChild = topicChain(topic);
-			newChild.add(fn, topic);
-			if(topic.indexOf("*") === -1) {
-				children.unshift(newChild);
-			}
-			else {
-				for(var i = 0, l = children.length; i < l; i++) {
-					var childTopic = children[i].getTopic();
-					var result = Hub.topicComparator(childTopic, topic);
-					if(result !== -1) {
-						children.splice(i, 0, newChild);
-						return;
-					}
-				}
-				children.push(newChild);
-			}
-		};
-		callChain.addChild = function(child) {
-			children.unshift(child);
-		};
-		callChain.remove = function(fn, topic) {
-			if(chainTopic === topic) {
-				return fns.remove(fn);
-			}
-			for(var i = 0, l = children.length; i < l; i++) {
-				var child = children[i];
-				if(child.matches(topic)) {
-					if(child.remove(fn, topic)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		};
-		return callChain;
-	}
-	
 	/**
 	 * stops message propagation for the current call chain.
 	 */
@@ -243,8 +127,7 @@
 		}
 		return 0;
 	};
-
-	Hub.chain = chain;
-	Hub.topicChain = topicChain;
 	
+	Hub.chain = chain;
+
 }());
