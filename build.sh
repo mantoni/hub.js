@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# Copyright (c) 2011 Maximilian Antoni
+# Copyright 2011, Maximilian Antoni
+# Released under the MIT license:
+# https://github.com/mantoni/hub.js/raw/master/LICENSE
 #
 # Build script for hub.js.
 #

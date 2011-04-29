@@ -1,3 +1,8 @@
+/**
+ * Copyright 2011, Maximilian Antoni
+ * Released under the MIT license:
+ * https://github.com/mantoni/hub.js/raw/master/LICENSE
+ */
 /*
  * Test cases for Hub.aborted.
  */
