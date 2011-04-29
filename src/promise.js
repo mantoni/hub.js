@@ -37,12 +37,12 @@
 	}
 	
 	/**
-	 * called by a promises fulfill() and reject() methods if the promise was
-	 * already fulfilled. Publishes an error message on the hub.
+	 * called by a promises resolve() and reject() methods if the promise was
+	 * already resolved. Publishes an error message on the hub.
 	 */
-	function promiseAlreadyFulfilled() {
-		Hub.invoke("hub.error/promise.fulfilled", new Hub.Error("validation",
-			"Promise already fulfilled"));
+	function promiseAlreadyResolved() {
+		Hub.invoke("hub.error/promise.resolved", new Hub.Error("validation",
+			"Promise already resolved"));
 	}
 	
 	/**
@@ -61,12 +61,12 @@
 	/**
 	 * creates a new promise.
 	 *
-	 * @param {Boolean} fulfilled whether the promise is initially fulfilled.
+	 * @param {Boolean} resolved whether the promise is initially resolved.
 	 * @param {*} value the initial value.
 	 * @param {Number} timeout the optional timeout.
 	 * @return {Object} the new promise.
 	 */
-	function createPromise(fulfilled, value, timeout) {
+	function createPromise(resolved, value, timeout) {
 		var callbacks;
 		var errorCallbacks;
 		var timeout;
@@ -80,7 +80,7 @@
 			 * @return {Object} this promise.
 			 */
 			then: function(callback, errorCallback) {
-				if(fulfilled) {
+				if(resolved) {
 					var fn = success ? callback : errorCallback;
 					if(fn) {
 						invokePromiseCallback(fn, value);
@@ -107,7 +107,7 @@
 			 * @return {Object} this promise.
 			 */
 			publish: function(topic) {
-				if(fulfilled) {
+				if(resolved) {
 					value = Hub.invoke.apply(Hub, arguments);
 					return this;
 				}
@@ -130,7 +130,7 @@
 			 * @return {Object} this promise.
 			 */
 			publishResult: function(topic) {
-				if(fulfilled) {
+				if(resolved) {
 					value = Hub.invoke(topic, value);
 					return this;
 				}
@@ -144,12 +144,12 @@
 			 * @param {*} value the value.
 			 * @return {Object} this promise.
 			 */
-			fulfill: function(data) {
-				if(fulfilled) {
-					promiseAlreadyFulfilled();
+			resolve: function(data) {
+				if(resolved) {
+					promiseAlreadyResolved();
 				}
 				else {
-					fulfilled = true;
+					resolved = true;
 					clearTimeout(timeout);
 					value = Hub.merge(value, data);
 					while(callbacks.length) {
@@ -164,11 +164,11 @@
 			 * @return {Object} this promise.
 			 */
 			reject: function(error) {
-				if(fulfilled) {
-					promiseAlreadyFulfilled();
+				if(resolved) {
+					promiseAlreadyResolved();
 				}
 				else {
-					fulfilled = true;
+					resolved = true;
 					success = false;
 					clearTimeout(timeout);
 					while(errorCallbacks.length) {
@@ -179,13 +179,13 @@
 			},
 			
 			/**
-			 * @return {Boolean} whether this promise was fulfilled.
+			 * @return {Boolean} whether this promise was resolved.
 			 */
-			fulfilled: function() {
-				return fulfilled;
+			resolved: function() {
+				return resolved;
 			}
 		};
-		if(!fulfilled) {
+		if(!resolved) {
 			callbacks = [];
 			errorCallbacks = [];
 			timeout = setTimeout(promiseTimeout(p), timeout || 60000);
@@ -195,7 +195,7 @@
 	
 	/**
 	 * joins the given promises together in a new promise. This means the
-	 * returned promise is fulfilled if the given promises are fulfilled. If
+	 * returned promise is resolved if the given promises are resolved. If
 	 * both promises succeed then the returned promise succeeds as well with
 	 * the data ob the promises being merged. If one of the given promises
 	 * failes, then the returned promise fails as well with the data set to
@@ -212,12 +212,12 @@
 		var wrapper = createPromise(false);
 		var success = true;
 		/*
-		 * checks whether the promise is done and calls fulfill or reject on
+		 * checks whether the promise is done and calls resolve or reject on
 		 * the wrapper.
 		 */
 		function checkDone() {
 			if(++count === 2) {
-				(success ? wrapper.fulfill : wrapper.reject)(mergedData);
+				(success ? wrapper.resolve : wrapper.reject)(mergedData);
 			}
 		}
 		function onSuccess(data) {
@@ -250,6 +250,9 @@
 		return real;
 	}
 	
+	// The error thrown when trying to resolve an already resolved promise.
+	var promiseResolvedError = new Error("Hub - promise already resolved");
+	
 	/*
 	 * PromiseProxy is a lightweight object that creates the actual promise
 	 * on demand.
@@ -267,13 +270,13 @@
 			return replacePromiseProxy(this).publishResult.apply(
 				null, arguments);
 		},
-		fulfill: function() {
-			throw new Error("Hub - promise already fulfilled");
+		resolve: function() {
+			throw promiseResolvedError;
 		},
 		reject: function() {
-			throw new Error("Hub - promise already fulfilled");
+			throw promiseResolvedError;
 		},
-		fulfilled: function() {
+		resolved: function() {
 			return true;
 		}
 	};

@@ -23,7 +23,7 @@
 						"</form>";
 					var promise = Hub.promise();
 					document.forms[0].onsubmit = function() {
-						promise.fulfill(this.input.value);
+						promise.resolve(this.input.value);
 						return false;
 					};
 				}

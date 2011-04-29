@@ -9,7 +9,7 @@ AsyncTestCase("PublishTimeoutTest", {
 	
 	testSimpleTimeout: function(queue) {
 		Hub.subscribe("a/b", function() {
-			Hub.promise(10); // promise with small timeout, never fulfilled.
+			Hub.promise(10); // promise with small timeout, never resolved.
 		});
 		queue.call(function(pool) {
 			var time = new Date().getTime();

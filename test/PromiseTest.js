@@ -7,25 +7,25 @@ TestCase("PromiseTest", {
 		Hub.reset();
 	},
 	
-	"test fulfill promise": function() {
+	"test resolve promise": function() {
 		var fn = stubFn();
-		Hub.promise().then(fn).fulfill();
+		Hub.promise().then(fn).resolve();
 		assert(fn.called);
 	},
 	
 	"test promise queue": function() {
 		var chain = [];
-		// then-then-fulfill:
+		// then-then-resolve:
 		Hub.promise().then(function() {
 			chain.push("a")
 		}).then(function() {
 			chain.push("b")
-		}).fulfill();
+		}).resolve();
 		assertEquals("a,b", chain.join());
-		// then-fulfill-then:
+		// then-resolve-then:
 		Hub.promise().then(function() {
 			chain.push("c")
-		}).fulfill().then(function() {
+		}).resolve().then(function() {
 			chain.push("d")
 		});
 		assertEquals("a,b,c,d", chain.join());
@@ -49,7 +49,7 @@ TestCase("PromiseTest", {
 		});
 		Hub.promise().publish("test/promise").then(function() {
 			chain.push("b");
-		}).fulfill();
+		}).resolve();
 		assertEquals("a,b", chain.join());
 	},
 	
@@ -61,7 +61,7 @@ TestCase("PromiseTest", {
 		Hub.subscribe("test/other", function(arg) {
 			value = arg;
 		});
-		Hub.promise().publish("test/promise").publish("test/other").fulfill();
+		Hub.promise().publish("test/promise").publish("test/other").resolve();
 		assertUndefined(value);
 	},
 
@@ -77,7 +77,7 @@ TestCase("PromiseTest", {
 		assertEquals("Test", value);
 	},
 
-	"test return value is used as parameter on publishResult (explicit fulfill)": function() {
+	"test return value is used as parameter on publishResult (explicit resolve)": function() {
 		Hub.subscribe("test/promise", function() {
 			return "Test";
 		});
@@ -85,7 +85,7 @@ TestCase("PromiseTest", {
 		Hub.subscribe("test/other", function(arg) {
 			value = arg;
 		});
-		Hub.promise().publish("test/promise").publishResult("test/other").fulfill();
+		Hub.promise().publish("test/promise").publishResult("test/other").resolve();
 		assertEquals("Test", value);
 	},
 
@@ -100,7 +100,7 @@ TestCase("PromiseTest", {
 			});
 		}).then(function() {
 			chain.push("c");
-		}).fulfill();
+		}).resolve();
 		assertEquals("a,b,c", chain.join());
 	},
 	
@@ -156,7 +156,7 @@ TestCase("PromiseTest", {
 		assertEquals(["Check"], fn.args);
 	},
 	
-	"test joined promises fulfill #1 first": function() {
+	"test joined promises resolve #1 first": function() {
 		var p1, p2, done = false;
 		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();
@@ -170,20 +170,20 @@ TestCase("PromiseTest", {
 		assertFalse(p1 === p2);
 		assertFalse(p1 === p3);
 		assertFalse(p2 === p3);
-		assertFalse(p1.fulfilled());
-		assertFalse(p2.fulfilled());
+		assertFalse(p1.resolved());
+		assertFalse(p2.resolved());
 		assertFalse(done);
-		p1.fulfill();
-		assertTrue(p1.fulfilled());
-		assertFalse(p2.fulfilled());
+		p1.resolve();
+		assertTrue(p1.resolved());
+		assertFalse(p2.resolved());
 		assertFalse(done);
-		p2.fulfill();
-		assertTrue(p1.fulfilled());
-		assertTrue(p2.fulfilled());
+		p2.resolve();
+		assertTrue(p1.resolved());
+		assertTrue(p2.resolved());
 		assertTrue(done);
 	},
 
-	"test joined promises fulfill #2 first": function() {
+	"test joined promises resolve #2 first": function() {
 		var p1, p2, done = false;
 		Hub.subscribe("test/promise.a", function() {
 			p1 = Hub.promise();
@@ -197,16 +197,16 @@ TestCase("PromiseTest", {
 		assertFalse(p1 === p2);
 		assertFalse(p1 === p3);
 		assertFalse(p2 === p3);
-		assertFalse(p1.fulfilled());
-		assertFalse(p2.fulfilled());
+		assertFalse(p1.resolved());
+		assertFalse(p2.resolved());
 		assertFalse(done);
-		p2.fulfill();
-		assertFalse(p1.fulfilled());
-		assertTrue(p2.fulfilled());
+		p2.resolve();
+		assertFalse(p1.resolved());
+		assertTrue(p2.resolved());
 		assertFalse(done);
-		p1.fulfill();
-		assertTrue(p1.fulfilled());
-		assertTrue(p2.fulfilled());
+		p1.resolve();
+		assertTrue(p1.resolved());
+		assertTrue(p2.resolved());
 		assertTrue(done);
 	}
 	

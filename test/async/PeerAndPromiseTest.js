@@ -7,12 +7,12 @@ AsyncTestCase("PeerAndPromiseTest", {
 		Hub.reset();
 	},
 	
-	testDeferredFulfill: function(queue) {
+	"test deferred resolve": function(queue) {
 		Hub.peer("test", {
 			"defer": function() {
 				var promise = Hub.promise();
 				setTimeout(function() {
-					promise.fulfill("Tadaa!");
+					promise.resolve("Tadaa!");
 				}, 10);
 			}
 		});
@@ -24,12 +24,12 @@ AsyncTestCase("PeerAndPromiseTest", {
 		});
 	},
 	
-	testDeferredFulfillAndReturnValueMerge: function(queue) {
+	"test deferred resolve and return value merge": function(queue) {
 		Hub.peer("test", {
 			"defer": function() {
 				var promise = Hub.promise();
 				setTimeout(function() {
-					promise.fulfill(["Tadaa!"]);
+					promise.resolve(["Tadaa!"]);
 				}, 10);
 				return ["Deferred"];
 			}
