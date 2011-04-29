@@ -38,7 +38,7 @@
 	function validateCallback(fn) {
 		var fnType = typeof fn;
 		if(fnType !== "function") {
-			throw new Error("Callback is not function: " + fnType);
+			throw new Error("Callback is " + fnType);
 		}
 	}
 	

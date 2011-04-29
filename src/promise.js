@@ -320,20 +320,18 @@
 	 */
 	Hub.promise = function(timeout) {
 		var newPromise = createPromise(false, undefined, timeout);
-		if(promise === true) {
-			// This means we are not within a publish call.
-			return newPromise;
-		}
-		// This means we are within a publish call now.
 		if(promise === false) {
 			// This means we do not have a promise yet.
-			return promise = newPromise;
+			promise = newPromise;
 		}
-		/*
-		 * This means there is an existing promise already which we can join
-		 * with the new one.
-		 */
-		promise = joinPromises(promise, newPromise);
+		else if(promise !== true) {
+			/*
+			 * This means there is an existing promise already which we can
+			 * join with the new one.
+			 */
+			promise = joinPromises(promise, newPromise);
+		}
+		// Otherwise we can simply the new promise.
 		return newPromise;
 	};
 	

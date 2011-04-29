@@ -41,26 +41,28 @@
      * @return {Function} the chain function.
      */
     function chain() {
-        var fns = arguments.length ?
-			Array.prototype.slice.call(arguments) : [];
-		var iterator = false;
+		var iterator = Hub.iterator(arguments.length ?
+			Array.prototype.slice.call(arguments) : []);
 		function callChain() {
 			callChain.aborted = false;
-			if(!iteratorStack.length) {
+			var top = !iteratorStack.length;
+			if(top) {
 				aborted = false;
 				args = arguments;
 			}
 			result = undefined;
 			try {
-				iterator = Hub.iterator(fns);
 				iteratorStack.push(iterator);
 				while(next()) {
-					// Avoid "empty while" compiler warning.
+					// This comment avoids "empty while" compiler warning.
 				}
 			}
 			finally {
 				callChain.aborted = aborted;
-				iterator = false;
+				iterator.reset();
+				if(top) {
+					iteratorStack.length = 0;
+				}
 			}
 			if(!iteratorStack.length) {
 				var returnValue = result;
@@ -70,55 +72,10 @@
 			}
 		}
 		callChain.add = function(fn) {
-			if(iterator) {
-				iterator.insert(0, fn);
-			}
-			else {
-				fns.unshift(fn);
-			}
-			return callChain;
+			iterator.insert(0, fn);
 		};
-		callChain.insert = function(index, fn) {
-			if(iterator) {
-				iterator.insert(index, fn);
-			}
-			else {
-				fns.splice(index, 0, fn);
-			}
-			return callChain;
-		};
-		callChain.remove = function(fn) {
-			if(typeof fn === "number") {
-				if(iterator) {
-					iterator.remove(fn);
-				}
-				else {
-					fns.splice(fn, 1);
-				}
-				return fn;
-			}
-			for(var i = fns.length; i--;) {
-				if(fns[i] === fn) {
-					if(iterator) {
-						iterator.remove(i);
-					}
-					else {
-						fns.splice(i, 1);
-					}
-					return i;
-				}
-			}
-			return -1;
-		};
-		callChain.size = function() {
-			return fns.length;
-		};
-		callChain.get = function(index) {
-			if(index < 0 || index > fns.length) {
-				throw new Error("Index out of bounds");
-			}
-			return fns[index];
-		};
+		callChain.insert = iterator.insert;
+		callChain.remove = iterator.remove;
 		return callChain;
 	}
 	
@@ -221,26 +178,9 @@
 		callChain.addChild = function(child) {
 			children.unshift(child);
 		};
-		callChain.getChild = function(topic, topicMatcher) {
-			if(chainTopic === topic) {
-				return this;
-			}
-			if(!topicMatcher) {
-				topicMatcher = pathMatcher(topic);
-			}
-			if(topicMatcher.test(chainTopic)) {
-				return this;
-			}
-			for(var i = 0, l = children.length; i < l; i++) {
-				var result = children[i].getChild(topic, topicMatcher);
-				if(result) {
-					return result;
-				}
-			}
-		};
 		callChain.remove = function(fn, topic) {
 			if(chainTopic === topic) {
-				return fns.remove(fn) !== -1;
+				return fns.remove(fn);
 			}
 			for(var i = 0, l = children.length; i < l; i++) {
 				var child = children[i];

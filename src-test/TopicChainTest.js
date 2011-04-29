@@ -97,37 +97,6 @@ TestCase("TopicChainTest", {
 		chain();
 		assert(fn1.called);
 		assertFalse(fn2.called);
-	},
-	
-	"test implements getChild": function() {
-		assertFunction(Hub.topicChain().getChild);
-	},
-	
-	"test getChild with same topic as chain topic": function() {
-		var chain = Hub.topicChain("a/b");
-		assertSame(chain, chain.getChild("a/b"));
-	},
-	
-	"test chain returned by getChild does not invoke parent": function() {
-		var chain = Hub.topicChain();
-		var fn1 = stubFn();
-		var fn2 = stubFn();
-		chain.add(fn1, "a/*");
-		chain.add(fn2, "a/b");
-		var child = chain.getChild("a/b");
-		child();
-		assertFalse(fn1.called);
-		assert(fn2.called);
-	},
-	
-	"test getChain with undefined child topic": function() {
-		var chain = Hub.topicChain();
-		var fn = stubFn();
-		chain.add(fn, "a/b");
-		var child = chain.getChild("a/*");
-		assertFunction(child);
-		child();
-		assert(fn.called);
 	}
 	
 });

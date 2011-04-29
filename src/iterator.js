@@ -41,17 +41,35 @@ Hub.iterator = function(array) {
 	 * the element at that index is removed. Otherwise the element at the
 	 * internal cursor position is removed.
 	 *
-	 * @param {Number} index the optional index.
+	 * @param {*} object the optional object or index to remove.
 	 */
-	iterator.remove = function remove(i) {
-		if(typeof i === "undefined") {
-			i = index;
+	iterator.remove = function remove(object) {
+		var type = typeof object;
+		if(type === "undefined") {
+			object = index;
 		}
-		else if(i < index) {
-			index--;
+		else if(type === "number") {
+			if(object < index) {
+				index--;
+			}
 		}
-		array.splice(i, 1);
+		else {
+			for(var i = array.length - 1; i >= 0; i--) {
+				if(array[i] === object) {
+					object = i;
+					break;
+				}
+			}
+			if(i < 0) {
+				return false;
+			}
+		}
+		if(object >= length) {
+			return false;
+		}
+		array.splice(object, 1);
 		iterator.hasNext = index < --length;
+		return true;
 	};
 	
 	/**
@@ -72,6 +90,14 @@ Hub.iterator = function(array) {
 		}
 		array.splice(i, 0, element);
 		iterator.hasNext = index < ++length;
+	};
+	
+	/**
+	 * resets the iterator so that the internal cursor position is zero.
+	 */
+	iterator.reset = function() {
+		index = 0;
+		iterator.hasNext = index < length;
 	};
 	
 	return iterator;

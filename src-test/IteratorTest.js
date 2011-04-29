@@ -72,6 +72,24 @@ TestCase("IteratorTest", {
 		assertEquals([0, 1, 3], arr);
 	},
 	
+	"test remove with value": function() {
+		var arr = ["a", "b"];
+		Hub.iterator(arr).remove("b");
+		assertEquals(["a"], arr);
+	},
+	
+	"test remove returns true if found": function() {
+		assertTrue(Hub.iterator(["a"]).remove("a"));
+	},
+	
+	"test remove returns false if not found": function() {
+		assertFalse(Hub.iterator(["a"]).remove("b"));
+	},
+	
+	"test remove returns false if no next": function() {
+		assertFalse(Hub.iterator([]).remove());
+	},
+	
 	"test remove with current index": function() {
 		this.assertValueAfterRemove(1, 2);
 	},
@@ -148,6 +166,20 @@ TestCase("IteratorTest", {
 		i();
 		i.insert(2, 3);
 		assertEquals(1, i());
+	},
+	
+	"test implements reset": function() {
+		assertFunction(Hub.iterator([]).reset);
+	},
+	
+	"test points to first item after reset": function() {
+		var i = Hub.iterator([0, 1]);
+		i();
+		i();
+		assertFalse(i.hasNext);
+		i.reset();
+		assert(i.hasNext);
+		assertEquals(0, i());
 	}
 
-}); // IteratorTest
+});

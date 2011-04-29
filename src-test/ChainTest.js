@@ -6,7 +6,7 @@ TestCase("ChainTest", {
 	"test function exists": function() {
 		assertFunction(Hub.chain);
 	},
-
+	
 	"test function returns function": function() {
 		assertFunction(Hub.chain());
 	},
@@ -14,37 +14,11 @@ TestCase("ChainTest", {
 	"test chain implements add": function() {
 		assertFunction(Hub.chain().add);
 	},
-
-	"test add returns chain": function() {
-		var c = Hub.chain();
-		assertSame(c, c.add(stubFn()));
-	},
-
+	
 	"test chain implements insert": function() {
 		assertFunction(Hub.chain().insert);
 	},
-
-	"test insert returns chain": function() {
-		var c = Hub.chain();
-		assertSame(c, c.insert(0, stubFn()));
-	},
 	
-	"test chain implements get": function() {
-		assertFunction(Hub.chain().get);
-	},
-	
-	"test get return value": function() {
-		var c = Hub.chain();
-		c.add(function() {
-			return 2;
-		});
-		c.add(function() {
-			return 1;
-		});
-		assertEquals(1, c.get(0)());
-		assertEquals(2, c.get(1)());
-	},
-
 	"test chain call": function() {
 		var calls = [];
 		var f1 = function() {
@@ -132,35 +106,6 @@ TestCase("ChainTest", {
 		chain();
 		assertEquals(1, calls);
 		assertFalse(sf.called);
-	},
-	
-	"test chain implements size": function() {
-		assertFunction(Hub.chain().size);
-	},
-	
-	"test size initialized with zero": function() {
-		var chain = Hub.chain();
-		assertNotUndefined(chain.size());
-		assertEquals(0, chain.size());
-	},
-	
-	"test size reflects added function": function() {
-		var chain = Hub.chain();
-		chain.add(stubFn());
-		assertEquals(1, chain.size());
-	},
-	
-	"test size initialized with number of initial functions": function() {
-		var chain = Hub.chain(stubFn(), stubFn());
-		assertEquals(2, chain.size());
-	},
-	
-	"test size reflects removed functions": function() {
-		var fn = stubFn();
-		var chain = Hub.chain(fn);
-		assertEquals(1, chain.size());
-		chain.remove(fn);
-		assertEquals(0, chain.size());
 	}
 	
 });
