@@ -223,6 +223,6 @@
 		return Boolean(rootChain.aborted);
 	};
 	
-	Hub.topicChain = topicChain;
+	Hub.topicChain = topicChain; // exposed for unit testing only.
 	
 }());
