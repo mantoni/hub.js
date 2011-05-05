@@ -8,10 +8,6 @@
  */
 TestCase("TopicChainTest", {
 	
-	tearDown: function() {
-		Hub.reset();
-	},
-	
 	"test method exists": function() {
 		assertFunction(Hub.topicChain);
 	},
@@ -102,6 +98,15 @@ TestCase("TopicChainTest", {
 		chain();
 		assert(fn1.called);
 		assertFalse(fn2.called);
+	},
+	
+	"test scope is retained": function() {
+		var chain = Hub.topicChain();
+		var fn = stubFn();
+		chain.add(fn, "**/**");
+		var object = {};
+		chain.call(object);
+		assertSame(object, fn.scope);
 	}
 	
 });

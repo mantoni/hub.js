@@ -58,16 +58,18 @@
 	 * returns a function that publishes the given topic on the Hub and then
 	 * invokes the provided chain if the topic was not aborted on the Hub.
 	 */
-	function interceptor(topic, chain) {
+	function interceptor(topic, chain, scope) {
 		return function() {
 			var args = Array.prototype.slice.call(arguments);
 			var result = Hub.publish.apply(Hub, [topic].concat(args));
 			if(!Hub.aborted()) {
-				result = Hub.merge(result, chain.apply(null, arguments));
+				result = Hub.merge(result, chain.apply(scope, arguments));
 			}
 			return result;
 		};
 	}
+	
+	var createPeer;
 	
 	/*
 	 * returns a peer instance for the definition with the given topic.
@@ -83,27 +85,38 @@
 		}
 		peer = createPeer(definition);
 		var api = {};
-		for(var message in peer) {
-			var chain = peer[message];
-			if(typeof chain === "function") {
-				api[message] = interceptor(namespace + "/" + message, chain);
+		var message;
+		for(message in peer) {
+			if(peer.hasOwnProperty(message)) {
+				var chain = peer[message];
+				if(typeof chain === "function") {
+					var topic = namespace + "/" + message;
+					api[message] = interceptor(topic, chain, api);
+				}
 			}
 		}
 		peer.api = api;
 		return peer;
 	}
-
+	
 	/*
 	 * creates a peer for the peer definition with the given name.
 	 */
-	function createPeer(definition) {
+	createPeer = function createPeer(definition) {
 		var peer = {};
 		var is = definition.is;
-		for(var i = 0, mixin; mixin = is[i++];) {
-			mix(peer, getPeer(mixin));
+		var i, l;
+		for(i = 0, l = is.length; i < l; i++) {
+			mix(peer, getPeer(is[i]));
 		}
 		mix(peer, definition.instance || definition.factory());
 		return peer;
+	};
+	
+	function subscriber(chain, scope) {
+		return function() {
+			return chain.apply(scope, arguments);
+		};
 	}
 	
 	/**

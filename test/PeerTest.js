@@ -78,6 +78,15 @@ TestCase("PeerTest", {
 		Hub.publish("a.*/m");
 		// "y" first, because it was added last.
 		assertEquals("y,x", chain.join());
+	},
+	
+	"test scope is peer": function() {
+		var fn = stubFn();
+		Hub.peer("a", {
+			"b": fn
+		});
+		Hub.publish("a/b");
+		assertSame(Hub.get("a"), fn.scope);
 	}
 
 });

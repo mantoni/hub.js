@@ -19,14 +19,14 @@
 		return new RegExp("^" + exp + "$");
 	}
 	
-	function topicChain(chainTopic) {
+	function topicChain(chainTopic, firstChild) {
 		if(!chainTopic) {
 			chainTopic = rootTopic;
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var fns = Hub.chain();
-		var children = [];
-		var callChain = function(topic, args, queue) {
+		var children = firstChild ? [firstChild] : [];
+		function callChain(topic, args, queue) {
 			if(!topic) {
 				topic = chainTopic;
 			}
@@ -37,7 +37,8 @@
 				}
 				topic = rootTopic;
 			}
-			var result = fns.apply(null, args);
+			var result = args && args.length ?
+							fns.apply(this, args) : fns.call(this);
 			if(fns.aborted) {
 				callChain.aborted = true;
 				return result;
@@ -46,20 +47,22 @@
 				queue = children.slice();
 			}
 			else {
-				for(var i = 0, l = children.length; i < l; i++) {
+				var i, l;
+				for(i = 0, l = children.length; i < l; i++) {
 					queue.push(children[i]);
 				}
 			}
 			while(queue.length) {
 				var child = queue.shift();
-				result = Hub.merge(result, child(topic, args, queue));
+				var childResult = child.call(this, topic, args, queue);
+				result = Hub.merge(result, childResult);
 				if(child.aborted) {
 					callChain.aborted = true;
 					break;
 				}
 			}
 			return result;
-		};
+		}
 		callChain.matches = function(topic) {
 			return chainTopicMatcher.test(topic);
 		};
@@ -71,9 +74,9 @@
 				fns.add(fn);
 				return;
 			}
-			var newChild;
-			for(var i = 0, l = children.length; i < l; i++) {
-				var child = children[i];
+			var newChild, i, l, child;
+			for(i = 0, l = children.length; i < l; i++) {
+				child = children[i];
 				if(child.matches(topic)) {
 					child.add(fn, topic, topicMatcher);
 					return;
@@ -82,8 +85,7 @@
 					topicMatcher = pathMatcher(topic);
 				}
 				if(topicMatcher.test(child.getTopic())) {
-					newChild = topicChain(topic);
-					newChild.addChild(child);
+					newChild = topicChain(topic, child);
 					newChild.add(fn, topic, topicMatcher);
 					children[i] = newChild;
 					return;
@@ -95,7 +97,7 @@
 				children.unshift(newChild);
 			}
 			else {
-				for(var i = 0, l = children.length; i < l; i++) {
+				for(i = 0, l = children.length; i < l; i++) {
 					var childTopic = children[i].getTopic();
 					var result = Hub.topicComparator(childTopic, topic);
 					if(result !== -1) {
@@ -106,15 +108,13 @@
 				children.push(newChild);
 			}
 		};
-		callChain.addChild = function(child) {
-			children.unshift(child);
-		};
 		callChain.remove = function(fn, topic) {
 			if(chainTopic === topic) {
 				return fns.remove(fn);
 			}
-			for(var i = 0, l = children.length; i < l; i++) {
-				var child = children[i];
+			var i, l, child;
+			for(i = 0, l = children.length; i < l; i++) {
+				child = children[i];
 				if(child.matches(topic)) {
 					if(child.remove(fn, topic)) {
 						return true;
@@ -126,10 +126,11 @@
 		return callChain;
 	}
 	
+	// ensures the given argument is a valid topic. Throws an error otherwise.
 	function validateTopic(topic) {
 		var type = typeof topic;
 		if(type !== "string") {
-			throw new Error("Topic is not string: " + type);
+			throw new Error("Topic is " + type);
 		}
 		if(!topic) {
 			throw new Error("Topic is empty");
@@ -153,8 +154,10 @@
 	 * @type {Function}
 	 */
 	var rootChain = topicChain();
-
+	
 	// Public API:
+	
+	Hub.topicChain = topicChain; // exposed for unit testing only.
 	
 	/**
 	 * resets the Hub to it's initial state. Primarily required for unit
@@ -184,7 +187,7 @@
 	 * @param {string} topic the topic.
 	 * @param {function(object)} fn the callback function.
 	 * @return {Boolean} false if the callback was not registered, otherwise
-	 * 				true.
+	 *			true.
 	 */
 	Hub.unsubscribe = function(topic, fn) {
 		validateCallback(fn);
@@ -225,7 +228,5 @@
 	Hub.aborted = function() {
 		return Boolean(rootChain.aborted);
 	};
-	
-	Hub.topicChain = topicChain; // exposed for unit testing only.
 	
 }());

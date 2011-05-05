@@ -111,6 +111,15 @@ TestCase("ChainTest", {
 		chain();
 		assertEquals(1, calls);
 		assertFalse(sf.called);
+	},
+	
+	"test scope is retained": function() {
+		var fn = stubFn();
+		var chain = Hub.chain();
+		chain.add(fn);
+		var object = {};
+		chain.call(object);
+		assertSame(object, fn.scope);
 	}
 	
 });

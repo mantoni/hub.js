@@ -12,6 +12,7 @@
 (function() {
 	
 	var aborted = false;
+	var scope;
 	var args;
 	var result;
 	var iteratorStack = [];
@@ -26,7 +27,7 @@
 			iteratorStack.pop();
 			return next();
 		}
-		result = Hub.merge(result, iterator().apply(null, args));
+		result = Hub.merge(result, iterator().apply(scope, args));
 		return true;
 	}
 	
@@ -52,12 +53,16 @@
 				aborted = false;
 				args = arguments;
 			}
+			var previousScope = scope;
+			scope = this;
 			result = undefined;
 			try {
 				iteratorStack.push(iterator);
-				while(next()) {
-					// This comment avoids "empty while" compiler warning.
+				var running = true;
+				do {
+					running = next();
 				}
+				while(running);
 			}
 			finally {
 				callChain.aborted = aborted;
@@ -65,11 +70,13 @@
 				if(top) {
 					iteratorStack.length = 0;
 				}
+				scope = previousScope;
 			}
 			if(!iteratorStack.length) {
 				var returnValue = result;
 				result = undefined;
 				args = undefined;
+				scope = undefined;
 				return returnValue;
 			}
 		}
