@@ -1,3 +1,5 @@
+/*jslint undef: true*/
+/*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -44,8 +46,11 @@
 	 * applies a mix-in to a peer.
 	 */
 	function mix(peer, mixin) {
-		for(var message in mixin) {
-			apply(peer, message, mixin[message]);
+		var message;
+		for(message in mixin) {
+			if(mixin.hasOwnProperty(message)) {
+				apply(peer, message, mixin[message]);
+			}
 		}
 	}
 	
@@ -137,12 +142,15 @@
 			definition.instance = factory;
 			var peer = peers[namespace] = createPeer(definition);
 			var api = peer.api = {};
-			for(var message in peer) {
-				var chain = peer[message];
-				if(typeof chain === "function") {
-					var topic = namespace + "/" + message;
-					Hub.subscribe(topic, chain);
-					api[message] = Hub.publisher(topic);
+			var message;
+			for(message in peer) {
+				if(peer.hasOwnProperty(message)) {
+					var chain = peer[message];
+					if(typeof chain === "function") {
+						var topic = namespace + "/" + message;
+						Hub.subscribe(topic, subscriber(chain, api));
+						api[message] = Hub.publisher(topic);
+					}
 				}
 			}
 		}
@@ -169,9 +177,12 @@
 	
 	Hub.resetPeers = function() {
 		peers = {};
-		for(var k in definitions) {
-			if(k.indexOf("lib.") === -1) {
-				delete definitions[k];
+		var k;
+		for(k in definitions) {
+			if(definitions.hasOwnProperty(k)) {
+				if(k.indexOf("lib.") === -1) {
+					delete definitions[k];
+				}
 			}
 		}
 	};

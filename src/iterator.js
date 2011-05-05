@@ -1,3 +1,5 @@
+/*jslint undef: true*/
+/*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -28,7 +30,7 @@ Hub.iterator = function(array) {
 		var item = array[index++];
 		iterator.hasNext = index < length;
 		return item;
-	};
+	}
 	/**
 	 * indicated whether more elements are available for iteration.
 	 *
@@ -45,6 +47,7 @@ Hub.iterator = function(array) {
 	 */
 	iterator.remove = function remove(object) {
 		var type = typeof object;
+		var i;
 		if(type === "undefined") {
 			object = index;
 		}
@@ -54,7 +57,7 @@ Hub.iterator = function(array) {
 			}
 		}
 		else {
-			for(var i = array.length - 1; i >= 0; i--) {
+			for(i = array.length - 1; i >= 0; i--) {
 				if(array[i] === object) {
 					object = i;
 					break;

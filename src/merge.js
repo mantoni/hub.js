@@ -1,3 +1,5 @@
+/*jslint undef: true*/
+/*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -21,10 +23,13 @@ Hub.merge = function(target, source) {
 	var toString = Object.prototype.toString;
 	var sourceType = toString.call(source);
 	var targetType = toString.call(target);
+	var k;
 	if(targetType === sourceType) {
 		if(sourceType === "[object Object]") {
-			for(var k in source) {
-				target[k] = arguments.callee(target[k], source[k]);
+			for(k in source) {
+				if(source.hasOwnProperty(k)) {
+					target[k] = Hub.merge(target[k], source[k]);
+				}
 			}
 			return target;
 		}

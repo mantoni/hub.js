@@ -1,3 +1,5 @@
+/*jslint undef: true*/
+/*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -12,24 +14,31 @@
  * @param {String} alias the alias for the topic.
  * @param {String} topic the topic.
  * @param {Function} dataTransformer the optional function to transform
- * 			the data on the callback
+ *			the data on the callback
  * @param {Object} dataToMerge the optional data to merge with the data
- * 			on the callback.
+ *			on the callback.
  */
-Hub.forward = function(alias, topic, dataTransformer, dataToMerge) {
-	if(typeof alias === "object") {
-		for(var k in alias) {
-			var t = alias[k];
-			if(typeof t === "string") {
-				Hub.subscribe(k, Hub.publisher(t));
-			}
-			else {
-				Hub.subscribe(k, Hub.publisher(t[0], t[1], t[2]));
+(function() {
+	var publisher = Hub.publisher;
+	var subscribe = Hub.subscribe;
+	
+	Hub.forward = function(alias, topic, dataTransformer, dataToMerge) {
+		if(typeof alias === "object") {
+			var k, t;
+			for(k in alias) {
+				if(alias.hasOwnProperty(k)) {
+					t = alias[k];
+					if(typeof t === "string") {
+						subscribe(k, publisher(t));
+					}
+					else {
+						subscribe(k, publisher(t[0], t[1], t[2]));
+					}
+				}
 			}
 		}
-	}
-	else {
-		Hub.subscribe(alias, Hub.publisher(topic, dataTransformer,
-				dataToMerge));
-	}
-};
+		else {
+			subscribe(alias, publisher(topic, dataTransformer, dataToMerge));
+		}
+	};
+}());

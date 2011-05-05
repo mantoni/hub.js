@@ -1,3 +1,5 @@
+/*jslint undef: true*/
+/*global Hub, clearTimeout, setTimeout*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
