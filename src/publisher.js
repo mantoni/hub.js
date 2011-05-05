@@ -11,49 +11,56 @@
  * 
  * @param {String} topic the topic´to publish.
  * @param {Function} dataTransformer the optional function to transform the
- * 			data on the callback
+ *			data on the callback
  * @param {Object} dataToMerge the optional data to merge with the data on the
- * 			callback
+ *			callback
  * @return {Function} the forwarder function
  */
-Hub.publisher = function(topic, dataTransformer, dataToMerge) {
-	if(typeof topic === "string") {
-		if(dataTransformer) {
-			if(dataToMerge) {
-				return function() {
-					return Hub.publish(topic, Hub.merge(
-						dataTransformer.apply(null, arguments), dataToMerge));
+(function() {
+	var publish = Hub.publish;
+	var merge = Hub.merge;
+	
+	Hub.publisher = function(topic, dataTransformer, dataToMerge) {
+		if(typeof topic === "string") {
+			if(dataTransformer) {
+				if(dataToMerge) {
+					return function() {
+						return publish(topic, merge(dataTransformer.apply(
+							null, arguments), dataToMerge));
+					};
 				}
-			}
-			if(typeof dataTransformer === "function") {
-				return function() {
-					return Hub.publish(topic,
-						dataTransformer.apply(null, arguments));
+				if(typeof dataTransformer === "function") {
+					return function() {
+						return publish(topic,
+							dataTransformer.apply(null, arguments));
+					};
 				}
+				return function(data) {
+					return publish(topic, merge(data, dataTransformer));
+				};
 			}
-			return function(data) {
-				return Hub.publish(topic,
-					Hub.merge(data, dataTransformer));
+			return function() {
+				if(arguments.length) {
+					return publish.apply(Hub, [topic].concat(
+						Array.prototype.slice.call(arguments)));
+				}
+				return publish(topic);
 			};
 		}
-		return function() {
-			if(arguments.length) {
-				return Hub.publish.apply(Hub, [topic].concat(
-					Array.prototype.slice.call(arguments)));
+		var api = Hub.chain();
+		var key;
+		for(key in topic) {
+			if(topic.hasOwnProperty(key)) {
+				var value = topic[key];
+				if(typeof value === "string") {
+					api[key] = Hub.publisher(value);
+				}
+				else {
+					api[key] = Hub.publisher.apply(Hub, value);
+				}
+				api.add(api[key]);
 			}
-			return Hub.publish(topic);
-		};
-	}
-	var api = Hub.chain();
-	for(var key in topic) {
-		var value = topic[key];
-		if(typeof value === "string") {
-			api[key] = Hub.publisher(value);
 		}
-		else {
-			api[key] = Hub.publisher.apply(Hub, value);
-		}
-		api.add(api[key]);
-	}
-	return api;
-};
+		return api;
+	};
+}());

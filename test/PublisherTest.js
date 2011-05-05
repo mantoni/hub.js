@@ -88,7 +88,7 @@ TestCase("PublisherTest", {
 	"test create api": function() {
 		var api = Hub.publisher({
 			ab: "a/b",
-			xy: "x/y",
+			xy: "x/y"
 		});
 		assertFunction(api);
 		assertFunction(api.ab);

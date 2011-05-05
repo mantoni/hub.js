@@ -16,13 +16,14 @@
  */
 Hub.resolve = function(object, path, defaultValue) {
 	var p = path.indexOf(".");
-	if(p !== -1) {
+	while(p !== -1) {
 		var key = path.substring(0, p);
-		if(key in object) {
-			return arguments.callee(object[key],
-				path.substring(p + 1), defaultValue);
+		if(!object.hasOwnProperty(key)) {
+			return defaultValue;
 		}
-		return defaultValue;
+		object = object[key];
+		path = path.substring(p + 1);
+		p = path.indexOf(".");
 	}
-	return path in object ? object[path] : defaultValue;
+	return object.hasOwnProperty(path) ? object[path] : defaultValue;
 };

@@ -8,10 +8,6 @@
  */
 TestCase("TopicComparatorTest", {
 	
-	tearDown: function() {
-		Hub.reset();
-	},
-	
 	"test method exists": function() {
 		assertFunction(Hub.topicComparator);
 	},
