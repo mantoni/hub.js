@@ -1,14 +1,10 @@
 hub.js
 ======
 
-Tools:
-------
-
-* [JsTestDriver](http://code.google.com/p/js-test-driver/)
-* [Closure Compiler](http://code.google.com/closure/compiler/)
-
 Running the JsTestDriver test cases:
 ------------------------------------
+
+The build script downloads required tools into the lib folder.
 
 1. Start the test server:
 
@@ -27,6 +23,20 @@ Compiling with Closure compiler:
     ./build.sh compile
 
 
+JSLint checks:
+--------------
+
+    ./build.sh lint
+
+
+Running it all:
+---------------
+
+    ./build.sh all
+
+Runs all tests, JSLint checks, compile and run tests on compiled file again.
+
+
 Tip for TextMate users:
 -----------------------
 
@@ -41,3 +51,6 @@ Links:
 ------
 
 * [Google Group](http://groups.google.com/group/hub-js)
+* [JsTestDriver](http://code.google.com/p/js-test-driver/)
+* [Closure Compiler](http://code.google.com/closure/compiler/)
+* [Node-JSLint](https://github.com/reid/node-jslint)

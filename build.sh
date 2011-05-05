@@ -31,6 +31,10 @@ CC_DOWNLOAD="http://closure-compiler.googlecode.com/files/$CC_TAR"
 JSTD_FILENAME="JsTestDriver-$JSTD_VERSION.jar"
 JSTD_DOWNLOAD="http://js-test-driver.googlecode.com/files/$JSTD_FILENAME"
 
+JSTD_CONFIG="jsTestDriver.conf"
+
+SOURCE_FILES="src/head.js src/merge.js src/resolve.js src/substitute.js src/error.js src/iterator.js src/chain.js src/peer.js src/pubsub.js src/promise.js src/publisher.js src/forward.js"
+
 download() {
 	if [ ! -e lib ]; then
 		mkdir lib
@@ -85,10 +89,32 @@ usage() {
 	echo "Usage: build.sh [compile | test | ct | start | stop ]"
 }
 
+lint() {
+	echo -n "Running JSLint checks ... "
+	LINT_OK=0
+	LINT_OPT="--node false"
+	for SOURCE_FILE in $SOURCE_FILES
+	do
+		LINT_RESULT=`jslint $LINT_OPT $SOURCE_FILE | sed -n -e '4,100p'`
+		if [ "$LINT_RESULT" != "No errors found." ]; then
+			echo
+			echo ${SOURCE_FILE:4}
+			echo "$LINT_RESULT"
+			LINT_OK=1
+		fi
+	done
+	if [ $LINT_OK -eq 0 ]; then
+		echo "OK"
+	else
+		echo
+	fi
+}
+
 compile() {
 	check_cc
 	echo -n "Compiling hub-$HUB_VERSION.js ... "
-	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js src/head.js --js src/merge.js --js src/resolve.js --js src/substitute.js --js src/error.js --js src/iterator.js --js src/chain.js --js src/peer.js --js src/pubsub.js --js src/promise.js --js src/publisher.js --js src/forward.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
+	cat $SOURCE_FILES > dist/hub.js
+	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js dist/hub.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -111,7 +137,7 @@ JsTestDriver server not running. Do this:
 	if [ $1 ]; then
 		TEST_CASE="$1"
 	fi
-	java -jar lib/$JSTD_FILENAME --tests $TEST_CASE
+	java -jar lib/$JSTD_FILENAME --config $JSTD_CONFIG --tests $TEST_CASE
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -163,9 +189,22 @@ case "$1" in
 	"test" | "t" )
 		test $2
 	;;
+	"lint" | "l" )
+		lint
+	;;
 	"ct" )
-		compile
 		test
+		compile
+	;;
+	"all" | "a" )
+		test
+		if [ ! -z `type -P jslint` ]; then
+			lint
+		fi
+		compile
+		cp dist/hub-$HUB_VERSION.js dist/hub.js
+		JSTD_CONFIG="jsTestDriverDist.conf"
+		test # run tests on dist/hub.js again
 	;;
 	"start" )
 		start
