@@ -90,7 +90,8 @@ TestCase("PromiseTest", {
 		Hub.subscribe("test/other", function(arg) {
 			value = arg;
 		});
-		Hub.promise().publish("test/promise").publishResult("test/other").resolve();
+		Hub.promise().publish("test/promise").publishResult(
+			"test/other").resolve();
 		assertEquals("Test", value);
 	},
 
@@ -213,6 +214,60 @@ TestCase("PromiseTest", {
 		assertTrue(p1.resolved());
 		assertTrue(p2.resolved());
 		assertTrue(done);
+	},
+	
+	"test should implement join": function() {
+		assertFunction(Hub.promise().join);
+	},
+	
+	"test join two resolve arguments": function() {
+		var p1 = Hub.promise();
+		var p2 = Hub.promise();
+		var fn = stubFn();
+		p1.join(p2).then(fn);
+		p2.resolve("b");
+		p1.resolve("a");
+		assert(fn.called);
+		assertEquals({0: "a", 1: "b"}, fn.args);
+	},
+	
+	"test join three resolve arguments": function() {
+		var p1 = Hub.promise();
+		var p2 = Hub.promise();
+		var p3 = Hub.promise();
+		var fn = stubFn();
+		p1.join(p2).join(p3).then(fn);
+		p1.resolve("a");
+		p3.resolve("c");
+		p2.resolve("b");
+		assert(fn.called);
+		assertEquals({0: "a", 1: "b", 2: "c"}, fn.args);
+	},
+	
+	"test join promise proxy": function() {
+		Hub.subscribe("a/b", stubFn());
+		Hub.subscribe("a/c", stubFn());
+		var fn = stubFn();
+		Hub.publish("a/b").join(Hub.publish("a/c")).then(fn);
+		assert(fn.called);
+	},
+	
+	"test join resolved": function() {
+		var p1 = Hub.promise();
+		p1.resolve("test");
+		var p2 = Hub.promise();
+		var fn = stubFn();
+		p1.join(p2).then(fn);
+		p2.resolve("case");
+		assert(fn.called);
+		assertEquals({0: "test", 1: "case"}, fn.args);
+	},
+	
+	"test then return value stored as promise value": function() {
+		var p1 = Hub.promise().resolve();
+		var fn = stubFn();
+		p1.then(stubFn("test")).then(fn);
+		assertEquals({0: "test"}, fn.args);
 	}
 	
 });

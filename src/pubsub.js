@@ -163,6 +163,7 @@
 	Hub.reset = function() {
 		rootChain = topicChain();
 		Hub.resetPeers();
+		Hub.resetPromise();
 	};
 	
 	/**

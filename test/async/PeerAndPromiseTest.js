@@ -34,16 +34,16 @@ AsyncTestCase("PeerAndPromiseTest", {
 			"defer": function() {
 				var promise = Hub.promise();
 				setTimeout(function() {
-					promise.resolve(["Tadaa!"]);
+					promise.resolve("Deferred");
 				}, 10);
-				return ["Deferred"];
+				return "Tadaa!";
 			}
 		});
 		
 		queue.call(function(pool) {
-			Hub.publish("test/defer").then(pool.add(function(value) {
-				assertArray(value);
-				assertEquals("Deferred Tadaa!", value.join(" "));
+			Hub.publish("test/defer").then(pool.add(function(value1, value2) {
+				assertEquals("Deferred", value1);
+				assertEquals("Tadaa!", value2);
 			}));
 		});
 	}

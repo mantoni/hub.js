@@ -17,7 +17,12 @@
 	 * @type {object}
 	 */
 	var promise = true;
-		
+	
+	var array_proto = Array.prototype;
+	var array_unshift = array_proto.unshift;
+	var array_push = array_proto.push;
+	var array_slice = array_proto.slice;
+
 	/*
 	 * invoke the given callback and pass in the data. If an error occurs
 	 * during execution, an error message is published on the hub. Used by
@@ -26,16 +31,29 @@
 	 * @param {Function} callback the callback function.
 	 * @param {*} value the value to pass to the callback.
 	 */
-	function invokePromiseCallback(callback, value) {
+	function invokePromiseCallback(callback, args, returnArgs) {
+		var result;
 		try {
-			callback(value);
+			result = callback.apply(null, args);
 		}
 		catch(e) {
 			Hub.invoke("hub.error/promise.callback", new Hub.Error("error",
 				"Error in promise callback: ${error}", {
 					error: e.message
 				}));
+			return; // TODO test case for whether return args; makes sense
 		}
+		if(!returnArgs) {
+			return;
+		}
+		if(result === undefined) {
+			return args; // retain previous arguments. TODO test case
+		}
+		// TODO test case for this:
+		/*if(Object.prototype.toString.call(result) === "[object Array]") {
+			return result;
+		}*/
+		return [result];
 	}
 	
 	/**
@@ -60,6 +78,8 @@
 		};
 	}
 	
+	var joinPromises;
+	
 	/**
 	 * creates a new promise.
 	 *
@@ -71,8 +91,8 @@
 	function createPromise(resolved, value, timeout) {
 		var callbacks;
 		var errorCallbacks;
-		var timeout;
 		var success = !(value instanceof Hub.Error);
+		var args = value === undefined ? [] : [value];
 		var p;
 		// Public API:
 		p = {
@@ -85,7 +105,7 @@
 				if(resolved) {
 					var fn = success ? callback : errorCallback;
 					if(fn) {
-						invokePromiseCallback(fn, value);
+						args = invokePromiseCallback(fn, args, true);
 					}
 				}
 				else {
@@ -110,15 +130,12 @@
 			 */
 			publish: function(topic) {
 				if(resolved) {
-					value = Hub.invoke.apply(Hub, arguments);
+					args = [Hub.invoke.apply(Hub, arguments)];
 					return this;
 				}
-				var args = [topic];
-				if(arguments.length > 1) {
-					args = args.concat(arguments);
-				}
+				var callArgs = array_slice.call(arguments);
 				return this.then(function() {
-					value = Hub.invoke.apply(Hub, args);
+					args = [Hub.invoke.apply(Hub, callArgs)];
 					// A return value would be meaningless here.
 				});
 			},
@@ -133,29 +150,31 @@
 			 */
 			publishResult: function(topic) {
 				if(resolved) {
-					value = Hub.invoke(topic, value);
+					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
 					return this;
 				}
 				return this.then(function() {
-					value = Hub.invoke(topic, value);
+					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
 					// A return value would be meaningless here.
 				});
 			},
 			
 			/**
-			 * @param {*} value the value.
+			 * @param {...*} args the results.
 			 * @return {Object} this promise.
 			 */
-			resolve: function(data) {
+			resolve: function() {
 				if(resolved) {
 					promiseAlreadyResolved();
 				}
 				else {
 					resolved = true;
 					clearTimeout(timeout);
-					value = Hub.merge(value, data);
+					if(arguments.length !== 0) {
+						args = array_slice.call(arguments);
+					}
 					while(callbacks.length) {
-						invokePromiseCallback(callbacks.shift(), value);
+						invokePromiseCallback(callbacks.shift(), args);
 					}
 				}
 				return this;
@@ -174,7 +193,8 @@
 					success = false;
 					clearTimeout(timeout);
 					while(errorCallbacks.length) {
-						invokePromiseCallback(errorCallbacks.shift(), error);
+						var callback = errorCallbacks.shift();
+						invokePromiseCallback(callback, [error]);
 					}
 				}
 				return this;
@@ -185,7 +205,12 @@
 			 */
 			resolved: function() {
 				return resolved;
+			},
+			
+			join: function(joinPromise) {
+				return joinPromises(p, joinPromise);
 			}
+			
 		};
 		if(!resolved) {
 			callbacks = [];
@@ -208,8 +233,8 @@
 	 * @param {Object} p2 the second promise
 	 * @return {Object} the joined promise
 	 */
-	function joinPromises(p1, p2) {
-		var mergedData;
+	joinPromises = function joinPromises(p1, p2) {
+		var results = [];
 		var count = 0;
 		var wrapper = createPromise(false);
 		var success = true;
@@ -219,29 +244,28 @@
 		 */
 		function checkDone() {
 			if(++count === 2) {
-				(success ? wrapper.resolve : wrapper.reject)(mergedData);
+				(success ? wrapper.resolve : wrapper.reject).apply(
+					null, results);
 			}
 		}
-		function onSuccess(data) {
-			if(success) {
-				mergedData = Hub.merge(mergedData, data);
-			}
+		p1.then(function() {
+			array_unshift.apply(results, arguments);
 			checkDone();
-		}
-		function onError(data) {
-			if(success) {
-				success = false;
-				mergedData = data;
-			}
-			else {
-				mergedData = Hub.merge(mergedData, data);
-			}
+		}, function() {
+			array_unshift.apply(results, arguments);
+			success = false;
 			checkDone();
-		}
-		p1.then(onSuccess, onError);
-		p2.then(onSuccess, onError);
+		});
+		p2.then(function() {
+			array_push.apply(results, arguments);
+			checkDone();
+		}, function(result) {
+			array_push.apply(results, arguments);
+			success = false;
+			checkDone();
+		});
 		return wrapper;
-	}
+	};
 	
 	// Helper function to replace the given proxy with a new promise.
 	function replacePromiseProxy(proxy) {
@@ -280,6 +304,9 @@
 		},
 		resolved: function() {
 			return true;
+		},
+		join: function(promise) {
+			return replacePromiseProxy(this).join(promise);
 		}
 	};
 	
@@ -338,6 +365,13 @@
 		}
 		// Otherwise we can simply the new promise.
 		return newPromise;
+	};
+	
+	Hub.resetPromise = function() {
+		if(typeof promise !== "boolean") {
+			promise.reject();
+		}
+		promise = true;
 	};
 	
 }());
