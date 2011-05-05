@@ -10,6 +10,8 @@
 # - compile | c: compile source files using Google Closure compiler
 # - test | t: run test cases with JsTestDriver
 # - ct: combined compile and test
+# - lint: run JSLint
+# - all: combined test, JSLint, compile and test of compiled version
 # - start: start the JsTestDriver server
 # - stop: stop the JsTestDriver server
 #
@@ -86,7 +88,7 @@ Missing JsTestDriver - Downloading to lib/$JSTD_FILENAME
 }
 
 usage() {
-	echo "Usage: build.sh [compile | test | ct | start | stop ]"
+	echo "Usage: build.sh [compile | test | ct | lint | all | start | stop ]"
 }
 
 lint() {
