@@ -23,7 +23,10 @@ HUB_VERSION="0.1-SNAPSHOT"
 CC_VERSION="20110119"
 
 # JsTestDriver version:
-JSTD_VERSION="1.3.1"
+JSTD_VERSION="1.3.2"
+
+# Coverage version:
+COVERAGE_VERSION=$JSTD_VERSION
 
 
 CC_FILENAME="compiler-$CC_VERSION.jar"
@@ -32,8 +35,11 @@ CC_DOWNLOAD="http://closure-compiler.googlecode.com/files/$CC_TAR"
 
 JSTD_FILENAME="JsTestDriver-$JSTD_VERSION.jar"
 JSTD_DOWNLOAD="http://js-test-driver.googlecode.com/files/$JSTD_FILENAME"
-
 JSTD_CONFIG="jsTestDriver.conf"
+
+COVERAGE_FILENAME="coverage-$COVERAGE_VERSION.jar"
+COVERAGE_DOWNLOAD="http://js-test-driver.googlecode.com/files/$COVERAGE_FILENAME"
+COVERAGE_CONFIG=".jstd-coverage.conf"
 
 SOURCE_FILES="src/head.js src/merge.js src/resolve.js src/substitute.js src/error.js src/iterator.js src/chain.js src/peer.js src/pubsub.js src/promise.js src/publisher.js src/forward.js"
 
@@ -84,6 +90,16 @@ check_jstd() {
 Missing JsTestDriver - Downloading to lib/$JSTD_FILENAME
 "
 		download $JSTD_FILENAME $JSTD_DOWNLOAD
+	fi
+}
+
+check_coverage() {
+	check_jstd
+	if [ ! -e lib/$COVERAGE_FILENAME ]; then
+		echo "
+Missing JsTestDriver Coverage Plugin - Downloading to lib/$COVERAGE_FILENAME
+"
+		download $COVERAGE_FILENAME $COVERAGE_DOWNLOAD
 	fi
 }
 
@@ -145,6 +161,29 @@ JsTestDriver server not running. Do this:
 	fi
 }
 
+coverage() {
+	#
+	# TODO JSTD runner is automatically reset if new config file is specified,
+	# but still coverage does not work. Server needs to be started with the
+	# plugin configuration in place.
+	#
+	# The need for all this would go away with resolution of issue 75:
+	# http://code.google.com/p/js-test-driver/issues/detail?id=75
+	#
+	check_coverage
+	cp $JSTD_CONFIG $COVERAGE_CONFIG
+	echo "
+plugin:
+  - name: \"coverage\"
+    jar: \"lib/$COVERAGE_FILENAME\"
+    module: \"com.google.jstestdriver.coverage.CoverageModule\"
+" >> $COVERAGE_CONFIG
+	cp dist/hub-$HUB_VERSION.js dist/hub.js
+	JSTD_CONFIG="$COVERAGE_CONFIG"
+	test
+	rm "$COVERAGE_CONFIG"
+}
+
 start() {
 	check_jstd
 	find_server_process
@@ -198,8 +237,11 @@ case "$1" in
 		test
 		compile
 	;;
+	"coverage" )
+		coverage
+	;;
 	"all" | "a" )
-		test
+		test # should be coverage, but does not work as expected.
 		if [ ! -z `type -P jslint` ]; then
 			lint
 		fi
