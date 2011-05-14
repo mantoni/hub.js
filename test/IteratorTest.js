@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -21,7 +26,7 @@ TestCase("IteratorTest", {
 	},
 	
 	"test hasNext is true for array with one element": function() {
-		assertTrue(Hub.iterator([null]).hasNext);
+		assert(Hub.iterator([null]).hasNext);
 	},
 	
 	"test throws error if no argument": function() {
@@ -84,7 +89,7 @@ TestCase("IteratorTest", {
 	},
 	
 	"test remove returns true if found": function() {
-		assertTrue(Hub.iterator(["a"]).remove("a"));
+		assert(Hub.iterator(["a"]).remove("a"));
 	},
 	
 	"test remove returns false if not found": function() {
@@ -123,7 +128,7 @@ TestCase("IteratorTest", {
 	"test insert changes hasNext to true": function() {
 		var i = Hub.iterator([]);
 		i.insert({});
-		assertTrue(i.hasNext);
+		assert(i.hasNext);
 	},
 	
 	"test inserted item is returned": function() {

@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -19,7 +24,7 @@ TestCase("UnsubscribeTest", {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
-		assertTrue(fn.called);
+		assert(fn.called);
 		fn.called = false;
 		Hub.unsubscribe("x/y", fn);
 		Hub.publish("x/y");
@@ -133,7 +138,7 @@ TestCase("UnsubscribeTest", {
 		Hub.publish("x/y");
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
-		assertTrue(fn.called);
+		assert(fn.called);
 		fn.called = false;
 		Hub.unsubscribe("x/y", fn);
 		Hub.publish("x/y");
@@ -144,7 +149,7 @@ TestCase("UnsubscribeTest", {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/*");
-		assertTrue(fn.called);
+		assert(fn.called);
 		fn.called = false;
 		Hub.unsubscribe("x/y", fn);
 		Hub.publish("x/*");
@@ -172,7 +177,7 @@ TestCase("UnsubscribeTest", {
 	"test unsubscribe returns true on success": function() {
 		var fn = function() {};
 		Hub.subscribe("x/y", fn);
-		assertTrue(Hub.unsubscribe("x/y", fn));
+		assert(Hub.unsubscribe("x/y", fn));
 	},
 	
 	"test unsubscribe returns false on failure": function() {

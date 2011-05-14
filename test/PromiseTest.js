@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -22,16 +27,16 @@ TestCase("PromiseTest", {
 		var chain = [];
 		// then-then-resolve:
 		Hub.promise().then(function() {
-			chain.push("a")
+			chain.push("a");
 		}).then(function() {
-			chain.push("b")
+			chain.push("b");
 		}).resolve();
 		assertEquals("a,b", chain.join());
 		// then-resolve-then:
 		Hub.promise().then(function() {
-			chain.push("c")
+			chain.push("c");
 		}).resolve().then(function() {
-			chain.push("d")
+			chain.push("d");
 		});
 		assertEquals("a,b,c,d", chain.join());
 	},
@@ -180,13 +185,13 @@ TestCase("PromiseTest", {
 		assertFalse(p2.resolved());
 		assertFalse(done);
 		p1.resolve();
-		assertTrue(p1.resolved());
+		assert(p1.resolved());
 		assertFalse(p2.resolved());
 		assertFalse(done);
 		p2.resolve();
-		assertTrue(p1.resolved());
-		assertTrue(p2.resolved());
-		assertTrue(done);
+		assert(p1.resolved());
+		assert(p2.resolved());
+		assert(done);
 	},
 
 	"test joined promises resolve #2 first": function() {
@@ -208,12 +213,12 @@ TestCase("PromiseTest", {
 		assertFalse(done);
 		p2.resolve();
 		assertFalse(p1.resolved());
-		assertTrue(p2.resolved());
+		assert(p2.resolved());
 		assertFalse(done);
 		p1.resolve();
-		assertTrue(p1.resolved());
-		assertTrue(p2.resolved());
-		assertTrue(done);
+		assert(p1.resolved());
+		assert(p2.resolved());
+		assert(done);
 	},
 	
 	"test should implement join": function() {

@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -51,7 +56,7 @@ TestCase("ChainTest", {
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
-		assertTrue(f2.called);
+		assert(f2.called);
 	},
 	
 	"test chain remove second of two": function() {
@@ -60,7 +65,7 @@ TestCase("ChainTest", {
 		var chain = Hub.chain(f1, f2);
 		chain.remove(f2);
 		chain();
-		assertTrue(f1.called);
+		assert(f1.called);
 		assertFalse(f2.called);
 	},
 	
@@ -72,8 +77,8 @@ TestCase("ChainTest", {
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
-		assertTrue(f2.called);
-		assertTrue(f3.called);
+		assert(f2.called);
+		assert(f3.called);
 	},
 	
 	"test chain remove second of three": function() {
@@ -83,9 +88,9 @@ TestCase("ChainTest", {
 		var chain = Hub.chain(f1, f2, f3);
 		chain.remove(f2);
 		chain();
-		assertTrue(f1.called);
+		assert(f1.called);
 		assertFalse(f2.called);
-		assertTrue(f3.called);
+		assert(f3.called);
 	},
 	
 	"test chain remove third of three": function() {
@@ -95,8 +100,8 @@ TestCase("ChainTest", {
 		var chain = Hub.chain(f1, f2, f3);
 		chain.remove(f3);
 		chain();
-		assertTrue(f1.called);
-		assertTrue(f2.called);
+		assert(f1.called);
+		assert(f2.called);
 		assertFalse(f3.called);
 	},
 	

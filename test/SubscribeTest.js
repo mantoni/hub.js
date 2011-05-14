@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -16,7 +21,7 @@ TestCase("SubscribeTest", {
 		assertFunction(Hub.subscribe);
 	},
 	
-	testSubscribeInvocation: function() {
+	"test subscribe invocation": function() {
 		var fn = stubFn();
 		assertNoException(function() {
 			Hub.subscribe("a", fn);
@@ -53,7 +58,7 @@ TestCase("SubscribeTest", {
 		});
 	},
 	
-	"test subscribe throws error if callback is not a function": function() {
+	"test subscribe throws if callback is not function": function() {
 		assertException(function() {
 			Hub.subscribe("x/y");
 		});

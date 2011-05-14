@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -15,19 +20,20 @@ TestCase("ObserverTest", {
 	"test abserver": function() {
 		
 		// The Observable singleton peer:
-		Hub.peer("Observable", function() {
+		Hub.peer("Observable", (function() {
 			var observers = [];
 			return {
 				observe: function(observer) {
 					observers.push(observer);
 				},
 				notify: function() {
-					for(var i = 0, l = observers.length; i < l; i++) {
+					var i, l;
+					for(i = 0, l = observers.length; i < l; i++) {
 						observers[i].onChange();
 					}
 				}
-			}
-		}());
+			};
+		}()));
 		
 		var instances = 0;
 		var invocations = 0;

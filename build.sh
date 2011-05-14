@@ -111,12 +111,16 @@ lint() {
 	echo -n "Running JSLint checks ... "
 	LINT_OK=0
 	LINT_OPT="--node false"
-	for SOURCE_FILE in $SOURCE_FILES
+	TESTS=`ls test/*.js`
+	TESTS_ASYNC=`ls test/async/*.js`
+	TESTS_PATTERNS=`ls test/patterns/*.js`
+	FILES="${SOURCE_FILES} $TESTS $TESTS_ASYNC $TESTS_PATTERNS"
+	for FILE in $FILES
 	do
-		LINT_RESULT=`jslint $LINT_OPT $SOURCE_FILE | sed -n -e '4,100p'`
+		LINT_RESULT=`jslint $LINT_OPT $FILE | sed -n -e '4,100p'`
 		if [ "$LINT_RESULT" != "No errors found." ]; then
 			echo
-			echo ${SOURCE_FILE:4}
+			echo $FILE
 			echo "$LINT_RESULT"
 			LINT_OK=1
 		fi

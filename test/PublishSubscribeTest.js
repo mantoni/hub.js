@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -16,7 +21,7 @@ TestCase("PublishSubscribeTest", {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	"test publish does not call subscriber with different topic": function() {
@@ -95,13 +100,13 @@ TestCase("PublishSubscribeTest", {
 		var fn1 = stubFn();
 		Hub.subscribe("x/a", fn1);
 		Hub.publish("x/*");
-		assertTrue(fn1.called);
+		assert(fn1.called);
 		var fn2 = stubFn();
 		Hub.subscribe("x/b", fn2);
 		fn1.called = false;
 		Hub.publish("x/*");
-		assertTrue(fn1.called);
-		assertTrue(fn2.called);
+		assert(fn1.called);
+		assert(fn2.called);
 	},
 	
 	"test subscribe to wildcard": function() {
@@ -110,50 +115,50 @@ TestCase("PublishSubscribeTest", {
 		Hub.publish("y/a");
 		assertFalse(fn.called);
 		Hub.publish("x/a");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	"test publish with placeholder in message": function() {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/{0}", "y");
-		assertTrue(fn.called);
+		assert(fn.called);
 		fn.called = false;
 		Hub.publish("x/{0.m}", {m: "y"});
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	"test subscribe publish subscribe same message": function() {
 		var fn1 = stubFn();
 		Hub.subscribe("x/y", fn1);
 		Hub.publish("x/y");
-		assertTrue(fn1.called);
+		assert(fn1.called);
 		fn1.called = false;
 		var fn2 = stubFn();
 		Hub.subscribe("x/y", fn2);
 		Hub.publish("x/y");
-		assertTrue(fn1.called);
-		assertTrue(fn2.called);
+		assert(fn1.called);
+		assert(fn2.called);
 	},
 	
 	"test subscribe publish subscribe same message w/ placeholder": function() {
 		var fn1 = stubFn();
 		Hub.subscribe("x/y", fn1);
 		Hub.publish("x/{0}", "y");
-		assertTrue(fn1.called);
+		assert(fn1.called);
 		fn1.called = false;
 		var fn2 = stubFn();
 		Hub.subscribe("x/y", fn2);
 		Hub.publish("x/{0}", "y");
-		assertTrue(fn1.called);
-		assertTrue(fn2.called);
+		assert(fn1.called);
+		assert(fn2.called);
 	},
 	
 	"test multicast publish and subscribe": function() {
 		var fnx = stubFn();
 		Hub.subscribe("x/*", fnx);
 		Hub.publish("x/*");
-		assertTrue(fnx.called);
+		assert(fnx.called);
 	},
 	
 	"test multicast subscriber invoked once": function() {

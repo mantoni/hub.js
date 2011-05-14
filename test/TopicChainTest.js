@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -71,7 +76,8 @@ TestCase("TopicChainTest", {
 				calls.push(name);
 			};
 		}
-		for(var i = 0, l = inserts.length; i < l; i++) {
+		var i, l;
+		for(i = 0, l = inserts.length; i < l; i++) {
 			chain.add(caller(inserts[i]), inserts[i]);
 		}
 		chain("**/**");

@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -20,16 +25,6 @@ TestCase("GetTest", {
 		assertException(function() {
 			Hub.get("unknown");
 		});
-	},
-	
-	"test get singleton": function() {
-		var fn = stubFn();
-		Hub.peer("test", {
-			key: fn
-		});
-		var test = Hub.get("test");
-		assertNotUndefined(test);
-		assertFunction(test.key);
 	},
 	
 	"test get singleton": function() {

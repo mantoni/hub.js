@@ -1,3 +1,8 @@
+/*jslint undef: true*/
+/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
+	assertFunction assertObject assertArray assertException assertNoException
+*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -30,7 +35,7 @@ TestCase("PeerTest", {
 			"message": fn
 		});
 		Hub.publish("simple/message");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	"test dot separated namespaces used for peer and listener": function() {
@@ -41,7 +46,7 @@ TestCase("PeerTest", {
 		Hub.publish("a.b/c");
 		assertFalse(fn.called);
 		Hub.publish("a.b/c.d");
-		assertTrue(fn.called);
+		assert(fn.called);
 	},
 	
 	/*
