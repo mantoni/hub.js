@@ -24,7 +24,7 @@ TestCase("ChainCreateTest", {
 
 TestCase("ChainCallTest", {
 		
-	"test call should invoke provided functions": function () {
+	"test should invoke provided functions": function () {
 		var calls = [];
 		var f1 = function () {
 			calls.push("f1");
@@ -32,16 +32,51 @@ TestCase("ChainCallTest", {
 		var f2 = function () {
 			calls.push("f2");
 		};
-		hub.chain(f1, f2)();
+		var chain = hub.chain(f1, f2);
+		
+		chain();
+		
 		assertEquals("Called in argument order", "f1,f2", calls.join());
+	}
+	
+});
+
+TestCase("StopPropagationTest", {
+	
+	"test should stop after invokation": function () {
+		var f = stubFn();
+		var chain = hub.chain(function () {
+			hub.stopPropagation();
+		}, f);
+		
+		chain();
+		
+		assertFalse(f.called);
 	},
 	
-	"test should stop after hub.stopPropagation": function () {
-		var f = stubFn();
-		hub.chain(function () {
+	"test should not override result": function () {
+		var chain = hub.chain(function () {
+			return ["first"];
+		}, function () {
 			hub.stopPropagation();
-		}, f)();
-		assertFalse(f.called);
+			return ["second"];
+		});
+		
+		var result = chain();
+		
+		assertEquals(["first", "second"], result);
+	},
+	
+	"test should override result": function () {
+		var chain = hub.chain(function () {
+			return ["first"];
+		}, function () {
+			hub.stopPropagation(["override"]);
+		});
+		
+		var result = chain();
+		
+		assertEquals(["override"], result);
 	}
 	
 });

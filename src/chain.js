@@ -27,7 +27,8 @@
 			iteratorStack.pop();
 			return next();
 		}
-		result = hub.merge(result, iterator().apply(scope, args));
+		var nextResult = iterator().apply(scope, args);
+		result = hub.merge(result, nextResult);
 		return true;
 	}
 	
@@ -52,10 +53,10 @@
 			if (top) {
 				aborted = false;
 				args = arguments;
+				result = undefined;
 			}
 			var previousScope = scope;
 			scope = this;
-			result = undefined;
 			try {
 				iteratorStack.push(iterator);
 				var running = true;
@@ -92,6 +93,9 @@
 	hub.stopPropagation = function () {
 		aborted = true;
 		iteratorStack.length = 0;
+		if (arguments.length) {
+			result = arguments[0];
+		}
 	};
 	
 	/**
