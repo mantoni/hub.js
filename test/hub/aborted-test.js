@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,28 +9,28 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.aborted.
+ * Test cases for hub.aborted.
  */
 TestCase("AbortedTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	"test should implement aborted": function () {
-		assertFunction(Hub.aborted);
+		assertFunction(hub.aborted);
 	},
 	
 	"test should return false by default": function () {
-		assertFalse(Hub.aborted());
+		assertFalse(hub.aborted());
 	},
 	
 	"test should return true after stopPropagation": function () {
-		Hub.subscribe("a/b", function () {
-			Hub.stopPropagation();
+		hub.subscribe("a/b", function () {
+			hub.stopPropagation();
 		});
-		Hub.publish("a/b");
-		assert(Hub.aborted());
+		hub.publish("a/b");
+		assert(hub.aborted());
 	}
 
 });

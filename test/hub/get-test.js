@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,56 +9,56 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.get.
+ * Test cases for hub.get.
  */
 TestCase("GetTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	"test should implement get": function () {
-		assertFunction(Hub.get);
+		assertFunction(hub.get);
 	},
 	
 	"test should throws if unknown": function () {
 		assertException(function () {
-			Hub.get("unknown");
+			hub.get("unknown");
 		});
 	},
 	
 	"test should return singleton peer": function () {
 		var fn = stubFn();
-		Hub.peer("test", {
+		hub.peer("test", {
 			key: fn
 		});
-		var test = Hub.get("test");
+		var test = hub.get("test");
 		assertNotUndefined(test);
-		assertSame(test, Hub.get("test"));
+		assertSame(test, hub.get("test"));
 		assertFunction(test.key);
 	},
 	
 	"test should return prototype peer": function () {
 		var fn = stubFn();
-		Hub.peer("test", function () {
+		hub.peer("test", function () {
 			return {
 				key: fn
 			};
 		});
-		var test = Hub.get("test");
+		var test = hub.get("test");
 		assertNotUndefined(test);
-		assertNotSame(test, Hub.get("test"));
+		assertNotSame(test, hub.get("test"));
 		assertFunction(test.key);
 	},
 	
 	"test should invoke singleton method and subscriber": function () {
 		var fn1 = stubFn();
-		Hub.peer("test", {
+		hub.peer("test", {
 			key: fn1
 		});
 		var fn2 = stubFn();
-		Hub.subscribe("test/key", fn2);
-		var test = Hub.get("test");
+		hub.subscribe("test/key", fn2);
+		var test = hub.get("test");
 		test.key();
 		assert(fn1.called);
 		assert(fn2.called);
@@ -66,14 +66,14 @@ TestCase("GetTest", {
 	
 	"test should invoke prototype method and subscriber": function () {
 		var fn1 = stubFn();
-		Hub.peer("test", function () {
+		hub.peer("test", function () {
 			return {
 				key: fn1
 			};
 		});
 		var fn2 = stubFn();
-		Hub.subscribe("test/key", fn2);
-		var test = Hub.get("test");
+		hub.subscribe("test/key", fn2);
+		var test = hub.get("test");
 		test.key();
 		assert(fn1.called);
 		assert(fn2.called);

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,18 +9,18 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.propagate.
+ * Test cases for hub.propagate.
  */
 TestCase("PropagateTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	"test propagate explicitly": function () {
 		var calls = [];
-		Hub.chain(function () {
-			Hub.propagate();
+		hub.chain(function () {
+			hub.propagate();
 			calls.push("a");
 		}, function () {
 			calls.push("b");
@@ -30,7 +30,7 @@ TestCase("PropagateTest", {
 	
 	"test implicit argument propagation": function () {
 		var calls = [];
-		Hub.chain(function (a, b) {
+		hub.chain(function (a, b) {
 			calls.push("x", a, b);
 		}, function (a, b) {
 			calls.push("y", a, b);
@@ -40,8 +40,8 @@ TestCase("PropagateTest", {
 	
 	"test explcit argument propagation": function () {
 		var calls = [];
-		Hub.chain(function (a, b) {
-			Hub.propagate();
+		hub.chain(function (a, b) {
+			hub.propagate();
 			calls.push("x", a, b);
 		}, function (a, b) {
 			calls.push("y", a, b);

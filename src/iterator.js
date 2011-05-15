@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -11,7 +11,7 @@
  *
  * @param {Array} array the array to iterate.
  */
-Hub.iterator = function (array) {
+hub.iterator = function (array) {
 	var index = 0;
 	var length = array.length;
 	

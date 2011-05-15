@@ -22,7 +22,7 @@ function runBenchmark(title, tests) {
 			return;
 		}
 		finally {
-			Hub.reset();
+			hub.reset();
 		}
 		var now = new Date().getTime();
 		var diff = now - time;

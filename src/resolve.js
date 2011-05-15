@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -14,7 +14,7 @@
  * @param {*} defaultValue the optional default value.
  * @return {*} the resolved value or the default value.
  */
-Hub.resolve = function (object, path, defaultValue) {
+hub.resolve = function (object, path, defaultValue) {
 	var p = path.indexOf(".");
 	while (p !== -1) {
 		var key = path.substring(0, p);

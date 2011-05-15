@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -14,13 +14,13 @@
 TestCase("ObserverTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 
 	"test abserver": function () {
 		
 		// The Observable singleton peer:
-		Hub.peer("Observable", (function () {
+		hub.peer("Observable", (function () {
 			var observers = [];
 			return {
 				observe: function (observer) {
@@ -39,7 +39,7 @@ TestCase("ObserverTest", {
 		var invocations = 0;
 		
 		// The Observer prototype peer:
-		Hub.peer("Observer", function () {
+		hub.peer("Observer", function () {
 			instances++;
 			return {
 				onChange: function () {
@@ -48,15 +48,15 @@ TestCase("ObserverTest", {
 			};
 		});
 		
-		var observable = Hub.get("Observable");
-		observable.observe(Hub.get("Observer"));
+		var observable = hub.get("Observable");
+		observable.observe(hub.get("Observer"));
 		assertEquals(1, instances);
-		observable.observe(Hub.get("Observer"));
-		// ^-- same as Hub.publish("Observable/observe", Hub.get("Observer"));
+		observable.observe(hub.get("Observer"));
+		// ^-- same as hub.publish("Observable/observe", hub.get("Observer"));
 		assertEquals(2, instances);
 		assertEquals(0, invocations);
 		observable.notify();
-		// ^-- same as Hub.publish("Observable/notify");
+		// ^-- same as hub.publish("Observable/notify");
 		assertEquals(2, invocations);
 	}
 

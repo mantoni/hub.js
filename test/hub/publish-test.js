@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,112 +9,112 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.publish.
+ * Test cases for hub.publish.
  */
 (function () {
 
 	function assertInvoked(topic, fn) {
-		Hub.publish(topic);
+		hub.publish(topic);
 		assert(topic, fn.called);
 		fn.called = false;
 	}
 	
 	function assertNotInvoked(topic, fn) {
-		Hub.publish(topic);
+		hub.publish(topic);
 		assertFalse(topic, fn.called);
 	}
 	
 	TestCase("PublishTest", {
 	
 		tearDown: function () {
-			Hub.reset();
+			hub.reset();
 		},
 	
 		"test should implement publish": function () {
-			assertFunction(Hub.publish);
+			assertFunction(hub.publish);
 		},
 	
 		"test should throw if topic is not string": function () {
 			assertException(function () {
-				Hub.publish(null);
+				hub.publish(null);
 			});
 			assertException(function () {
-				Hub.publish(undefined);
+				hub.publish(undefined);
 			});
 			assertException(function () {
-				Hub.publish(false);
+				hub.publish(false);
 			});
 			assertException(function () {
-				Hub.publish(true);
+				hub.publish(true);
 			});
 			assertException(function () {
-				Hub.publish({});
+				hub.publish({});
 			});
 			assertException(function () {
-				Hub.publish([]);
+				hub.publish([]);
 			});
 			assertException(function () {
-				Hub.publish(77);
+				hub.publish(77);
 			});
 		},
 	
 		"test should throw if topic is empty": function () {
 			assertException(function () {
-				Hub.publish("");
+				hub.publish("");
 			});
 		},
 	
 		"test should throw if topic is invalid": function () {
 			assertException(function () {
-				Hub.publish("foo/bar/doo");
+				hub.publish("foo/bar/doo");
 			});
 			assertException(function () {
-				Hub.publish("foo /doo");
+				hub.publish("foo /doo");
 			});
 			assertException(function () {
-				Hub.publish("foo:doo");
+				hub.publish("foo:doo");
 			});
 		},
 	
 		"test should not throw if topic is valid": function () {
 			assertNoException(function () {
-				Hub.publish("a");
+				hub.publish("a");
 			});
 			assertNoException(function () {
-				Hub.publish("a/b");
+				hub.publish("a/b");
 			});
 			assertNoException(function () {
-				Hub.publish("a/*");
+				hub.publish("a/*");
 			});
 			assertNoException(function () {
-				Hub.publish("*/b");
+				hub.publish("*/b");
 			});
 			assertNoException(function () {
-				Hub.publish("a.*/b");
+				hub.publish("a.*/b");
 			});
 			assertNoException(function () {
-				Hub.publish("a/b.*");
+				hub.publish("a/b.*");
 			});
 			assertNoException(function () {
-				Hub.publish("a.*/b.*");
+				hub.publish("a.*/b.*");
 			});
 			assertNoException(function () {
-				Hub.publish("*.a/b");
+				hub.publish("*.a/b");
 			});
 			assertNoException(function () {
-				Hub.publish("*.a/*.b");
+				hub.publish("*.a/*.b");
 			});
 			assertNoException(function () {
-				Hub.publish("**/b");
+				hub.publish("**/b");
 			});
 			assertNoException(function () {
-				Hub.publish("a/**");
+				hub.publish("a/**");
 			});
 		},
 	
 		"test should find matching subscriber for wildcards": function () {
 			var fn = stubFn();
-			Hub.subscribe("a.b/c.d", fn);
+			hub.subscribe("a.b/c.d", fn);
 			assertInvoked("a.b/c.*", fn);
 			assertInvoked("a.b/c.**", fn);
 			assertNotInvoked("a.b/*", fn);

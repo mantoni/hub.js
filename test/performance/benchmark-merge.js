@@ -4,38 +4,38 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Benchmarks for Hub.merge.
+ * Benchmarks for hub.merge.
  */
-runBenchmark("Hub.merge", {
+runBenchmark("hub.merge", {
 	
-	'Hub.merge("test", undefined)': function (l) {
+	'hub.merge("test", undefined)': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge("test", undefined);
+			hub.merge("test", undefined);
 		}
 	},
 	
-	'Hub.merge(undefined, "test")': function (l) {
+	'hub.merge(undefined, "test")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge(undefined, "test");
+			hub.merge(undefined, "test");
 		}
 	},
 	
-	'Hub.merge({}, {})': function (l) {
+	'hub.merge({}, {})': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge({}, {});
+			hub.merge({}, {});
 		}
 	},
 	
-	'Hub.merge([], [])': function (l) {
+	'hub.merge([], [])': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge([], []);
+			hub.merge([], []);
 		}
 	},
 	
-	'Hub.merge({}, []) + try-catch': function (l) {
+	'hub.merge({}, []) + try-catch': function (l) {
 		for (var i = 0; i < l; i++) {
 			try {
-				Hub.merge({}, []);
+				hub.merge({}, []);
 			}
 			catch (e) {
 				// exception is expected.
@@ -43,15 +43,15 @@ runBenchmark("Hub.merge", {
 		}
 	},
 	
-	'Hub.merge(["foo"], ["bar"])': function (l) {
+	'hub.merge(["foo"], ["bar"])': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge(["foo"], ["bar"]);
+			hub.merge(["foo"], ["bar"]);
 		}
 	},
 	
-	'Hub.merge({foo:"foo"}, {bar:"bar"})': function (l) {
+	'hub.merge({foo:"foo"}, {bar:"bar"})': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.merge({foo:"foo"}, {bar:"bar"});
+			hub.merge({foo:"foo"}, {bar:"bar"});
 		}
 	}
 	

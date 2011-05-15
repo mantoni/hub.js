@@ -4,85 +4,85 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Benchmarks for Hub.publish.
+ * Benchmarks for hub.publish.
  */
-runBenchmark("Hub.publish", {
+runBenchmark("hub.publish", {
 	
-	'No subscribers - Hub.publish("a/b")': function (l) {
+	'No subscribers - hub.publish("a/b")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b");
+			hub.publish("a/b");
 		}
 	},
 	
-	'No subscribers - Hub.publish("a/*")': function (l) {
+	'No subscribers - hub.publish("a/*")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/*");
+			hub.publish("a/*");
 		}
 	},
 	
-	'No subscribers - Hub.publish("*/b")': function (l) {
+	'No subscribers - hub.publish("*/b")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("*/b");
+			hub.publish("*/b");
 		}
 	},
 	
-	'No subscribers - Hub.publish("*/*")': function (l) {
+	'No subscribers - hub.publish("*/*")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("*/*");
+			hub.publish("*/*");
 		}
 	},
 		
-	'No subscribers - Hub.publish("a/b", "hello")': function (l) {
+	'No subscribers - hub.publish("a/b", "hello")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b", "hello");
+			hub.publish("a/b", "hello");
 		}
 	},
 
-	'No subscribers - Hub.publish("a/b", "hello", "world")': function (l) {
+	'No subscribers - hub.publish("a/b", "hello", "world")': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b", "hello", "world");
+			hub.publish("a/b", "hello", "world");
 		}
 	},
 
-	'One empty subscriber - Hub.publish("a/b")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("a/b")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b");
+			hub.publish("a/b");
 		}
 	},
 	
-	'One empty subscriber - Hub.publish("a/*")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("a/*")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/*");
+			hub.publish("a/*");
 		}
 	},
 	
-	'One empty subscriber - Hub.publish("*/b")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("*/b")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("*/b");
+			hub.publish("*/b");
 		}
 	},
 	
-	'One empty subscriber - Hub.publish("*/*")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("*/*")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("*/*");
+			hub.publish("*/*");
 		}
 	},
 	
-	'One empty subscriber - Hub.publish("a/b", "hello")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("a/b", "hello")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b", "hello");
+			hub.publish("a/b", "hello");
 		}
 	},
 
-	'One empty subscriber - Hub.publish("a/b", "hello", "world")': function (l) {
-		Hub.subscribe("a/b", function () {});
+	'One empty subscriber - hub.publish("a/b", "hello", "world")': function (l) {
+		hub.subscribe("a/b", function () {});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b", "hello", "world");
+			hub.publish("a/b", "hello", "world");
 		}
 	}
 	

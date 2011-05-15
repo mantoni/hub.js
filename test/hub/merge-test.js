@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,14 +9,14 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.merge.
+ * Test cases for hub.merge.
  */
 (function () {
 	
 	function mergeError(target, source) {
 		var error = null;
 		try {
-			Hub.merge(target, source);
+			hub.merge(target, source);
 		} catch (e) {
 			error = e;
 		}
@@ -29,23 +29,23 @@
 	TestCase("MergeTest", {
 
 		"test empty object": function () {
-			var o = Hub.merge({}, {});
+			var o = hub.merge({}, {});
 			assertEquals("[object Object]", Object.prototype.toString.call(o));
 		},
 
 		"test empty array": function () {
-			var a = Hub.merge([], []);
+			var a = hub.merge([], []);
 			assertEquals("[object Array]", Object.prototype.toString.call(a));
 		},
 
 		"test should merge object properties": function () {
-			var o = Hub.merge({ foo: "foo" }, { bar: "bar" });
+			var o = hub.merge({ foo: "foo" }, { bar: "bar" });
 			assertEquals("foo", o.foo);
 			assertEquals("bar", o.bar);
 		},
 
 		"test should concatenate arrays": function () {
-			var a = Hub.merge(["foo"], ["bar"]);
+			var a = hub.merge(["foo"], ["bar"]);
 			assertEquals("foo,bar", a.join());
 		},
 
@@ -64,35 +64,35 @@
 		"test should not throw for same string values": function () {
 			var o;
 			assertNoException(function () {
-				o = Hub.merge({ x: "foo" }, { x: "foo" });
+				o = hub.merge({ x: "foo" }, { x: "foo" });
 			});
 			assertEquals("foo", o.x);
 		},
 
 		"test should retain value if merged with undefined": function () {
-			assertSame(true, Hub.merge(true, undefined));
-			assertSame(true, Hub.merge(undefined, true));
-			assertSame(false, Hub.merge(false, undefined));
-			assertSame(false, Hub.merge(undefined, false));
-			assertEquals("", Hub.merge("", undefined));
-			assertEquals("", Hub.merge(undefined, ""));
+			assertSame(true, hub.merge(true, undefined));
+			assertSame(true, hub.merge(undefined, true));
+			assertSame(false, hub.merge(false, undefined));
+			assertSame(false, hub.merge(undefined, false));
+			assertEquals("", hub.merge("", undefined));
+			assertEquals("", hub.merge(undefined, ""));
 		},
 
 		"test should retain value if merged with null": function () {
-			assertSame(true, Hub.merge(true, null));
-			assertSame(true, Hub.merge(null, true));
-			assertSame(false, Hub.merge(false, null));
-			assertSame(false, Hub.merge(null, false));
-			assertEquals("", Hub.merge("", null));
-			assertEquals("", Hub.merge(null, ""));
+			assertSame(true, hub.merge(true, null));
+			assertSame(true, hub.merge(null, true));
+			assertSame(false, hub.merge(false, null));
+			assertSame(false, hub.merge(null, false));
+			assertEquals("", hub.merge("", null));
+			assertEquals("", hub.merge(null, ""));
 		},
 
 		"test should merge true and true": function () {
-			assertSame(true, Hub.merge(true, true));
+			assertSame(true, hub.merge(true, true));
 		},
 
 		"test should merge false and false": function () {
-			assertSame(false, Hub.merge(false, false));
+			assertSame(false, hub.merge(false, false));
 		},
 
 		"test should fail on true and false": function () {
@@ -104,8 +104,8 @@
 		},
 
 		"test should merge equal strings": function () {
-			assertSame("", Hub.merge("", ""));
-			assertSame("a", Hub.merge("a", "a"));
+			assertSame("", hub.merge("", ""));
+			assertSame("a", hub.merge("a", "a"));
 		},
 
 		"test should fail on different strings": function () {

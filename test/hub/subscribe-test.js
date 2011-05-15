@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,70 +9,70 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.subscribe.
+ * Test cases for hub.subscribe.
  */
 TestCase("SubscribeTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	testFunctionExists: function () {
-		assertFunction(Hub.subscribe);
+		assertFunction(hub.subscribe);
 	},
 	
 	"test subscribe invocation": function () {
 		var fn = stubFn();
 		assertNoException(function () {
-			Hub.subscribe("a", fn);
+			hub.subscribe("a", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a/b", fn);
+			hub.subscribe("a/b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a/*", fn);
+			hub.subscribe("a/*", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("*/b", fn);
+			hub.subscribe("*/b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a.*/b", fn);
+			hub.subscribe("a.*/b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a/b.*", fn);
+			hub.subscribe("a/b.*", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a.*/b.*", fn);
+			hub.subscribe("a.*/b.*", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("*.a/b", fn);
+			hub.subscribe("*.a/b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("*.a/*.b", fn);
+			hub.subscribe("*.a/*.b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("**/b", fn);
+			hub.subscribe("**/b", fn);
 		});
 		assertNoException(function () {
-			Hub.subscribe("a/**", fn);
+			hub.subscribe("a/**", fn);
 		});
 	},
 	
 	"test subscribe throws if callback is not function": function () {
 		assertException(function () {
-			Hub.subscribe("x/y");
+			hub.subscribe("x/y");
 		});
 		assertException(function () {
-			Hub.subscribe("x/y", null);
+			hub.subscribe("x/y", null);
 		});
 		assertException(function () {
-			Hub.subscribe("x/y", true);
+			hub.subscribe("x/y", true);
 		});
 		assertException(function () {
-			Hub.subscribe("x/y", {});
+			hub.subscribe("x/y", {});
 		});
 		assertException(function () {
-			Hub.subscribe("x/y", []);
+			hub.subscribe("x/y", []);
 		});
 	}
 	

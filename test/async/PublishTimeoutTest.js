@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn AsyncTestCase fail assert assertFalse assertNull
+/*globals hub stubFn AsyncTestCase fail assert assertFalse assertNull
 	assertNotNull assertUndefined assertNotUndefined assertSame assertNotSame
 	assertEquals assertFunction assertObject assertArray assertException
 	assertNoException
@@ -10,21 +10,21 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.publish timeouts.
+ * Test cases for hub.publish timeouts.
  */
 AsyncTestCase("PublishTimeoutTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	testSimpleTimeout: function (queue) {
-		Hub.subscribe("a/b", function () {
-			Hub.promise(10); // promise with small timeout, never resolved.
+		hub.subscribe("a/b", function () {
+			hub.promise(10); // promise with small timeout, never resolved.
 		});
 		queue.call(function (pool) {
 			var time = new Date().getTime();
-			Hub.publish("a/b").then(function () {
+			hub.publish("a/b").then(function () {
 				fail("Unexpected success callback");
 			}, pool.add(function (error) {
 				assertObject(error);

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -14,7 +14,7 @@
 TestCase("MixinTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	/*
@@ -24,69 +24,69 @@ TestCase("MixinTest", {
 	 */
 	"test mixin call order": function () {
 		var chain = [];
-		Hub.peer("parent", {
+		hub.peer("parent", {
 			"test": function () {
 				chain.push("parent");
 			}
 		});
-		Hub.peer("child", "parent", {
+		hub.peer("child", "parent", {
 			"test": function () {
 				chain.push("child");
 			}
 		});
 		// child is called first, then the "super" implementation.
-		Hub.publish("child/test");
+		hub.publish("child/test");
 		assertEquals("child,parent", chain.join());
 	},
 	
 	/*
-	 * Hub.stopPropagation() stops the propagation of the message
+	 * hub.stopPropagation() stops the propagation of the message
 	 * in the current chain. So in this test case, the parents "test"
 	 * is not invoked.
 	 */
 	"test stop propagation": function () {
 		var chain = [];
-		Hub.peer("parent", {
+		hub.peer("parent", {
 			"test": function () {
 				chain.push("parent");
 			}
 		});
-		Hub.peer("child", "parent", {
+		hub.peer("child", "parent", {
 			"test": function () {
 				chain.push("child");
-				Hub.stopPropagation();
+				hub.stopPropagation();
 			}
 		});
-		Hub.publish("child/test");
+		hub.publish("child/test");
 		assertEquals("child", chain.join());
 	},
 	
 	/*
-	 * Hub.propagate() explicitly propagates the message to the
+	 * hub.propagate() explicitly propagates the message to the
 	 * next function in the call chain. This also means that the
 	 * next function is not implicitly invoked afterwards anymore.
 	 */
 	"test propagate": function () {
 		var chain = [];
-		Hub.peer("parent", {
+		hub.peer("parent", {
 			"test": function () {
 				chain.push("parent");
 			}
 		});
-		Hub.peer("child", "parent", {
+		hub.peer("child", "parent", {
 			"test": function () {
-				Hub.propagate();
+				hub.propagate();
 				chain.push("child");
 			}
 		});
 		// explicit "super" invocation changes call order here.
-		Hub.publish("child/test");
+		hub.publish("child/test");
 		assertEquals("parent,child", chain.join());
 	},
 	
 	"test unknown mixin throws error": function () {
 		assertException(function () {
-			Hub.peer("child", "parent", {});
+			hub.peer("child", "parent", {});
 		});
 	}
 

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,20 +9,20 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.peer.
+ * Test cases for hub.peer.
  */
 TestCase("PeerTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	"test should fail if defined twice": function () {
-		Hub.peer("definedTwice", {});
+		hub.peer("definedTwice", {});
 		try {
-			Hub.peer("definedTwice", {});
+			hub.peer("definedTwice", {});
 		} catch (e) {
-			assertEquals("Hub - peer already defined: definedTwice",
+			assertEquals("hub - peer already defined: definedTwice",
 				e.message);
 			return;
 		}
@@ -31,21 +31,21 @@ TestCase("PeerTest", {
 	
 	"test should receive message": function () {
 		var fn = stubFn();
-		Hub.peer("simple", {
+		hub.peer("simple", {
 			"message": fn
 		});
-		Hub.publish("simple/message");
+		hub.publish("simple/message");
 		assert(fn.called);
 	},
 	
 	"test should allow dot separated namespace and message": function () {
 		var fn = stubFn();
-		Hub.peer("a.b", {
+		hub.peer("a.b", {
 			"c.d": fn
 		});
-		Hub.publish("a.b/c");
+		hub.publish("a.b/c");
 		assertFalse(fn.called);
-		Hub.publish("a.b/c.d");
+		hub.publish("a.b/c.d");
 		assert(fn.called);
 	},
 	
@@ -55,43 +55,43 @@ TestCase("PeerTest", {
 	 */
 	"test should override subscriber": function () {
 		var chain = [];
-		Hub.subscribe("a/b", function () {
+		hub.subscribe("a/b", function () {
 			chain.push("subscribe");
 		});
-		Hub.peer("a", {
+		hub.peer("a", {
 			"b": function () {
 				chain.push("peer");
 			}
 		});
-		Hub.publish("a/b");
+		hub.publish("a/b");
 		// "peer" first, because it was added last.
 		assertEquals("peer,subscribe", chain.join());
 	},
 	
 	"test should receive multicast": function () {
 		var chain = [];
-		Hub.peer("a.b", {
+		hub.peer("a.b", {
 			"m": function () {
 				chain.push("x");
 			}
 		});
-		Hub.peer("a.c", {
+		hub.peer("a.c", {
 			"m": function () {
 				chain.push("y");
 			}
 		});
-		Hub.publish("a.*/m");
+		hub.publish("a.*/m");
 		// "y" first, because it was added last.
 		assertEquals("y,x", chain.join());
 	},
 	
 	"test should receive message with peer as scope object": function () {
 		var fn = stubFn();
-		Hub.peer("a", {
+		hub.peer("a", {
 			"b": fn
 		});
-		Hub.publish("a/b");
-		assertSame(Hub.get("a"), fn.scope);
+		hub.publish("a/b");
+		assertSame(hub.get("a"), fn.scope);
 	}
 
 });

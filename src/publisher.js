@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -17,10 +17,10 @@
  * @return {Function} the forwarder function
  */
 (function () {
-	var publish = Hub.publish;
-	var merge = Hub.merge;
+	var publish = hub.publish;
+	var merge = hub.merge;
 	
-	Hub.publisher = function (topic, dataTransformer, dataToMerge) {
+	hub.publisher = function (topic, dataTransformer, dataToMerge) {
 		if (typeof topic === "string") {
 			if (dataTransformer) {
 				if (dataToMerge) {
@@ -45,22 +45,22 @@
 			}
 			return function () {
 				if (arguments.length) {
-					return publish.apply(Hub, [topic].concat(
+					return publish.apply(hub, [topic].concat(
 						Array.prototype.slice.call(arguments)
 					));
 				}
 				return publish(topic);
 			};
 		}
-		var api = Hub.chain();
+		var api = hub.chain();
 		var key;
 		for (key in topic) {
 			if (topic.hasOwnProperty(key)) {
 				var value = topic[key];
 				if (typeof value === "string") {
-					api[key] = Hub.publisher(value);
+					api[key] = hub.publisher(value);
 				} else {
-					api[key] = Hub.publisher.apply(Hub, value);
+					api[key] = hub.publisher.apply(hub, value);
 				}
 				api.add(api[key]);
 			}

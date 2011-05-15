@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -19,10 +19,10 @@
  *			on the callback.
  */
 (function () {
-	var publisher = Hub.publisher;
-	var subscribe = Hub.subscribe;
+	var publisher = hub.publisher;
+	var subscribe = hub.subscribe;
 	
-	Hub.forward = function (alias, topic, dataTransformer, dataToMerge) {
+	hub.forward = function (alias, topic, dataTransformer, dataToMerge) {
 		if (typeof alias === "object") {
 			var k, t;
 			for (k in alias) {

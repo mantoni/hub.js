@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -37,7 +37,7 @@
 	function apply(peer, message, fn) {
 		var c = peer[message];
 		if (!c) {
-			peer[message] = c = Hub.chain();
+			peer[message] = c = hub.chain();
 		}
 		c.add(fn);
 	}
@@ -55,15 +55,15 @@
 	}
 	
 	/*
-	 * returns a function that publishes the given topic on the Hub and then
-	 * invokes the provided chain if the topic was not aborted on the Hub.
+	 * returns a function that publishes the given topic on the hub and then
+	 * invokes the provided chain if the topic was not aborted on the hub.
 	 */
 	function interceptor(topic, chain, scope) {
 		return function () {
 			var args = Array.prototype.slice.call(arguments);
-			var result = Hub.publish.apply(Hub, [topic].concat(args));
-			if (!Hub.aborted()) {
-				result = Hub.merge(result, chain.apply(scope, arguments));
+			var result = hub.publish.apply(hub, [topic].concat(args));
+			if (!hub.aborted()) {
+				result = hub.merge(result, chain.apply(scope, arguments));
 			}
 			return result;
 		};
@@ -121,7 +121,7 @@
 	
 	/**
 	 * <p>
-	 * defines a peer in the Hub that publishes and receives messages.
+	 * defines a peer in the hub that publishes and receives messages.
 	 * </p>
 	 * <p>
 	 * Configuration parameters:
@@ -129,17 +129,17 @@
 	 * <ul>
 	 * <li>is (String|Array): single peer name or list of peer names this peer
 	 * inherits from</li>
-	 * <li>scope (String): the peer scope, either Hub.SINGLETON or
-	 * Hub.PROTOTYPE. Defaults to Hub.SINGLETON.</li>
+	 * <li>scope (String): the peer scope, either hub.SINGLETON or
+	 * hub.PROTOTYPE. Defaults to hub.SINGLETON.</li>
 	 * </ul>
 	 * 
 	 * @param {String} namespace the namespace for the peer
 	 * @param {String|Array} is the optional list of peer names to mix
 	 * @param {Function} factory the factory for the map of listeners
 	 */
-	Hub.peer = function (namespace, is, factory) {
+	hub.peer = function (namespace, is, factory) {
 		if (definitions[namespace]) {
-			throw new Error("Hub - peer already defined: " + namespace);
+			throw new Error("hub - peer already defined: " + namespace);
 		}
 		if (!factory) {
 			factory = is;
@@ -160,8 +160,8 @@
 					var chain = peer[message];
 					if (typeof chain === "function") {
 						var topic = namespace + "/" + message;
-						Hub.subscribe(topic, subscriber(chain, api));
-						api[message] = Hub.publisher(topic);
+						hub.subscribe(topic, subscriber(chain, api));
+						api[message] = hub.publisher(topic);
 					}
 				}
 			}
@@ -183,11 +183,11 @@
 	 * @param {String} namespace the namespace.
 	 * @return {Object} the API of the peer.
 	 */
-	Hub.get = function (namespace) {
+	hub.get = function (namespace) {
 		return getPeer(namespace).api;
 	};
 	
-	Hub.resetPeers = function () {
+	hub.resetPeers = function () {
 		peers = {};
 		var k;
 		for (k in definitions) {

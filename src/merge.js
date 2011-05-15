@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -12,7 +12,7 @@
  * @param {*} source the source value or object.
  * @return {*} the new target value or object.
  */
-Hub.merge = function (target, source) {
+hub.merge = function (target, source) {
 	if (target === undefined || target === null || target === source) {
 		return source;
 	}
@@ -27,7 +27,7 @@ Hub.merge = function (target, source) {
 		if (sourceType === "[object Object]") {
 			for (k in source) {
 				if (source.hasOwnProperty(k)) {
-					target[k] = Hub.merge(target[k], source[k]);
+					target[k] = hub.merge(target[k], source[k]);
 				}
 			}
 			return target;
@@ -36,7 +36,7 @@ Hub.merge = function (target, source) {
 			return target.concat(source);
 		}
 	}
-	throw new Hub.Error("validation",
+	throw new hub.Error("validation",
 		targetType === sourceType ?
 			"Cannot merge value {target} with {source}" :
 			"Cannot merge type {targetType} with {sourceType}", {

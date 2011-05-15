@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -27,7 +27,7 @@
 			iteratorStack.pop();
 			return next();
 		}
-		result = Hub.merge(result, iterator().apply(scope, args));
+		result = hub.merge(result, iterator().apply(scope, args));
 		return true;
 	}
 	
@@ -37,14 +37,14 @@
 	 * the given order.
 	 * The chain implements add(Function) and remove(Function) to add
 	 * and remove functions from the chain.
-	 * Chain iteration can be aborted via Hub.stopPropagation() or
-	 * explicitly triggered via Hub.propagate().
+	 * Chain iteration can be aborted via hub.stopPropagation() or
+	 * explicitly triggered via hub.propagate().
 	 * 
 	 * @param {...Function} the functions to chain.
 	 * @return {Function} the chain function.
 	 */
 	function chain() {
-		var iterator = Hub.iterator(arguments.length ?
+		var iterator = hub.iterator(arguments.length ?
 			Array.prototype.slice.call(arguments) : []);
 		function callChain() {
 			callChain.aborted = false;
@@ -89,7 +89,7 @@
 	/**
 	 * stops message propagation for the current call chain.
 	 */
-	Hub.stopPropagation = function () {
+	hub.stopPropagation = function () {
 		aborted = true;
 		iteratorStack.length = 0;
 	};
@@ -98,10 +98,10 @@
 	 * explicitly propagates the message to the next function in the current
 	 * call chain.
 	 */
-	Hub.propagate = function () {
+	hub.propagate = function () {
 		next();
 	};
 	
-	Hub.chain = chain;
+	hub.chain = chain;
 
 }());

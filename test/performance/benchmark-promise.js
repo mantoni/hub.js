@@ -4,22 +4,22 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Benchmarks for Hub.promise.
+ * Benchmarks for hub.promise.
  */
-runBenchmark("Hub.promise", {
+runBenchmark("hub.promise", {
 	
-	'Hub.promise()': function (l) {
+	'hub.promise()': function (l) {
 		for (var i = 0; i < l; i++) {
-			Hub.promise();
+			hub.promise();
 		}
 	},
 	
-	'Hub.promise() from within listener': function (l) {
-		Hub.subscribe("a/b", function () {
-			Hub.promise();
+	'hub.promise() from within listener': function (l) {
+		hub.subscribe("a/b", function () {
+			hub.promise();
 		});
 		for (var i = 0; i < l; i++) {
-			Hub.publish("a/b");
+			hub.publish("a/b");
 		}
 	}
 	

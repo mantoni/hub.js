@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,33 +9,33 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.substitute.
+ * Test cases for hub.substitute.
  */
 TestCase("SubstituteTest", {
 	
 	"test function exists": function () {
-		assertFunction(Hub.substitute);
+		assertFunction(hub.substitute);
 	},
 	
 	"test substitute nothing": function () {
 		assertEquals("the quick brown fox",
-			Hub.substitute("the quick brown fox"));
+			hub.substitute("the quick brown fox"));
 	},
 	
 	"test substitute index from array": function () {
-		assertEquals("hello index", Hub.substitute("hello {0}", ["index"]));
+		assertEquals("hello index", hub.substitute("hello {0}", ["index"]));
 	},
 	
 	"test substitute key from object": function () {
 		assertEquals("hello value",
-			Hub.substitute("hello {key}", { key: "value" }));
+			hub.substitute("hello {key}", { key: "value" }));
 	},
 	
 	"test substitute fallback": function () {
 		assertEquals("hello fallback",
-			Hub.substitute("hello {0}", null, "fallback"));
+			hub.substitute("hello {0}", null, "fallback"));
 		assertEquals("hello fallback",
-			Hub.substitute("hello {0}", {}, "fallback"));
+			hub.substitute("hello {0}", {}, "fallback"));
 	}
 	
 });

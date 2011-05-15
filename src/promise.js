@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub, clearTimeout, setTimeout*/
+/*global hub, clearTimeout, setTimeout*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -12,7 +12,7 @@
 	
 	/**
 	 * The current promise. Also indicates whether currently executing
-	 * Hub.publish.
+	 * hub.publish.
 	 *
 	 * @type {object}
 	 */
@@ -36,7 +36,7 @@
 		try {
 			result = callback.apply(null, args);
 		} catch (e) {
-			Hub.invoke("hub.error/promise.callback", new Hub.Error("error",
+			hub.invoke("hub.error/promise.callback", new hub.Error("error",
 				"Error in promise callback: ${error}", {
 					error: e.message
 				}));
@@ -60,7 +60,7 @@
 	 * already resolved. Publishes an error message on the hub.
 	 */
 	function promiseAlreadyResolved() {
-		Hub.invoke("hub.error/promise.resolved", new Hub.Error("validation",
+		hub.invoke("hub.error/promise.resolved", new hub.Error("validation",
 			"Promise already resolved"));
 	}
 	
@@ -90,7 +90,7 @@
 	function createPromise(resolved, value, timeout) {
 		var callbacks;
 		var errorCallbacks;
-		var success = !(value instanceof Hub.Error);
+		var success = !(value instanceof hub.Error);
 		var args = value === undefined ? [] : [value];
 		var p;
 		// Public API:
@@ -128,12 +128,12 @@
 			 */
 			publish: function (topic) {
 				if (resolved) {
-					args = [Hub.invoke.apply(Hub, arguments)];
+					args = [hub.invoke.apply(hub, arguments)];
 					return this;
 				}
 				var callArgs = array_slice.call(arguments);
 				return this.then(function () {
-					args = [Hub.invoke.apply(Hub, callArgs)];
+					args = [hub.invoke.apply(hub, callArgs)];
 					// A return value would be meaningless here.
 				});
 			},
@@ -148,11 +148,11 @@
 			 */
 			publishResult: function (topic) {
 				if (resolved) {
-					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
+					args = [hub.invoke.apply(hub, [topic].concat(args))];
 					return this;
 				}
 				return this.then(function () {
-					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
+					args = [hub.invoke.apply(hub, [topic].concat(args))];
 					// A return value would be meaningless here.
 				});
 			},
@@ -275,7 +275,7 @@
 	}
 	
 	// The error thrown when trying to resolve an already resolved promise.
-	var promiseResolvedError = new Error("Hub - promise already resolved");
+	var promiseResolvedError = new Error("hub - promise already resolved");
 	
 	/*
 	 * PromiseProxy is a lightweight object that creates the actual promise
@@ -321,14 +321,14 @@
 	 * @param {String} topic the topic
 	 * @param {...Object} args the arguments to pass
 	 */
-	Hub.publish = function (topic) {
+	hub.publish = function (topic) {
 		var previousPromise = promise;
 		promise = false;
 		var result;
 		try {
-			result = Hub.invoke.apply(this, arguments);
+			result = hub.invoke.apply(this, arguments);
 		} catch (e) {
-			if (promise && e instanceof Hub.Error) {
+			if (promise && e instanceof hub.Error) {
 				promise.reject(e);
 				return promise;
 			}
@@ -349,7 +349,7 @@
 	 * @param {Number} timeout the optional timeout for the promise
 	 * @return {Object} the promise
 	 */
-	Hub.promise = function (timeout) {
+	hub.promise = function (timeout) {
 		var newPromise = createPromise(false, undefined, timeout);
 		if (promise === false) {
 			// This means we do not have a promise yet.
@@ -365,7 +365,7 @@
 		return newPromise;
 	};
 	
-	Hub.resetPromise = function () {
+	hub.resetPromise = function () {
 		if (typeof promise !== "boolean") {
 			promise.reject();
 		}

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,23 +9,23 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.topicChain.
+ * Test cases for hub.topicChain.
  */
 TestCase("TopicChainTest", {
 	
 	"test method exists": function () {
-		assertFunction(Hub.topicChain);
+		assertFunction(hub.topicChain);
 	},
 	
 	"test implements add and remove": function () {
-		var chain = Hub.topicChain();
+		var chain = hub.topicChain();
 		assertFunction(chain.add);
 		assertFunction(chain.remove);
 	},
 	
 	"test invoke calls added function": function () {
 		var fn = stubFn();
-		var chain = Hub.topicChain();
+		var chain = hub.topicChain();
 		chain.add(fn, "**/**");
 		chain("**/**");
 		assert(fn.called);
@@ -69,7 +69,7 @@ TestCase("TopicChainTest", {
 	},
 	
 	verifyInsertOrder: function (inserts, expected) {
-		var chain = Hub.topicChain();
+		var chain = hub.topicChain();
 		var calls = [];
 		function caller(name) {
 			return function () {
@@ -85,7 +85,7 @@ TestCase("TopicChainTest", {
 	},
 	
 	"test call invokes only matching": function () {
-		var chain = Hub.topicChain();
+		var chain = hub.topicChain();
 		var fn1 = stubFn();
 		var fn2 = stubFn();
 		chain.add(fn1, "a/b");
@@ -96,7 +96,7 @@ TestCase("TopicChainTest", {
 	},
 	
 	"test invoke without topic falls back to chain topic": function () {
-		var chain = Hub.topicChain("a/b");
+		var chain = hub.topicChain("a/b");
 		var fn1 = stubFn();
 		var fn2 = stubFn();
 		chain.add(fn1, "a/b");
@@ -107,7 +107,7 @@ TestCase("TopicChainTest", {
 	},
 	
 	"test scope is retained": function () {
-		var chain = Hub.topicChain();
+		var chain = hub.topicChain();
 		var fn = stubFn();
 		chain.add(fn, "**/**");
 		var object = {};

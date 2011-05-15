@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -14,150 +14,150 @@
 TestCase("PublishSubscribeTest", {
 	
 	tearDown: function () {
-		Hub.reset();
+		hub.reset();
 	},
 	
 	"test publish calls subscriber with same topic": function () {
 		var fn = stubFn();
-		Hub.subscribe("x/y", fn);
-		Hub.publish("x/y");
+		hub.subscribe("x/y", fn);
+		hub.publish("x/y");
 		assert(fn.called);
 	},
 	
 	"test publish does not call subscriber with different topic": function () {
 		var fn = stubFn();
-		Hub.subscribe("a/b", fn);
-		Hub.publish("x/y");
+		hub.subscribe("a/b", fn);
+		hub.publish("x/y");
 		assertFalse(fn.called);
 	},
 	
 	"test publish one argument": function () {
 		var value1;
-		Hub.subscribe("x/y", function (arg1) {
+		hub.subscribe("x/y", function (arg1) {
 			value1 = arg1;
 		});
-		Hub.publish("x/y", "first");
+		hub.publish("x/y", "first");
 		assertEquals("first", value1);
 	},
 	
 	"test publish two arguments": function () {
 		var value1, value2;
-		Hub.subscribe("x/y", function (arg1, arg2) {
+		hub.subscribe("x/y", function (arg1, arg2) {
 			value1 = arg1;
 			value2 = arg2;
 		});
-		Hub.publish("x/y", "first", "second");
+		hub.publish("x/y", "first", "second");
 		assertEquals("first", value1);
 		assertEquals("second", value2);
 	},
 	
 	"test publish on topic with two subscribers": function () {
 		var m = [];
-		Hub.subscribe("x/y", function () {
+		hub.subscribe("x/y", function () {
 			m.push("a");
 		});
-		Hub.subscribe("x/y", function () {
+		hub.subscribe("x/y", function () {
 			m.push("b");
 		});
-		Hub.publish("x/y");
+		hub.publish("x/y");
 		// First b, then a since second overrides first:
 		assertEquals("b,a", m.join());
 	},
 	
 	"test publish to two subscribers via wildcard message": function () {
 		var m = [];
-		Hub.subscribe("x/a", function () {
+		hub.subscribe("x/a", function () {
 			m.push("a");
 		});
-		Hub.subscribe("x/b", function () {
+		hub.subscribe("x/b", function () {
 			m.push("b");
 		});
-		Hub.subscribe("y/c", function () {
+		hub.subscribe("y/c", function () {
 			m.push("c");
 		});
-		Hub.publish("x/*");
+		hub.publish("x/*");
 		// b overrides a:
 		assertEquals("b,a", m.join());
 	},
 	
 	"test publish to two subscribers via wildcard namespace": function () {
 		var m = [];
-		Hub.subscribe("x/a", function () {
+		hub.subscribe("x/a", function () {
 			m.push("a");
 		});
-		Hub.subscribe("y/a", function () {
+		hub.subscribe("y/a", function () {
 			m.push("b");
 		});
-		Hub.subscribe("z/b", function () {
+		hub.subscribe("z/b", function () {
 			m.push("c");
 		});
-		Hub.publish("*/a");
+		hub.publish("*/a");
 		// y overrides x:
 		assertEquals("b,a", m.join());
 	},
 	
 	"test publish to wildcard, subscribe another, publish again": function () {
 		var fn1 = stubFn();
-		Hub.subscribe("x/a", fn1);
-		Hub.publish("x/*");
+		hub.subscribe("x/a", fn1);
+		hub.publish("x/*");
 		assert(fn1.called);
 		var fn2 = stubFn();
-		Hub.subscribe("x/b", fn2);
+		hub.subscribe("x/b", fn2);
 		fn1.called = false;
-		Hub.publish("x/*");
+		hub.publish("x/*");
 		assert(fn1.called);
 		assert(fn2.called);
 	},
 	
 	"test subscribe to wildcard": function () {
 		var fn = stubFn();
-		Hub.subscribe("x/*", fn);
-		Hub.publish("y/a");
+		hub.subscribe("x/*", fn);
+		hub.publish("y/a");
 		assertFalse(fn.called);
-		Hub.publish("x/a");
+		hub.publish("x/a");
 		assert(fn.called);
 	},
 	
 	"test publish with placeholder in message": function () {
 		var fn = stubFn();
-		Hub.subscribe("x/y", fn);
-		Hub.publish("x/{0}", "y");
+		hub.subscribe("x/y", fn);
+		hub.publish("x/{0}", "y");
 		assert(fn.called);
 		fn.called = false;
-		Hub.publish("x/{0.m}", {m: "y"});
+		hub.publish("x/{0.m}", {m: "y"});
 		assert(fn.called);
 	},
 	
 	"test subscribe publish subscribe same message": function () {
 		var fn1 = stubFn();
-		Hub.subscribe("x/y", fn1);
-		Hub.publish("x/y");
+		hub.subscribe("x/y", fn1);
+		hub.publish("x/y");
 		assert(fn1.called);
 		fn1.called = false;
 		var fn2 = stubFn();
-		Hub.subscribe("x/y", fn2);
-		Hub.publish("x/y");
+		hub.subscribe("x/y", fn2);
+		hub.publish("x/y");
 		assert(fn1.called);
 		assert(fn2.called);
 	},
 	
 	"test subscribe publish subscribe same message w/ placeholder": function () {
 		var fn1 = stubFn();
-		Hub.subscribe("x/y", fn1);
-		Hub.publish("x/{0}", "y");
+		hub.subscribe("x/y", fn1);
+		hub.publish("x/{0}", "y");
 		assert(fn1.called);
 		fn1.called = false;
 		var fn2 = stubFn();
-		Hub.subscribe("x/y", fn2);
-		Hub.publish("x/{0}", "y");
+		hub.subscribe("x/y", fn2);
+		hub.publish("x/{0}", "y");
 		assert(fn1.called);
 		assert(fn2.called);
 	},
 	
 	"test multicast publish and subscribe": function () {
 		var fnx = stubFn();
-		Hub.subscribe("x/*", fnx);
-		Hub.publish("x/*");
+		hub.subscribe("x/*", fnx);
+		hub.publish("x/*");
 		assert(fnx.called);
 	},
 	
@@ -168,10 +168,10 @@ TestCase("PublishSubscribeTest", {
 		};
 		var fna = stubFn();
 		var fnb = stubFn();
-		Hub.subscribe("x/a", fna);
-		Hub.subscribe("x/b", fnb);
-		Hub.subscribe("x/*", fn);
-		Hub.publish("x/*");
+		hub.subscribe("x/a", fna);
+		hub.subscribe("x/b", fnb);
+		hub.subscribe("x/*", fn);
+		hub.publish("x/*");
 		assert(fna.called);
 		assert(fnb.called);
 		assertEquals(1, count);
@@ -182,19 +182,19 @@ TestCase("PublishSubscribeTest", {
 		var fn = function () {
 			count++;
 		};
-		Hub.subscribe("x/a", fn);
-		Hub.publish("x/*");
+		hub.subscribe("x/a", fn);
+		hub.publish("x/*");
 		assertEquals(1, count);
-		Hub.publish("x/*");
+		hub.publish("x/*");
 		assertEquals(2, count);
 	},
 	
 	"test throw in subscriber": function () {
-		Hub.subscribe("test/throw", function () {
+		hub.subscribe("test/throw", function () {
 			throw new Error();
 		});
 		assertException(function () {
-			Hub.publish("test/throw");
+			hub.publish("test/throw");
 		});
 	}
 	

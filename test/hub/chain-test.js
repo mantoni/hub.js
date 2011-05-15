@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,12 +9,12 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.chain.
+ * Test cases for hub.chain.
  */
 TestCase("ChainCreateTest", {
 	
 	"test should create empty chain": function () {
-		var chain = Hub.chain();
+		var chain = hub.chain();
 
 		assertFunction(chain.add);
 		assertFunction(chain.insert);
@@ -32,14 +32,14 @@ TestCase("ChainCallTest", {
 		var f2 = function () {
 			calls.push("f2");
 		};
-		Hub.chain(f1, f2)();
+		hub.chain(f1, f2)();
 		assertEquals("Called in argument order", "f1,f2", calls.join());
 	},
 	
-	"test should stop after Hub.stopPropagation": function () {
+	"test should stop after hub.stopPropagation": function () {
 		var f = stubFn();
-		Hub.chain(function () {
-			Hub.stopPropagation();
+		hub.chain(function () {
+			hub.stopPropagation();
 		}, f)();
 		assertFalse(f.called);
 	}
@@ -51,7 +51,7 @@ TestCase("ChainRemoveTest", {
 	"test remove first of two": function () {
 		var f1 = stubFn();
 		var f2 = stubFn();
-		var chain = Hub.chain(f1, f2);
+		var chain = hub.chain(f1, f2);
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
@@ -61,7 +61,7 @@ TestCase("ChainRemoveTest", {
 	"test remove second of two": function () {
 		var f1 = stubFn();
 		var f2 = stubFn();
-		var chain = Hub.chain(f1, f2);
+		var chain = hub.chain(f1, f2);
 		chain.remove(f2);
 		chain();
 		assert(f1.called);
@@ -72,7 +72,7 @@ TestCase("ChainRemoveTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.chain(f1, f2, f3);
+		var chain = hub.chain(f1, f2, f3);
 		chain.remove(f1);
 		chain();
 		assertFalse(f1.called);
@@ -84,7 +84,7 @@ TestCase("ChainRemoveTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.chain(f1, f2, f3);
+		var chain = hub.chain(f1, f2, f3);
 		chain.remove(f2);
 		chain();
 		assert(f1.called);
@@ -96,7 +96,7 @@ TestCase("ChainRemoveTest", {
 		var f1 = stubFn();
 		var f2 = stubFn();
 		var f3 = stubFn();
-		var chain = Hub.chain(f1, f2, f3);
+		var chain = hub.chain(f1, f2, f3);
 		chain.remove(f3);
 		chain();
 		assert(f1.called);
@@ -111,7 +111,7 @@ TestCase("ChainConcurrencyTest", {
 	"test should allow add during invocation": function () {
 		var calls = 0;
 		var sf = stubFn();
-		var chain = Hub.chain();
+		var chain = hub.chain();
 		chain.add(function () {
 			calls++;
 			chain.add(sf);
@@ -127,7 +127,7 @@ TestCase("ChainScopeTest", {
 	
 	"test should retain scope": function () {
 		var fn = stubFn();
-		var chain = Hub.chain();
+		var chain = hub.chain();
 		chain.add(fn);
 		var object = {};
 		chain.call(object);
@@ -140,51 +140,51 @@ TestCase("ChainNestingTest", {
 	
 	"test should invoke nested chain": function () {
 		var f = stubFn();
-		var ca = Hub.chain(f);
-		var cb = Hub.chain(ca);
+		var ca = hub.chain(f);
+		var cb = hub.chain(ca);
 		cb();
 		assert(f.called);
 	},
 	
 	"test should abort parent": function () {
-		var ca = Hub.chain(function () {
-			Hub.stopPropagation();
+		var ca = hub.chain(function () {
+			hub.stopPropagation();
 		});
 		var f = stubFn();
-		var cb = Hub.chain(ca, f);
+		var cb = hub.chain(ca, f);
 		cb();
 		assertFalse(f.called);
 	},
 	
 	"test should propagate to parent": function () {
 		var f = stubFn();
-		var ca = Hub.chain(function () {
-			Hub.propagate();
+		var ca = hub.chain(function () {
+			hub.propagate();
 			assert(f.called);
 		});
-		var cb = Hub.chain(ca, f);
+		var cb = hub.chain(ca, f);
 		cb();
 	},
 	
 	"test should merge results": function () {
-		var c1 = Hub.chain(function () {
+		var c1 = hub.chain(function () {
 			return [1];
 		});
-		var c2 = Hub.chain(function () {
+		var c2 = hub.chain(function () {
 			return [2];
 		});
-		assertEquals([1, 2], Hub.chain(c1, c2)());
+		assertEquals([1, 2], hub.chain(c1, c2)());
 	},
 	
 	"test should pass arguments through": function () {
 		var args = [];
-		var c1 = Hub.chain(function (a) {
+		var c1 = hub.chain(function (a) {
 			args.push(a);
 		});
-		var c2 = Hub.chain(function (a) {
+		var c2 = hub.chain(function (a) {
 			args.push(a);
 		});
-		Hub.chain(c1, c2)("x");
+		hub.chain(c1, c2)("x");
 		assertEquals(["x", "x"], args);
 	}
 	

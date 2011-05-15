@@ -7,6 +7,6 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /**
- * Defines the Hub namespace.
+ * Defines the hub namespace.
  */
-Hub = {};
+hub = {};

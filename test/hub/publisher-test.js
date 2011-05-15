@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -9,13 +9,13 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for Hub.publisher.
+ * Test cases for hub.publisher.
  */
 (function () {
 	
 	function publishData(fn) {
 		var result;
-		Hub.subscribe("a/b", function (data) {
+		hub.subscribe("a/b", function (data) {
 			result = data;
 		});
 		fn.apply(null, Array.prototype.slice.call(arguments, 1));
@@ -25,20 +25,20 @@
 	TestCase("PublisherTest", {
 	
 		tearDown: function () {
-			Hub.reset();
+			hub.reset();
 		},
 	
 		"test should implement publisher": function () {
-			assertFunction(Hub.publisher);
+			assertFunction(hub.publisher);
 		},
 		
 		"test should return function": function () {
-			var publisher = Hub.publisher("a/b");
+			var publisher = hub.publisher("a/b");
 			assertFunction(publisher);
 		},
 	
 		"test should not throw on invocation": function () {
-			var publisher = Hub.publisher("a/b");
+			var publisher = hub.publisher("a/b");
 			assertNoException(function () {
 				publisher();
 			});
@@ -54,32 +54,32 @@
 		},
 	
 		"test should pass single argument to subscriber": function () {
-			var fn = Hub.publisher("a/b");
+			var fn = hub.publisher("a/b");
 			assertEquals("data", publishData(fn, "data"));
 		},
 	
 		"test should merge argument": function () {
-			var fn = Hub.publisher("a/b", {x: "x"});
+			var fn = hub.publisher("a/b", {x: "x"});
 			var d = publishData(fn, {});
 			assertEquals("x", d.x);
 		},
 			
 		"test should invoke transformer with one argument": function () {
-			var fn = Hub.publisher("a/b", function (msg) {
+			var fn = hub.publisher("a/b", function (msg) {
 				return msg + "!";
 			});
 			assertEquals("Hi!", publishData(fn, "Hi"));
 		},
 	
 		"test should invoke transform with two arguments": function () {
-			var fn = Hub.publisher("a/b", function (msg1, msg2) {
+			var fn = hub.publisher("a/b", function (msg1, msg2) {
 				return msg1 + " " + msg2 + "!";
 			});
 			assertEquals("Hi there!", publishData(fn, "Hi", "there"));
 		},
 	
 		"test should merge data and transform result": function () {
-			var fn = Hub.publisher("a/b", function (data) {
+			var fn = hub.publisher("a/b", function (data) {
 				return { x: data };
 			}, { y: "y" });
 			var d = publishData(fn, "x");
@@ -88,7 +88,7 @@
 		},
 		
 		"test create api": function () {
-			var api = Hub.publisher({
+			var api = hub.publisher({
 				ab: "a/b",
 				xy: "x/y"
 			});
@@ -97,8 +97,8 @@
 			assertFunction(api.xy);
 			var ab = stubFn();
 			var xy = stubFn();
-			Hub.subscribe("a/b", ab);
-			Hub.subscribe("x/y", xy);
+			hub.subscribe("a/b", ab);
+			hub.subscribe("x/y", xy);
 			api();
 			assert(ab.called);
 			assert(xy.called);

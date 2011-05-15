@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global Hub*/
+/*global hub*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:
@@ -53,14 +53,14 @@
 			return 1;
 		}
 		return 0;
-	};
+	}
 	
 	function topicChain(chainTopic, firstChild) {
 		if (!chainTopic) {
 			chainTopic = rootTopic;
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
-		var fns = Hub.chain();
+		var fns = hub.chain();
 		var children = firstChild ? [firstChild] : [];
 		function callChain(topic, args, queue) {
 			if (!topic) {
@@ -90,7 +90,7 @@
 			while (queue.length) {
 				var child = queue.shift();
 				var childResult = child.call(this, topic, args, queue);
-				result = Hub.merge(result, childResult);
+				result = hub.merge(result, childResult);
 				if (child.aborted) {
 					callChain.aborted = true;
 					break;
@@ -191,17 +191,17 @@
 	
 	// Public API:
 	
-	Hub.topicChain = topicChain; // exposed for unit testing only.
-	Hub.topicComparator = topicComparator;
+	hub.topicChain = topicChain; // exposed for unit testing only.
+	hub.topicComparator = topicComparator;
 	
 	/**
-	 * resets the Hub to it's initial state. Primarily required for unit
+	 * resets the hub to it's initial state. Primarily required for unit
 	 * testing.
 	 */
-	Hub.reset = function () {
+	hub.reset = function () {
 		rootChain = topicChain();
-		Hub.resetPeers();
-		Hub.resetPromise();
+		hub.resetPeers();
+		hub.resetPromise();
 	};
 	
 	/**
@@ -210,7 +210,7 @@
 	 * @param {string} topic the topic.
 	 * @param {function (object)} fn the callback function.
 	 */
-	Hub.subscribe = function (topic, fn) {
+	hub.subscribe = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		rootChain.add(fn, topic);
@@ -224,7 +224,7 @@
 	 * @return {Boolean} false if the callback was not registered, otherwise
 	 *			true.
 	 */
-	Hub.unsubscribe = function (topic, fn) {
+	hub.unsubscribe = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		return rootChain.remove(fn, topic);
@@ -238,16 +238,16 @@
 	 * @param {String} topic the topic.
 	 * @param {...Object} args the arguments to pass.
 	 */
-	Hub.invoke = function (topic) {
+	hub.invoke = function (topic) {
 		validateTopic(topic);
 		var args = Array.prototype.slice.call(arguments, 1);
 		if (topic.indexOf("{") !== -1) {
-			topic = Hub.substitute(topic, args);
+			topic = hub.substitute(topic, args);
 		}
 		try {
 			return rootChain(topic, args);
 		} catch (e) {
-			throw new Hub.Error("error",
+			throw new hub.Error("error",
 				"Error in call chain for topic \"{topic}\": {error}", {
 					topic: topic,
 					error: e.message
@@ -260,7 +260,7 @@
 	 *
 	 * @return {Boolean} true if the last publish was aborted.
 	 */
-	Hub.aborted = function () {
+	hub.aborted = function () {
 		return Boolean(rootChain.aborted);
 	};
 	
