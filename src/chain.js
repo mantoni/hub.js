@@ -102,38 +102,6 @@
 		next();
 	};
 	
-	/**
-	 * compares two topics. Returns 0 if the topics have the same priority,
-	 * -1 if the first given topic is "smaller"" the second one and 1 if
-	 * the first topic is "larger" than the second one. This means that a
-	 * subscriber for the "smaller" topic gets invoked before a subscriber
-	 * for the "larger" topic.
-	 *
-	 * @param {String} left the first topic.
-	 * @param {String} right the second topic.
-	 * @return {Number} 0, 1 or -1.
-	 */
-	Hub.topicComparator = function (left, right) {
-		var leftStar = left.indexOf("*");
-		var rightStar = right.indexOf("*");
-		if (leftStar === -1) {
-			return rightStar === -1 ? 0 : 1;
-		}
-		if (rightStar === -1) {
-			return -1;
-		}
-		var leftSlash = left.indexOf("/");
-		var rightSlash = right.indexOf("/");
-		if (leftStar < leftSlash) {
-			if (rightStar > rightSlash) {
-				return -1;
-			}
-		} else if (rightStar < rightSlash) {
-			return 1;
-		}
-		return 0;
-	};
-	
 	Hub.chain = chain;
 
 }());
