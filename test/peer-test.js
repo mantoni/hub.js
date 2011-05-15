@@ -17,7 +17,7 @@ TestCase("PeerTest", {
 		Hub.reset();
 	},
 	
-	"test defining a node twice fails": function() {
+	"test should fail if defined twice": function() {
 		Hub.peer("definedTwice", {});
 		try {
 			Hub.peer("definedTwice", {});
@@ -29,7 +29,7 @@ TestCase("PeerTest", {
 		fail("Exception expected");
 	},
 	
-	"test a simple peer definition with one listener works": function() {
+	"test should receive message": function() {
 		var fn = stubFn();
 		Hub.peer("simple", {
 			"message": fn
@@ -38,7 +38,7 @@ TestCase("PeerTest", {
 		assert(fn.called);
 	},
 	
-	"test dot separated namespaces used for peer and listener": function() {
+	"test should allow dot separated namespace and message": function() {
 		var fn = stubFn();
 		Hub.peer("a.b", {
 			"c.d": fn
@@ -53,7 +53,7 @@ TestCase("PeerTest", {
 	 * ensure a peer can be defined after an existing subscription and both
 	 * get mixed and then invoked in the correct order.
 	 */
-	"test subscribe then add peer": function() {
+	"test should override subscriber": function() {
 		var chain = [];
 		Hub.subscribe("a/b", function() {
 			chain.push("subscribe");
@@ -68,7 +68,7 @@ TestCase("PeerTest", {
 		assertEquals("peer,subscribe", chain.join());
 	},
 	
-	"test peer multicasting": function() {
+	"test should receive multicast": function() {
 		var chain = [];
 		Hub.peer("a.b", {
 			"m": function() {
@@ -85,7 +85,7 @@ TestCase("PeerTest", {
 		assertEquals("y,x", chain.join());
 	},
 	
-	"test scope is peer": function() {
+	"test should receive message with peer as scope object": function() {
 		var fn = stubFn();
 		Hub.peer("a", {
 			"b": fn

@@ -273,6 +273,18 @@ TestCase("PromiseTest", {
 		var fn = stubFn();
 		p1.then(stubFn("test")).then(fn);
 		assertEquals({0: "test"}, fn.args);
+	},
+	
+	"test promise rejected": function() {
+		Hub.subscribe("test/throw", function() {
+			Hub.promise();
+			throw new Error();
+		});
+		var f = stubFn();
+		Hub.publish("test/throw").then(function() {
+			fail("Unexpected success");
+		}, f);
+		assert(f.called);
 	}
 	
 });

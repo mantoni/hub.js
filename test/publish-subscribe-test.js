@@ -187,6 +187,15 @@ TestCase("PublishSubscribeTest", {
 		assertEquals(1, count);
 		Hub.publish("x/*");
 		assertEquals(2, count);
+	},
+	
+	"test throw in subscriber": function() {
+		Hub.subscribe("test/throw", function() {
+			throw new Error();
+		});
+		assertException(function() {
+			Hub.publish("test/throw");
+		});
 	}
 	
 });

@@ -17,15 +17,15 @@ TestCase("AbortedTest", {
 		Hub.reset();
 	},
 	
-	"test function exists": function() {
+	"test should implement aborted": function() {
 		assertFunction(Hub.aborted);
 	},
 	
-	"test aborted returns false by default": function() {
+	"test should return false by default": function() {
 		assertFalse(Hub.aborted());
 	},
 	
-	"test aborted returns true after stopPropagation": function() {
+	"test should return true after stopPropagation": function() {
 		Hub.subscribe("a/b", function() {
 			Hub.stopPropagation();
 		});

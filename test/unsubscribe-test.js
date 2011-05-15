@@ -17,10 +17,7 @@ TestCase("UnsubscribeTest", {
 		Hub.reset();
 	},
 	
-	/*
-	 * basic unsubscribe functionality.
-	 */
-	testSimpleUnsubscribe: function() {
+	"test simple unsubscribe": function() {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
@@ -31,7 +28,7 @@ TestCase("UnsubscribeTest", {
 		assertFalse(fn.called);
 	},
 	
-	testUnsubscribeFirstInChainOfTwo: function() {
+	"test unsubscribe first in chain of two": function() {
 		var a = [];
 		var f1 = function() {
 			a.push("f1");
@@ -49,7 +46,7 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f2", a.join());
 	},
 	
-	testUnsubscribeSecondInChainOfTwo: function() {
+	"test unsubscribe second in chain of two": function() {
 		var a = [];
 		var f1 = function() {
 			a.push("f1");
@@ -67,7 +64,7 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f1", a.join());
 	},
 	
-	testUnsubscribeFirstInChainOfThree: function() {
+	"test unsubscribe first in chain of three": function() {
 		var a = [];
 		var f1 = function() {
 			a.push("f1");
@@ -89,7 +86,7 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f3,f2", a.join());
 	},
 	
-	testUnsubscribeSecondInChainOfThree: function() {
+	"test unsubscribe second in chain of three": function() {
 		var a = [];
 		var f1 = function() {
 			a.push("f1");
@@ -111,7 +108,7 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f3,f1", a.join());
 	},
 	
-	testUnsubscribeThirdInChainOfThree: function() {
+	"test unsubscribe third in chain of three": function() {
 		var a = [];
 		var f1 = function() {
 			a.push("f1");
@@ -156,7 +153,7 @@ TestCase("UnsubscribeTest", {
 		assertFalse(fn.called);
 	},
 	
-	"test unsubscribe throws error if callback is not a function": function() {
+	"test unsubscribe throws if callback is not a function": function() {
 		assertException(function() {
 			Hub.unsubscribe("x/y");
 		});
@@ -183,6 +180,5 @@ TestCase("UnsubscribeTest", {
 	"test unsubscribe returns false on failure": function() {
 		assertFalse(Hub.unsubscribe("x/y", function() {}));
 	}
-
-	// unsubscribe
+	
 });

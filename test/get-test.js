@@ -17,17 +17,17 @@ TestCase("GetTest", {
 		Hub.reset();
 	},
 	
-	"test function exists": function() {
+	"test should implement get": function() {
 		assertFunction(Hub.get);
 	},
 	
-	"test get undefined throws error": function() {
+	"test should throws if unknown": function() {
 		assertException(function() {
 			Hub.get("unknown");
 		});
 	},
 	
-	"test get singleton": function() {
+	"test should return singleton peer": function() {
 		var fn = stubFn();
 		Hub.peer("test", {
 			key: fn
@@ -38,7 +38,7 @@ TestCase("GetTest", {
 		assertFunction(test.key);
 	},
 	
-	"test get prototype": function() {
+	"test should return prototype peer": function() {
 		var fn = stubFn();
 		Hub.peer("test", function() {
 			return {
@@ -51,7 +51,7 @@ TestCase("GetTest", {
 		assertFunction(test.key);
 	},
 	
-	"test additional subscriber invoked on singleton": function() {
+	"test should invoke singleton method and subscriber": function() {
 		var fn1 = stubFn();
 		Hub.peer("test", {
 			key: fn1
@@ -64,7 +64,7 @@ TestCase("GetTest", {
 		assert(fn2.called);
 	},
 	
-	"test additional subscriber invoked on prototype": function() {
+	"test should invoke prototype method and subscriber": function() {
 		var fn1 = stubFn();
 		Hub.peer("test", function () {
 			return {
