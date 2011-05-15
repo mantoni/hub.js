@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,11 +13,11 @@
  */
 TestCase("ForwardTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test simple forward short": function() {
+	"test simple forward short": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.forward("a/b", "x/y");
@@ -25,7 +25,7 @@ TestCase("ForwardTest", {
 		assert(fn.called);
 	},
 	
-	"test multi forward simple": function() {
+	"test multi forward simple": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.forward({
@@ -35,7 +35,7 @@ TestCase("ForwardTest", {
 		assert(fn.called);
 	},
 	
-	testMultiForwardComplex: function() {
+	testMultiForwardComplex: function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.forward({

@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub, clearTimeout, setTimeout*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -8,7 +8,7 @@
 /**
  * adds promises to the hub.
  */
-(function() {
+(function () {
 	
 	/**
 	 * The current promise. Also indicates whether currently executing
@@ -35,22 +35,21 @@
 		var result;
 		try {
 			result = callback.apply(null, args);
-		}
-		catch(e) {
+		} catch (e) {
 			Hub.invoke("hub.error/promise.callback", new Hub.Error("error",
 				"Error in promise callback: ${error}", {
 					error: e.message
 				}));
 			return; // TODO test case for whether return args; makes sense
 		}
-		if(!returnArgs) {
+		if (!returnArgs) {
 			return;
 		}
-		if(result === undefined) {
+		if (result === undefined) {
 			return args; // retain previous arguments. TODO test case
 		}
 		// TODO test case for this:
-		/*if(Object.prototype.toString.call(result) === "[object Array]") {
+		/*if (Object.prototype.toString.call(result) === "[object Array]") {
 			return result;
 		}*/
 		return [result];
@@ -71,7 +70,7 @@
 	 * @param {Object} monitoredPromise the promise.
 	 */
 	function promiseTimeout(monitoredPromise) {
-		return function() {
+		return function () {
 			monitoredPromise.reject({
 				type: "timeout"
 			});
@@ -101,18 +100,17 @@
 			 * @param {Function} errorCallback the error callback.
 			 * @return {Object} this promise.
 			 */
-			then: function(callback, errorCallback) {
-				if(resolved) {
+			then: function (callback, errorCallback) {
+				if (resolved) {
 					var fn = success ? callback : errorCallback;
-					if(fn) {
+					if (fn) {
 						args = invokePromiseCallback(fn, args, true);
 					}
-				}
-				else {
-					if(callback) {
+				} else {
+					if (callback) {
 						callbacks.push(callback);
 					}
-					if(errorCallback) {
+					if (errorCallback) {
 						errorCallbacks.push(errorCallback);
 					}
 				}
@@ -128,13 +126,13 @@
 			 * @param {...*} arguments the arguments.
 			 * @return {Object} this promise.
 			 */
-			publish: function(topic) {
-				if(resolved) {
+			publish: function (topic) {
+				if (resolved) {
 					args = [Hub.invoke.apply(Hub, arguments)];
 					return this;
 				}
 				var callArgs = array_slice.call(arguments);
-				return this.then(function() {
+				return this.then(function () {
 					args = [Hub.invoke.apply(Hub, callArgs)];
 					// A return value would be meaningless here.
 				});
@@ -148,12 +146,12 @@
 			 * @param {String} topic the topic.
 			 * @return {Object} this promise.
 			 */
-			publishResult: function(topic) {
-				if(resolved) {
+			publishResult: function (topic) {
+				if (resolved) {
 					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
 					return this;
 				}
-				return this.then(function() {
+				return this.then(function () {
 					args = [Hub.invoke.apply(Hub, [topic].concat(args))];
 					// A return value would be meaningless here.
 				});
@@ -163,17 +161,16 @@
 			 * @param {...*} args the results.
 			 * @return {Object} this promise.
 			 */
-			resolve: function() {
-				if(resolved) {
+			resolve: function () {
+				if (resolved) {
 					promiseAlreadyResolved();
-				}
-				else {
+				} else {
 					resolved = true;
 					clearTimeout(timeout);
-					if(arguments.length !== 0) {
+					if (arguments.length !== 0) {
 						args = array_slice.call(arguments);
 					}
-					while(callbacks.length) {
+					while (callbacks.length) {
 						invokePromiseCallback(callbacks.shift(), args);
 					}
 				}
@@ -184,15 +181,14 @@
 			 * @param {*} error the error data.
 			 * @return {Object} this promise.
 			 */
-			reject: function(error) {
-				if(resolved) {
+			reject: function (error) {
+				if (resolved) {
 					promiseAlreadyResolved();
-				}
-				else {
+				} else {
 					resolved = true;
 					success = false;
 					clearTimeout(timeout);
-					while(errorCallbacks.length) {
+					while (errorCallbacks.length) {
 						var callback = errorCallbacks.shift();
 						invokePromiseCallback(callback, [error]);
 					}
@@ -203,16 +199,16 @@
 			/**
 			 * @return {Boolean} whether this promise was resolved.
 			 */
-			resolved: function() {
+			resolved: function () {
 				return resolved;
 			},
 			
-			join: function(joinPromise) {
+			join: function (joinPromise) {
 				return joinPromises(p, joinPromise);
 			}
 			
 		};
-		if(!resolved) {
+		if (!resolved) {
 			callbacks = [];
 			errorCallbacks = [];
 			timeout = setTimeout(promiseTimeout(p), timeout || 60000);
@@ -243,23 +239,25 @@
 		 * the wrapper.
 		 */
 		function checkDone() {
-			if(++count === 2) {
+			if (++count === 2) {
 				(success ? wrapper.resolve : wrapper.reject).apply(
-					null, results);
+					null,
+					results
+				);
 			}
 		}
-		p1.then(function() {
+		p1.then(function () {
 			array_unshift.apply(results, arguments);
 			checkDone();
-		}, function() {
+		}, function () {
 			array_unshift.apply(results, arguments);
 			success = false;
 			checkDone();
 		});
-		p2.then(function() {
+		p2.then(function () {
 			array_push.apply(results, arguments);
 			checkDone();
-		}, function(result) {
+		}, function (result) {
 			array_push.apply(results, arguments);
 			success = false;
 			checkDone();
@@ -283,29 +281,31 @@
 	 * PromiseProxy is a lightweight object that creates the actual promise
 	 * on demand.
 	 */
-	var PromiseProxy = function() {};
+	var PromiseProxy = function () {};
 	// Same API as actual promise:
 	PromiseProxy.prototype = {
-		then: function(success, error) {
+		then: function (success, error) {
 			return replacePromiseProxy(this).then(success, error);
 		},
-		publish: function() {
+		publish: function () {
 			return replacePromiseProxy(this).publish.apply(null, arguments);
 		},
-		publishResult: function(namespace, message, data) {
+		publishResult: function (namespace, message, data) {
 			return replacePromiseProxy(this).publishResult.apply(
-				null, arguments);
+				null,
+				arguments
+			);
 		},
-		resolve: function() {
+		resolve: function () {
 			throw promiseResolvedError;
 		},
-		reject: function() {
+		reject: function () {
 			throw promiseResolvedError;
 		},
-		resolved: function() {
+		resolved: function () {
 			return true;
 		},
-		join: function(promise) {
+		join: function (promise) {
 			return replacePromiseProxy(this).join(promise);
 		}
 	};
@@ -321,21 +321,20 @@
 	 * @param {String} topic the topic
 	 * @param {...Object} args the arguments to pass
 	 */
-	Hub.publish = function(topic) {
+	Hub.publish = function (topic) {
 		var previousPromise = promise;
 		promise = false;
 		var result;
 		try {
 			result = Hub.invoke.apply(this, arguments);
-		}
-		catch(e) {
-			if(promise && e instanceof Hub.Error) {
+		} catch (e) {
+			if (promise && e instanceof Hub.Error) {
 				promise.reject(e);
 				return promise;
 			}
 			throw e;
 		}
-		if(typeof result !== "undefined") {
+		if (typeof result !== "undefined") {
 			var p = createPromise(true, result);
 			promise = promise ? joinPromises(promise, p) : p;
 		}
@@ -350,13 +349,12 @@
 	 * @param {Number} timeout the optional timeout for the promise
 	 * @return {Object} the promise
 	 */
-	Hub.promise = function(timeout) {
+	Hub.promise = function (timeout) {
 		var newPromise = createPromise(false, undefined, timeout);
-		if(promise === false) {
+		if (promise === false) {
 			// This means we do not have a promise yet.
 			promise = newPromise;
-		}
-		else if(promise !== true) {
+		} else if (promise !== true) {
 			/*
 			 * This means there is an existing promise already which we can
 			 * join with the new one.
@@ -367,8 +365,8 @@
 		return newPromise;
 	};
 	
-	Hub.resetPromise = function() {
-		if(typeof promise !== "boolean") {
+	Hub.resetPromise = function () {
+		if (typeof promise !== "boolean") {
 			promise.reject();
 		}
 		promise = true;

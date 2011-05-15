@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,36 +13,36 @@
  */
 TestCase("PublishSubscribeTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test publish calls subscriber with same topic": function() {
+	"test publish calls subscriber with same topic": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
 		assert(fn.called);
 	},
 	
-	"test publish does not call subscriber with different topic": function() {
+	"test publish does not call subscriber with different topic": function () {
 		var fn = stubFn();
 		Hub.subscribe("a/b", fn);
 		Hub.publish("x/y");
 		assertFalse(fn.called);
 	},
 	
-	"test publish one argument": function() {
+	"test publish one argument": function () {
 		var value1;
-		Hub.subscribe("x/y", function(arg1) {
+		Hub.subscribe("x/y", function (arg1) {
 			value1 = arg1;
 		});
 		Hub.publish("x/y", "first");
 		assertEquals("first", value1);
 	},
 	
-	"test publish two arguments": function() {
+	"test publish two arguments": function () {
 		var value1, value2;
-		Hub.subscribe("x/y", function(arg1, arg2) {
+		Hub.subscribe("x/y", function (arg1, arg2) {
 			value1 = arg1;
 			value2 = arg2;
 		});
@@ -51,12 +51,12 @@ TestCase("PublishSubscribeTest", {
 		assertEquals("second", value2);
 	},
 	
-	"test publish on topic with two subscribers": function() {
+	"test publish on topic with two subscribers": function () {
 		var m = [];
-		Hub.subscribe("x/y", function() {
+		Hub.subscribe("x/y", function () {
 			m.push("a");
 		});
-		Hub.subscribe("x/y", function() {
+		Hub.subscribe("x/y", function () {
 			m.push("b");
 		});
 		Hub.publish("x/y");
@@ -64,15 +64,15 @@ TestCase("PublishSubscribeTest", {
 		assertEquals("b,a", m.join());
 	},
 	
-	"test publish to two subscribers via wildcard message": function() {
+	"test publish to two subscribers via wildcard message": function () {
 		var m = [];
-		Hub.subscribe("x/a", function() {
+		Hub.subscribe("x/a", function () {
 			m.push("a");
 		});
-		Hub.subscribe("x/b", function() {
+		Hub.subscribe("x/b", function () {
 			m.push("b");
 		});
-		Hub.subscribe("y/c", function() {
+		Hub.subscribe("y/c", function () {
 			m.push("c");
 		});
 		Hub.publish("x/*");
@@ -80,15 +80,15 @@ TestCase("PublishSubscribeTest", {
 		assertEquals("b,a", m.join());
 	},
 	
-	"test publish to two subscribers via wildcard namespace": function() {
+	"test publish to two subscribers via wildcard namespace": function () {
 		var m = [];
-		Hub.subscribe("x/a", function() {
+		Hub.subscribe("x/a", function () {
 			m.push("a");
 		});
-		Hub.subscribe("y/a", function() {
+		Hub.subscribe("y/a", function () {
 			m.push("b");
 		});
-		Hub.subscribe("z/b", function() {
+		Hub.subscribe("z/b", function () {
 			m.push("c");
 		});
 		Hub.publish("*/a");
@@ -96,7 +96,7 @@ TestCase("PublishSubscribeTest", {
 		assertEquals("b,a", m.join());
 	},
 	
-	"test publish to wildcard, subscribe another, publish again": function() {
+	"test publish to wildcard, subscribe another, publish again": function () {
 		var fn1 = stubFn();
 		Hub.subscribe("x/a", fn1);
 		Hub.publish("x/*");
@@ -109,7 +109,7 @@ TestCase("PublishSubscribeTest", {
 		assert(fn2.called);
 	},
 	
-	"test subscribe to wildcard": function() {
+	"test subscribe to wildcard": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/*", fn);
 		Hub.publish("y/a");
@@ -118,7 +118,7 @@ TestCase("PublishSubscribeTest", {
 		assert(fn.called);
 	},
 	
-	"test publish with placeholder in message": function() {
+	"test publish with placeholder in message": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/{0}", "y");
@@ -128,7 +128,7 @@ TestCase("PublishSubscribeTest", {
 		assert(fn.called);
 	},
 	
-	"test subscribe publish subscribe same message": function() {
+	"test subscribe publish subscribe same message": function () {
 		var fn1 = stubFn();
 		Hub.subscribe("x/y", fn1);
 		Hub.publish("x/y");
@@ -141,7 +141,7 @@ TestCase("PublishSubscribeTest", {
 		assert(fn2.called);
 	},
 	
-	"test subscribe publish subscribe same message w/ placeholder": function() {
+	"test subscribe publish subscribe same message w/ placeholder": function () {
 		var fn1 = stubFn();
 		Hub.subscribe("x/y", fn1);
 		Hub.publish("x/{0}", "y");
@@ -154,16 +154,16 @@ TestCase("PublishSubscribeTest", {
 		assert(fn2.called);
 	},
 	
-	"test multicast publish and subscribe": function() {
+	"test multicast publish and subscribe": function () {
 		var fnx = stubFn();
 		Hub.subscribe("x/*", fnx);
 		Hub.publish("x/*");
 		assert(fnx.called);
 	},
 	
-	"test multicast subscriber invoked once": function() {
+	"test multicast subscriber invoked once": function () {
 		var count = 0;
-		var fn = function() {
+		var fn = function () {
 			count++;
 		};
 		var fna = stubFn();
@@ -177,9 +177,9 @@ TestCase("PublishSubscribeTest", {
 		assertEquals(1, count);
 	},
 	
-	"test multicast publish twice": function() {
+	"test multicast publish twice": function () {
 		var count = 0;
-		var fn = function() {
+		var fn = function () {
 			count++;
 		};
 		Hub.subscribe("x/a", fn);
@@ -189,11 +189,11 @@ TestCase("PublishSubscribeTest", {
 		assertEquals(2, count);
 	},
 	
-	"test throw in subscriber": function() {
-		Hub.subscribe("test/throw", function() {
+	"test throw in subscriber": function () {
+		Hub.subscribe("test/throw", function () {
 			throw new Error();
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.publish("test/throw");
 		});
 	}

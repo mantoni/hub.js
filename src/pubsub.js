@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -8,30 +8,34 @@
 /**
  *
  */
-(function() {
+(function () {
 	
 	var rootTopic = "**/**";
 	
 	function pathMatcher(name) {
 		var exp = name.replace(/\./g, "\\.").replace(
-			/\*\*/g, "([a-zA-Z0-9\\.#]+|##)").replace(
-			/\*/g, "([a-zA-Z0-9\\*]+)").replace(/#/g, "\\*");
+			/\*\*/g,
+			"([a-zA-Z0-9\\.#]+|##)"
+		).replace(
+			/\*/g,
+			"([a-zA-Z0-9\\*]+)"
+		).replace(/#/g, "\\*");
 		return new RegExp("^" + exp + "$");
 	}
 	
 	function topicChain(chainTopic, firstChild) {
-		if(!chainTopic) {
+		if (!chainTopic) {
 			chainTopic = rootTopic;
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var fns = Hub.chain();
 		var children = firstChild ? [firstChild] : [];
 		function callChain(topic, args, queue) {
-			if(!topic) {
+			if (!topic) {
 				topic = chainTopic;
 			}
-			if(topic !== rootTopic && !chainTopicMatcher.test(topic)) {
-				if(topic.indexOf("*") === -1 ||
+			if (topic !== rootTopic && !chainTopicMatcher.test(topic)) {
+				if (topic.indexOf("*") === -1 ||
 						!pathMatcher(topic).test(chainTopic)) {
 					return;
 				}
@@ -39,52 +43,51 @@
 			}
 			var result = args && args.length ?
 							fns.apply(this, args) : fns.call(this);
-			if(fns.aborted) {
+			if (fns.aborted) {
 				callChain.aborted = true;
 				return result;
 			}
-			if(!queue) {
+			if (!queue) {
 				queue = children.slice();
-			}
-			else {
+			} else {
 				var i, l;
-				for(i = 0, l = children.length; i < l; i++) {
+				for (i = 0, l = children.length; i < l; i++) {
 					queue.push(children[i]);
 				}
 			}
-			while(queue.length) {
+			while (queue.length) {
 				var child = queue.shift();
 				var childResult = child.call(this, topic, args, queue);
 				result = Hub.merge(result, childResult);
-				if(child.aborted) {
+				if (child.aborted) {
 					callChain.aborted = true;
 					break;
 				}
 			}
 			return result;
 		}
-		callChain.matches = function(topic) {
+		callChain.matches = function (topic) {
 			return chainTopicMatcher.test(topic);
 		};
-		callChain.getTopic = function() {
+		callChain.getTopic = function () {
 			return chainTopic;
 		};
-		callChain.add = function(fn, topic, topicMatcher) {
-			if(chainTopic === topic) {
+		callChain.add = function (fn, topic, topicMatcher) {
+			if (chainTopic === topic) {
 				fns.add(fn);
 				return;
 			}
 			var newChild, i, l, child;
-			for(i = 0, l = children.length; i < l; i++) {
+			for (i = 0, l = children.length; i < l; i++) {
 				child = children[i];
-				if(child.matches(topic)) {
+				if (child.matches(topic)) {
 					child.add(fn, topic, topicMatcher);
 					return;
 				}
-				if(!topicMatcher) {
+				if (!topicMatcher) {
 					topicMatcher = pathMatcher(topic);
 				}
-				if(topicMatcher.test(child.getTopic())) {
+				if (topicMatcher.test(child.getTopic())) {
 					newChild = topicChain(topic, child);
 					newChild.add(fn, topic, topicMatcher);
 					children[i] = newChild;
@@ -93,14 +96,13 @@
 			}
 			newChild = topicChain(topic);
 			newChild.add(fn, topic);
-			if(topic.indexOf("*") === -1) {
+			if (topic.indexOf("*") === -1) {
 				children.unshift(newChild);
-			}
-			else {
-				for(i = 0, l = children.length; i < l; i++) {
+			} else {
+				for (i = 0, l = children.length; i < l; i++) {
 					var childTopic = children[i].getTopic();
 					var result = Hub.topicComparator(childTopic, topic);
-					if(result !== -1) {
+					if (result !== -1) {
 						children.splice(i, 0, newChild);
 						return;
 					}
@@ -108,15 +110,15 @@
 				children.push(newChild);
 			}
 		};
-		callChain.remove = function(fn, topic) {
-			if(chainTopic === topic) {
+		callChain.remove = function (fn, topic) {
+			if (chainTopic === topic) {
 				return fns.remove(fn);
 			}
 			var i, l, child;
-			for(i = 0, l = children.length; i < l; i++) {
+			for (i = 0, l = children.length; i < l; i++) {
 				child = children[i];
-				if(child.matches(topic)) {
-					if(child.remove(fn, topic)) {
+				if (child.matches(topic)) {
+					if (child.remove(fn, topic)) {
 						return true;
 					}
 				}
@@ -129,13 +131,13 @@
 	// ensures the given argument is a valid topic. Throws an error otherwise.
 	function validateTopic(topic) {
 		var type = typeof topic;
-		if(type !== "string") {
+		if (type !== "string") {
 			throw new Error("Topic is " + type);
 		}
-		if(!topic) {
+		if (!topic) {
 			throw new Error("Topic is empty");
 		}
-		if(!(/^[a-zA-Z0-9\.\{\}\*]+(\/[a-zA-Z0-9\.\{\}\*]+)?$/.test(topic))) {
+		if (!(/^[a-zA-Z0-9\.\{\}\*]+(\/[a-zA-Z0-9\.\{\}\*]+)?$/.test(topic))) {
 			throw new Error("Illegal topic: " + topic);
 		}
 	}
@@ -143,7 +145,7 @@
 	// ensures the given argument is a function. Throws an error otherwise.
 	function validateCallback(fn) {
 		var fnType = typeof fn;
-		if(fnType !== "function") {
+		if (fnType !== "function") {
 			throw new Error("Callback is " + fnType);
 		}
 	}
@@ -163,7 +165,7 @@
 	 * resets the Hub to it's initial state. Primarily required for unit
 	 * testing.
 	 */
-	Hub.reset = function() {
+	Hub.reset = function () {
 		rootChain = topicChain();
 		Hub.resetPeers();
 		Hub.resetPromise();
@@ -173,9 +175,9 @@
 	 * subscribes a callback function to the given topic.
 	 * 
 	 * @param {string} topic the topic.
-	 * @param {function(object)} fn the callback function.
+	 * @param {function (object)} fn the callback function.
 	 */
-	Hub.subscribe = function(topic, fn) {
+	Hub.subscribe = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		rootChain.add(fn, topic);
@@ -185,11 +187,11 @@
 	 * unsubscribes a callback function from the given topic.
 	 *
 	 * @param {string} topic the topic.
-	 * @param {function(object)} fn the callback function.
+	 * @param {function (object)} fn the callback function.
 	 * @return {Boolean} false if the callback was not registered, otherwise
 	 *			true.
 	 */
-	Hub.unsubscribe = function(topic, fn) {
+	Hub.unsubscribe = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		return rootChain.remove(fn, topic);
@@ -203,19 +205,19 @@
 	 * @param {String} topic the topic.
 	 * @param {...Object} args the arguments to pass.
 	 */
-	Hub.invoke = function(topic) {
+	Hub.invoke = function (topic) {
 		validateTopic(topic);
 		var args = Array.prototype.slice.call(arguments, 1);
-		if(topic.indexOf("{") !== -1) {
+		if (topic.indexOf("{") !== -1) {
 			topic = Hub.substitute(topic, args);
 		}
 		try {
 			return rootChain(topic, args);
-		}
-		catch(e) {
+		} catch (e) {
 			throw new Hub.Error("error",
 				"Error in call chain for topic \"{topic}\": {error}", {
-					topic: topic, error: e.message
+					topic: topic,
+					error: e.message
 				});
 		}
 	};
@@ -225,7 +227,7 @@
 	 *
 	 * @return {Boolean} true if the last publish was aborted.
 	 */
-	Hub.aborted = function() {
+	Hub.aborted = function () {
 		return Boolean(rootChain.aborted);
 	};
 	

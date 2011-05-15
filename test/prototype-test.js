@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,9 +13,9 @@
  */
 TestCase("PrototypeTest", {
 	
-	setUp: function() {
+	setUp: function () {
 		var fn = stubFn();
-		Hub.peer("test", function() {
+		Hub.peer("test", function () {
 			return {
 				stub: fn
 			};
@@ -23,26 +23,26 @@ TestCase("PrototypeTest", {
 		this.fn = fn;
 	},
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test publish does not invoke method on prototype peer": function() {
+	"test publish does not invoke method on prototype peer": function () {
 		Hub.publish("test/stub");
 		assertFalse(this.fn.called);
 	},
 	
-	"test publisher does not invoke method on prototype peer": function() {
+	"test publisher does not invoke method on prototype peer": function () {
 		Hub.publisher("test/stub")();
 		assertFalse(this.fn.called);
 	},
 	
-	"test get and invoke method": function() {
+	"test get and invoke method": function () {
 		Hub.get("test").stub();
 		assert(this.fn.called);
 	},
 	
-	"test wildcard subscriber is invoked 1": function() {
+	"test wildcard subscriber is invoked 1": function () {
 		var fn = stubFn();
 		Hub.subscribe("test/*", fn);
 		Hub.get("test").stub();
@@ -50,7 +50,7 @@ TestCase("PrototypeTest", {
 		assert(fn.called);
 	},
 	
-	"test wildcard subscriber is invoked 2": function() {
+	"test wildcard subscriber is invoked 2": function () {
 		var fn = stubFn();
 		var instance = Hub.get("test");
 		Hub.subscribe("test/*", fn);

@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,11 +13,11 @@
  */
 TestCase("UnsubscribeTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test simple unsubscribe": function() {
+	"test simple unsubscribe": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/y");
@@ -28,12 +28,12 @@ TestCase("UnsubscribeTest", {
 		assertFalse(fn.called);
 	},
 	
-	"test unsubscribe first in chain of two": function() {
+	"test unsubscribe first in chain of two": function () {
 		var a = [];
-		var f1 = function() {
+		var f1 = function () {
 			a.push("f1");
 		};
-		var f2 = function() {
+		var f2 = function () {
 			a.push("f2");
 		};
 		Hub.subscribe("x/y", f1);
@@ -46,12 +46,12 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f2", a.join());
 	},
 	
-	"test unsubscribe second in chain of two": function() {
+	"test unsubscribe second in chain of two": function () {
 		var a = [];
-		var f1 = function() {
+		var f1 = function () {
 			a.push("f1");
 		};
-		var f2 = function() {
+		var f2 = function () {
 			a.push("f2");
 		};
 		Hub.subscribe("x/y", f1);
@@ -64,15 +64,15 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f1", a.join());
 	},
 	
-	"test unsubscribe first in chain of three": function() {
+	"test unsubscribe first in chain of three": function () {
 		var a = [];
-		var f1 = function() {
+		var f1 = function () {
 			a.push("f1");
 		};
-		var f2 = function() {
+		var f2 = function () {
 			a.push("f2");
 		};
-		var f3 = function() {
+		var f3 = function () {
 			a.push("f3");
 		};
 		Hub.subscribe("x/y", f1);
@@ -86,15 +86,15 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f3,f2", a.join());
 	},
 	
-	"test unsubscribe second in chain of three": function() {
+	"test unsubscribe second in chain of three": function () {
 		var a = [];
-		var f1 = function() {
+		var f1 = function () {
 			a.push("f1");
 		};
-		var f2 = function() {
+		var f2 = function () {
 			a.push("f2");
 		};
-		var f3 = function() {
+		var f3 = function () {
 			a.push("f3");
 		};
 		Hub.subscribe("x/y", f1);
@@ -108,15 +108,15 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f3,f1", a.join());
 	},
 	
-	"test unsubscribe third in chain of three": function() {
+	"test unsubscribe third in chain of three": function () {
 		var a = [];
-		var f1 = function() {
+		var f1 = function () {
 			a.push("f1");
 		};
-		var f2 = function() {
+		var f2 = function () {
 			a.push("f2");
 		};
-		var f3 = function() {
+		var f3 = function () {
 			a.push("f3");
 		};
 		Hub.subscribe("x/y", f1);
@@ -130,7 +130,7 @@ TestCase("UnsubscribeTest", {
 		assertEquals("f2,f1", a.join());
 	},
 	
-	"test publish subscribe publish unsubscribe publish": function() {
+	"test publish subscribe publish unsubscribe publish": function () {
 		var fn = stubFn();
 		Hub.publish("x/y");
 		Hub.subscribe("x/y", fn);
@@ -142,7 +142,7 @@ TestCase("UnsubscribeTest", {
 		assertFalse(fn.called);
 	},
 	
-	"test subscribe publish wildcard and unsubscribe": function() {
+	"test subscribe publish wildcard and unsubscribe": function () {
 		var fn = stubFn();
 		Hub.subscribe("x/y", fn);
 		Hub.publish("x/*");
@@ -153,32 +153,32 @@ TestCase("UnsubscribeTest", {
 		assertFalse(fn.called);
 	},
 	
-	"test unsubscribe throws if callback is not a function": function() {
-		assertException(function() {
+	"test unsubscribe throws if callback is not a function": function () {
+		assertException(function () {
 			Hub.unsubscribe("x/y");
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.unsubscribe("x/y", null);
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.unsubscribe("x/y", true);
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.unsubscribe("x/y", {});
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.unsubscribe("x/y", []);
 		});
 	},
 	
-	"test unsubscribe returns true on success": function() {
-		var fn = function() {};
+	"test unsubscribe returns true on success": function () {
+		var fn = function () {};
 		Hub.subscribe("x/y", fn);
 		assert(Hub.unsubscribe("x/y", fn));
 	},
 	
-	"test unsubscribe returns false on failure": function() {
-		assertFalse(Hub.unsubscribe("x/y", function() {}));
+	"test unsubscribe returns false on failure": function () {
+		assertFalse(Hub.unsubscribe("x/y", function () {}));
 	}
 	
 });

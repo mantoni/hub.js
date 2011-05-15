@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -11,7 +11,7 @@
  *
  * @param {Array} array the array to iterate.
  */
-Hub.iterator = function(array) {
+Hub.iterator = function (array) {
 	var index = 0;
 	var length = array.length;
 	
@@ -24,7 +24,7 @@ Hub.iterator = function(array) {
 	 * @return {*}
 	 */
 	function iterator() {
-		if(index >= length) {
+		if (index >= length) {
 			throw new Error("Iterator out of bounds.");
 		}
 		var item = array[index++];
@@ -48,26 +48,24 @@ Hub.iterator = function(array) {
 	iterator.remove = function remove(object) {
 		var type = typeof object;
 		var i;
-		if(type === "undefined") {
+		if (type === "undefined") {
 			object = index;
-		}
-		else if(type === "number") {
-			if(object < index) {
+		} else if (type === "number") {
+			if (object < index) {
 				index--;
 			}
-		}
-		else {
-			for(i = array.length - 1; i >= 0; i--) {
-				if(array[i] === object) {
+		} else {
+			for (i = array.length - 1; i >= 0; i--) {
+				if (array[i] === object) {
 					object = i;
 					break;
 				}
 			}
-			if(i < 0) {
+			if (i < 0) {
 				return false;
 			}
 		}
-		if(object >= length) {
+		if (object >= length) {
 			return false;
 		}
 		array.splice(object, 1);
@@ -84,11 +82,10 @@ Hub.iterator = function(array) {
 	 * @param {*} element the element to insert.
 	 */
 	iterator.insert = function insert(i, element) {
-		if(typeof element === "undefined") {
+		if (typeof element === "undefined") {
 			element = i;
 			i = index;
-		}
-		else if(i < index) {
+		} else if (i < index) {
 			index++;
 		}
 		array.splice(i, 0, element);
@@ -98,7 +95,7 @@ Hub.iterator = function(array) {
 	/**
 	 * resets the iterator so that the internal cursor position is zero.
 	 */
-	iterator.reset = function() {
+	iterator.reset = function () {
 		index = 0;
 		iterator.hasNext = index < length;
 	};

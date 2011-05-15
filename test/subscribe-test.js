@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,65 +13,65 @@
  */
 TestCase("SubscribeTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	testFunctionExists: function() {
+	testFunctionExists: function () {
 		assertFunction(Hub.subscribe);
 	},
 	
-	"test subscribe invocation": function() {
+	"test subscribe invocation": function () {
 		var fn = stubFn();
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a/b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a/*", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("*/b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a.*/b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a/b.*", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a.*/b.*", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("*.a/b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("*.a/*.b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("**/b", fn);
 		});
-		assertNoException(function() {
+		assertNoException(function () {
 			Hub.subscribe("a/**", fn);
 		});
 	},
 	
-	"test subscribe throws if callback is not function": function() {
-		assertException(function() {
+	"test subscribe throws if callback is not function": function () {
+		assertException(function () {
 			Hub.subscribe("x/y");
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.subscribe("x/y", null);
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.subscribe("x/y", true);
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.subscribe("x/y", {});
 		});
-		assertException(function() {
+		assertException(function () {
 			Hub.subscribe("x/y", []);
 		});
 	}

@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,25 +13,25 @@
  */
 TestCase("TopicComparatorTest", {
 	
-	"test method exists": function() {
+	"test method exists": function () {
 		assertFunction(Hub.topicComparator);
 	},
 	
-	"test equal": function() {
+	"test equal": function () {
 		assertEquals(0, Hub.topicComparator("foo", "bar"));
 	},
 	
-	"test wildcard message": function() {
+	"test wildcard message": function () {
 		assertEquals(-1, Hub.topicComparator("foo/*", "foo/bar"));
 		assertEquals(1, Hub.topicComparator("foo/bar", "foo/*"));
 	},
 
-	"test wildcard namespace": function() {
+	"test wildcard namespace": function () {
 		assertEquals(-1, Hub.topicComparator("*/bar", "foo/bar"));
 		assertEquals(1, Hub.topicComparator("foo/bar", "*/bar"));
 	},
 
-	"test namespace before message": function() {
+	"test namespace before message": function () {
 		assertEquals(-1, Hub.topicComparator("*/foo", "foo/*"));
 		assertEquals(1, Hub.topicComparator("foo/*", "*/foo"));
 	}

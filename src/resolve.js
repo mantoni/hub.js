@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -14,11 +14,11 @@
  * @param {*} defaultValue the optional default value.
  * @return {*} the resolved value or the default value.
  */
-Hub.resolve = function(object, path, defaultValue) {
+Hub.resolve = function (object, path, defaultValue) {
 	var p = path.indexOf(".");
-	while(p !== -1) {
+	while (p !== -1) {
 		var key = path.substring(0, p);
-		if(!object.hasOwnProperty(key)) {
+		if (!object.hasOwnProperty(key)) {
 			return defaultValue;
 		}
 		object = object[key];

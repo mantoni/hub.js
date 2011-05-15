@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -11,14 +11,13 @@
 /*
  * Test cases for Hub.merge.
  */
-(function() {
+(function () {
 	
 	function mergeError(target, source) {
 		var error = null;
 		try {
 			Hub.merge(target, source);
-		}
-		catch(e) {
+		} catch (e) {
 			error = e;
 		}
 		assertNotNull(error);
@@ -29,28 +28,28 @@
 
 	TestCase("MergeTest", {
 
-		"test empty object": function() {
+		"test empty object": function () {
 			var o = Hub.merge({}, {});
 			assertEquals("[object Object]", Object.prototype.toString.call(o));
 		},
 
-		"test empty array": function() {
+		"test empty array": function () {
 			var a = Hub.merge([], []);
 			assertEquals("[object Array]", Object.prototype.toString.call(a));
 		},
 
-		"test should merge object properties": function() {
+		"test should merge object properties": function () {
 			var o = Hub.merge({ foo: "foo" }, { bar: "bar" });
 			assertEquals("foo", o.foo);
 			assertEquals("bar", o.bar);
 		},
 
-		"test should concatenate arrays": function() {
+		"test should concatenate arrays": function () {
 			var a = Hub.merge(["foo"], ["bar"]);
 			assertEquals("foo,bar", a.join());
 		},
 
-		"test should throw for different string values": function() {
+		"test should throw for different string values": function () {
 			var target = { x: "foo" };
 			var source = { x: "bar" };
 			var error = mergeError(target, source);
@@ -62,15 +61,15 @@
 			assertEquals("[object String]", error.context.sourceType);
 		},
 
-		"test should not throw for same string values": function() {
+		"test should not throw for same string values": function () {
 			var o;
-			assertNoException(function() {
+			assertNoException(function () {
 				o = Hub.merge({ x: "foo" }, { x: "foo" });
 			});
 			assertEquals("foo", o.x);
 		},
 
-		"test should retain value if merged with undefined": function() {
+		"test should retain value if merged with undefined": function () {
 			assertSame(true, Hub.merge(true, undefined));
 			assertSame(true, Hub.merge(undefined, true));
 			assertSame(false, Hub.merge(false, undefined));
@@ -79,7 +78,7 @@
 			assertEquals("", Hub.merge(undefined, ""));
 		},
 
-		"test should retain value if merged with null": function() {
+		"test should retain value if merged with null": function () {
 			assertSame(true, Hub.merge(true, null));
 			assertSame(true, Hub.merge(null, true));
 			assertSame(false, Hub.merge(false, null));
@@ -88,15 +87,15 @@
 			assertEquals("", Hub.merge(null, ""));
 		},
 
-		"test should merge true and true": function() {
+		"test should merge true and true": function () {
 			assertSame(true, Hub.merge(true, true));
 		},
 
-		"test should merge false and false": function() {
+		"test should merge false and false": function () {
 			assertSame(false, Hub.merge(false, false));
 		},
 
-		"test should fail on true and false": function() {
+		"test should fail on true and false": function () {
 			var error = mergeError(true, false);
 			assertSame(true, error.context.target);
 			assertSame(false, error.context.source);
@@ -104,12 +103,12 @@
 			assertEquals("[object Boolean]", error.context.sourceType);
 		},
 
-		"test should merge equal strings": function() {
+		"test should merge equal strings": function () {
 			assertSame("", Hub.merge("", ""));
 			assertSame("a", Hub.merge("a", "a"));
 		},
 
-		"test should fail on different strings": function() {
+		"test should fail on different strings": function () {
 			var error = mergeError("", "a");
 			assertSame("", error.context.target);
 			assertSame("a", error.context.source);
@@ -117,7 +116,7 @@
 			assertEquals("[object String]", error.context.sourceType);
 		},
 
-		"test should fail on object and array": function() {
+		"test should fail on object and array": function () {
 			var error = mergeError({}, []);
 			assertEquals("validation", error.type);
 			assertEquals("Cannot merge type [object Object] with [object Array]",

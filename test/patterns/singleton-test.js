@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,11 +13,11 @@
  */
 TestCase("SingletonTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 
-	"test singleton object": function() {
+	"test singleton object": function () {
 		var fn = stubFn();
 		Hub.peer("singleton", {
 			method: fn
@@ -26,9 +26,9 @@ TestCase("SingletonTest", {
 		assert(fn.called);
 	},
 
-	"test singleton module": function() {
+	"test singleton module": function () {
 		var fn = stubFn();
-		Hub.peer("singleton", (function() {
+		Hub.peer("singleton", (function () {
 			// private variables go here.
 			return {
 				method: fn

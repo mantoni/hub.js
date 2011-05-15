@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -8,7 +8,7 @@
 /**
  * 
  */
-(function() {
+(function () {
 	
 	/**
 	 * All peer instances that have been created.
@@ -36,7 +36,7 @@
 	 */
 	function apply(peer, message, fn) {
 		var c = peer[message];
-		if(!c) {
+		if (!c) {
 			peer[message] = c = Hub.chain();
 		}
 		c.add(fn);
@@ -47,8 +47,8 @@
 	 */
 	function mix(peer, mixin) {
 		var message;
-		for(message in mixin) {
-			if(mixin.hasOwnProperty(message)) {
+		for (message in mixin) {
+			if (mixin.hasOwnProperty(message)) {
 				apply(peer, message, mixin[message]);
 			}
 		}
@@ -59,10 +59,10 @@
 	 * invokes the provided chain if the topic was not aborted on the Hub.
 	 */
 	function interceptor(topic, chain, scope) {
-		return function() {
+		return function () {
 			var args = Array.prototype.slice.call(arguments);
 			var result = Hub.publish.apply(Hub, [topic].concat(args));
-			if(!Hub.aborted()) {
+			if (!Hub.aborted()) {
 				result = Hub.merge(result, chain.apply(scope, arguments));
 			}
 			return result;
@@ -76,20 +76,20 @@
 	 */
 	function getPeer(namespace) {
 		var peer = peers[namespace];
-		if(peer) {
+		if (peer) {
 			return peer;
 		}
 		var definition = definitions[namespace];
-		if(!definition) {
+		if (!definition) {
 			throw new Error("Peer is not defined: " + namespace);
 		}
 		peer = createPeer(definition);
 		var api = {};
 		var message;
-		for(message in peer) {
-			if(peer.hasOwnProperty(message)) {
+		for (message in peer) {
+			if (peer.hasOwnProperty(message)) {
 				var chain = peer[message];
-				if(typeof chain === "function") {
+				if (typeof chain === "function") {
 					var topic = namespace + "/" + message;
 					api[message] = interceptor(topic, chain, api);
 				}
@@ -106,7 +106,7 @@
 		var peer = {};
 		var is = definition.is;
 		var i, l;
-		for(i = 0, l = is.length; i < l; i++) {
+		for (i = 0, l = is.length; i < l; i++) {
 			mix(peer, getPeer(is[i]));
 		}
 		mix(peer, definition.instance || definition.factory());
@@ -114,7 +114,7 @@
 	};
 	
 	function subscriber(chain, scope) {
-		return function() {
+		return function () {
 			return chain.apply(scope, arguments);
 		};
 	}
@@ -137,29 +137,28 @@
 	 * @param {String|Array} is the optional list of peer names to mix
 	 * @param {Function} factory the factory for the map of listeners
 	 */
-	Hub.peer = function(namespace, is, factory) {
-		if(definitions[namespace]) {
+	Hub.peer = function (namespace, is, factory) {
+		if (definitions[namespace]) {
 			throw new Error("Hub - peer already defined: " + namespace);
 		}
-		if(!factory) {
+		if (!factory) {
 			factory = is;
 			is = null;
 		}
 		var definition = {
 			is: is ? (typeof is === "string" ? [is] : is) : emptyArray
 		};
-		if(typeof factory === "function") {
+		if (typeof factory === "function") {
 			definition.factory = factory;
-		}
-		else {
+		} else {
 			definition.instance = factory;
 			var peer = peers[namespace] = createPeer(definition);
 			var api = peer.api = {};
 			var message;
-			for(message in peer) {
-				if(peer.hasOwnProperty(message)) {
+			for (message in peer) {
+				if (peer.hasOwnProperty(message)) {
 					var chain = peer[message];
-					if(typeof chain === "function") {
+					if (typeof chain === "function") {
 						var topic = namespace + "/" + message;
 						Hub.subscribe(topic, subscriber(chain, api));
 						api[message] = Hub.publisher(topic);
@@ -184,16 +183,16 @@
 	 * @param {String} namespace the namespace.
 	 * @return {Object} the API of the peer.
 	 */
-	Hub.get = function(namespace) {
+	Hub.get = function (namespace) {
 		return getPeer(namespace).api;
 	};
 	
-	Hub.resetPeers = function() {
+	Hub.resetPeers = function () {
 		peers = {};
 		var k;
-		for(k in definitions) {
-			if(definitions.hasOwnProperty(k)) {
-				if(k.indexOf("lib.") === -1) {
+		for (k in definitions) {
+			if (definitions.hasOwnProperty(k)) {
+				if (k.indexOf("lib.") === -1) {
 					delete definitions[k];
 				}
 			}

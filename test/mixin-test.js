@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,7 +13,7 @@
  */
 TestCase("MixinTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
@@ -22,15 +22,15 @@ TestCase("MixinTest", {
 	 * first and the parent second. This follows the idea of
 	 * overwriting.
 	 */
-	"test mixin call order": function() {
+	"test mixin call order": function () {
 		var chain = [];
 		Hub.peer("parent", {
-			"test": function() {
+			"test": function () {
 				chain.push("parent");
 			}
 		});
 		Hub.peer("child", "parent", {
-			"test": function() {
+			"test": function () {
 				chain.push("child");
 			}
 		});
@@ -44,15 +44,15 @@ TestCase("MixinTest", {
 	 * in the current chain. So in this test case, the parents "test"
 	 * is not invoked.
 	 */
-	"test stop propagation": function() {
+	"test stop propagation": function () {
 		var chain = [];
 		Hub.peer("parent", {
-			"test": function() {
+			"test": function () {
 				chain.push("parent");
 			}
 		});
 		Hub.peer("child", "parent", {
-			"test": function() {
+			"test": function () {
 				chain.push("child");
 				Hub.stopPropagation();
 			}
@@ -66,15 +66,15 @@ TestCase("MixinTest", {
 	 * next function in the call chain. This also means that the
 	 * next function is not implicitly invoked afterwards anymore.
 	 */
-	"test propagate": function() {
+	"test propagate": function () {
 		var chain = [];
 		Hub.peer("parent", {
-			"test": function() {
+			"test": function () {
 				chain.push("parent");
 			}
 		});
 		Hub.peer("child", "parent", {
-			"test": function() {
+			"test": function () {
 				Hub.propagate();
 				chain.push("child");
 			}
@@ -84,8 +84,8 @@ TestCase("MixinTest", {
 		assertEquals("parent,child", chain.join());
 	},
 	
-	"test unknown mixin throws error": function() {
-		assertException(function() {
+	"test unknown mixin throws error": function () {
+		assertException(function () {
 			Hub.peer("child", "parent", {});
 		});
 	}

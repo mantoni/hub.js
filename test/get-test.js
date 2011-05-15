@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,21 +13,21 @@
  */
 TestCase("GetTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test should implement get": function() {
+	"test should implement get": function () {
 		assertFunction(Hub.get);
 	},
 	
-	"test should throws if unknown": function() {
-		assertException(function() {
+	"test should throws if unknown": function () {
+		assertException(function () {
 			Hub.get("unknown");
 		});
 	},
 	
-	"test should return singleton peer": function() {
+	"test should return singleton peer": function () {
 		var fn = stubFn();
 		Hub.peer("test", {
 			key: fn
@@ -38,9 +38,9 @@ TestCase("GetTest", {
 		assertFunction(test.key);
 	},
 	
-	"test should return prototype peer": function() {
+	"test should return prototype peer": function () {
 		var fn = stubFn();
-		Hub.peer("test", function() {
+		Hub.peer("test", function () {
 			return {
 				key: fn
 			};
@@ -51,7 +51,7 @@ TestCase("GetTest", {
 		assertFunction(test.key);
 	},
 	
-	"test should invoke singleton method and subscriber": function() {
+	"test should invoke singleton method and subscriber": function () {
 		var fn1 = stubFn();
 		Hub.peer("test", {
 			key: fn1
@@ -64,7 +64,7 @@ TestCase("GetTest", {
 		assert(fn2.called);
 	},
 	
-	"test should invoke prototype method and subscriber": function() {
+	"test should invoke prototype method and subscriber": function () {
 		var fn1 = stubFn();
 		Hub.peer("test", function () {
 			return {

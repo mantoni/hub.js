@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -15,10 +15,10 @@
  * @param {String} description the description of the error.
  * @param {Object} context the context for the error.
  */
-Hub.Error = function(type, description, context) {
+Hub.Error = function (type, description, context) {
 	this.type = type;
 	this.context = context;
-	this.toString = function() {
+	this.toString = function () {
 		return Hub.substitute(description, context);
 	};
 };

@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -12,28 +12,27 @@
  * @param {*} source the source value or object.
  * @return {*} the new target value or object.
  */
-Hub.merge = function(target, source) {
-	if(target === undefined || target === null ||
-			target === source) {
+Hub.merge = function (target, source) {
+	if (target === undefined || target === null || target === source) {
 		return source;
 	}
-	if(source === undefined || source === null) {
+	if (source === undefined || source === null) {
 		return target;
 	}
 	var toString = Object.prototype.toString;
 	var sourceType = toString.call(source);
 	var targetType = toString.call(target);
 	var k;
-	if(targetType === sourceType) {
-		if(sourceType === "[object Object]") {
-			for(k in source) {
-				if(source.hasOwnProperty(k)) {
+	if (targetType === sourceType) {
+		if (sourceType === "[object Object]") {
+			for (k in source) {
+				if (source.hasOwnProperty(k)) {
 					target[k] = Hub.merge(target[k], source[k]);
 				}
 			}
 			return target;
 		}
-		if(sourceType === "[object Array]") {
+		if (sourceType === "[object Array]") {
 			return target.concat(source);
 		}
 	}

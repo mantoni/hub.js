@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*global Hub*/
 /**
  * Copyright 2011, Maximilian Antoni
@@ -16,46 +16,50 @@
  *			callback
  * @return {Function} the forwarder function
  */
-(function() {
+(function () {
 	var publish = Hub.publish;
 	var merge = Hub.merge;
 	
-	Hub.publisher = function(topic, dataTransformer, dataToMerge) {
-		if(typeof topic === "string") {
-			if(dataTransformer) {
-				if(dataToMerge) {
-					return function() {
+	Hub.publisher = function (topic, dataTransformer, dataToMerge) {
+		if (typeof topic === "string") {
+			if (dataTransformer) {
+				if (dataToMerge) {
+					return function () {
 						return publish(topic, merge(dataTransformer.apply(
-							null, arguments), dataToMerge));
+							null,
+							arguments
+						), dataToMerge));
 					};
 				}
-				if(typeof dataTransformer === "function") {
-					return function() {
-						return publish(topic,
-							dataTransformer.apply(null, arguments));
+				if (typeof dataTransformer === "function") {
+					return function () {
+						return publish(topic, dataTransformer.apply(
+							null,
+							arguments
+						));
 					};
 				}
-				return function(data) {
+				return function (data) {
 					return publish(topic, merge(data, dataTransformer));
 				};
 			}
-			return function() {
-				if(arguments.length) {
+			return function () {
+				if (arguments.length) {
 					return publish.apply(Hub, [topic].concat(
-						Array.prototype.slice.call(arguments)));
+						Array.prototype.slice.call(arguments)
+					));
 				}
 				return publish(topic);
 			};
 		}
 		var api = Hub.chain();
 		var key;
-		for(key in topic) {
-			if(topic.hasOwnProperty(key)) {
+		for (key in topic) {
+			if (topic.hasOwnProperty(key)) {
 				var value = topic[key];
-				if(typeof value === "string") {
+				if (typeof value === "string") {
 					api[key] = Hub.publisher(value);
-				}
-				else {
+				} else {
 					api[key] = Hub.publisher.apply(Hub, value);
 				}
 				api.add(api[key]);

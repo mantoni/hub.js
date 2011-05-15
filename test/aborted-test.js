@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,20 +13,20 @@
  */
 TestCase("AbortedTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test should implement aborted": function() {
+	"test should implement aborted": function () {
 		assertFunction(Hub.aborted);
 	},
 	
-	"test should return false by default": function() {
+	"test should return false by default": function () {
 		assertFalse(Hub.aborted());
 	},
 	
-	"test should return true after stopPropagation": function() {
-		Hub.subscribe("a/b", function() {
+	"test should return true after stopPropagation": function () {
+		Hub.subscribe("a/b", function () {
 			Hub.stopPropagation();
 		});
 		Hub.publish("a/b");

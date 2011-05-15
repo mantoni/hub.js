@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,37 +13,37 @@
  */
 TestCase("PropagateTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test propagate explicitly": function() {
+	"test propagate explicitly": function () {
 		var calls = [];
-		Hub.chain(function() {
+		Hub.chain(function () {
 			Hub.propagate();
 			calls.push("a");
-		}, function() {
+		}, function () {
 			calls.push("b");
 		})();
 		assertEquals("b,a", calls.join());
 	},
 	
-	"test implicit argument propagation": function() {
+	"test implicit argument propagation": function () {
 		var calls = [];
-		Hub.chain(function(a, b) {
+		Hub.chain(function (a, b) {
 			calls.push("x", a, b);
-		}, function(a, b) {
+		}, function (a, b) {
 			calls.push("y", a, b);
 		})("a", "b");
 		assertEquals("x,a,b,y,a,b", calls.join());
 	},
 	
-	"test explcit argument propagation": function() {
+	"test explcit argument propagation": function () {
 		var calls = [];
-		Hub.chain(function(a, b) {
+		Hub.chain(function (a, b) {
 			Hub.propagate();
 			calls.push("x", a, b);
-		}, function(a, b) {
+		}, function (a, b) {
 			calls.push("y", a, b);
 		})("a", "b");
 		assertEquals("y,a,b,x,a,b", calls.join());

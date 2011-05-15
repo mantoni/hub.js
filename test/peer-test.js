@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,15 +13,15 @@
  */
 TestCase("PeerTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	"test should fail if defined twice": function() {
+	"test should fail if defined twice": function () {
 		Hub.peer("definedTwice", {});
 		try {
 			Hub.peer("definedTwice", {});
-		} catch(e) {
+		} catch (e) {
 			assertEquals("Hub - peer already defined: definedTwice",
 				e.message);
 			return;
@@ -29,7 +29,7 @@ TestCase("PeerTest", {
 		fail("Exception expected");
 	},
 	
-	"test should receive message": function() {
+	"test should receive message": function () {
 		var fn = stubFn();
 		Hub.peer("simple", {
 			"message": fn
@@ -38,7 +38,7 @@ TestCase("PeerTest", {
 		assert(fn.called);
 	},
 	
-	"test should allow dot separated namespace and message": function() {
+	"test should allow dot separated namespace and message": function () {
 		var fn = stubFn();
 		Hub.peer("a.b", {
 			"c.d": fn
@@ -53,13 +53,13 @@ TestCase("PeerTest", {
 	 * ensure a peer can be defined after an existing subscription and both
 	 * get mixed and then invoked in the correct order.
 	 */
-	"test should override subscriber": function() {
+	"test should override subscriber": function () {
 		var chain = [];
-		Hub.subscribe("a/b", function() {
+		Hub.subscribe("a/b", function () {
 			chain.push("subscribe");
 		});
 		Hub.peer("a", {
-			"b": function() {
+			"b": function () {
 				chain.push("peer");
 			}
 		});
@@ -68,15 +68,15 @@ TestCase("PeerTest", {
 		assertEquals("peer,subscribe", chain.join());
 	},
 	
-	"test should receive multicast": function() {
+	"test should receive multicast": function () {
 		var chain = [];
 		Hub.peer("a.b", {
-			"m": function() {
+			"m": function () {
 				chain.push("x");
 			}
 		});
 		Hub.peer("a.c", {
-			"m": function() {
+			"m": function () {
 				chain.push("y");
 			}
 		});
@@ -85,7 +85,7 @@ TestCase("PeerTest", {
 		assertEquals("y,x", chain.join());
 	},
 	
-	"test should receive message with peer as scope object": function() {
+	"test should receive message with peer as scope object": function () {
 		var fn = stubFn();
 		Hub.peer("a", {
 			"b": fn

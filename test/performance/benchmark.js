@@ -15,7 +15,7 @@ function runBenchmark(title, tests) {
 		try {
 			fn(iterations);
 		}
-		catch(e) {
+		catch (e) {
 			ttime.appendChild(document.createTextNode("FAILURE"));
 			ttime.title = e.message;
 			ttime.style.color = "red";
@@ -33,11 +33,11 @@ function runBenchmark(title, tests) {
 	function reloader(ttime, fn) {
 		var link = document.createElement("a");
 		link.href = "javascript:void(null)";
-		link.onclick = function() {
+		link.onclick = function () {
 			while(ttime.hasChildNodes()) {
 				ttime.removeChild(ttime.firstChild);
 			}
-			setTimeout(function() {
+			setTimeout(function () {
 				run(ttime, fn);
 			}, 1);
 		};
@@ -47,10 +47,10 @@ function runBenchmark(title, tests) {
 		
 	function executeNext() {
 		var name;
-		for(name in tests) {
+		for (name in tests) {
 			break;
 		}
-		if(!name) {
+		if (!name) {
 			runNextOnQueue();
 			return;
 		}
@@ -70,7 +70,7 @@ function runBenchmark(title, tests) {
 		tr.appendChild(tagain);
 		benchmarkTable.appendChild(tr);
 		
-		setTimeout(function() {
+		setTimeout(function () {
 			run(ttime, fn);
 			executeNext();
 		}, 10);
@@ -85,7 +85,7 @@ function runBenchmark(title, tests) {
 	}
 	
 	function runNextOnQueue() {
-		if(benchmarkQueue.length) {
+		if (benchmarkQueue.length) {
 			benchmarkQueue.shift()();
 		}
 		else {
@@ -103,7 +103,7 @@ function runBenchmark(title, tests) {
 	
 	benchmarkQueue.push(testRunner);
 	
-	if(!benchmarkRunning) {
+	if (!benchmarkRunning) {
 		benchmarkRunning = true;
 		runNextOnQueue();
 	}

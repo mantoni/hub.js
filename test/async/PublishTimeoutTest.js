@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn AsyncTestCase fail assert assertFalse assertNull
 	assertNotNull assertUndefined assertNotUndefined assertSame assertNotSame
 	assertEquals assertFunction assertObject assertArray assertException
@@ -14,19 +14,19 @@
  */
 AsyncTestCase("PublishTimeoutTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 	
-	testSimpleTimeout: function(queue) {
-		Hub.subscribe("a/b", function() {
+	testSimpleTimeout: function (queue) {
+		Hub.subscribe("a/b", function () {
 			Hub.promise(10); // promise with small timeout, never resolved.
 		});
-		queue.call(function(pool) {
+		queue.call(function (pool) {
 			var time = new Date().getTime();
-			Hub.publish("a/b").then(function() {
+			Hub.publish("a/b").then(function () {
 				fail("Unexpected success callback");
-			}, pool.add(function(error) {
+			}, pool.add(function (error) {
 				assertObject(error);
 				assertEquals("timeout", error.type);
 			}));

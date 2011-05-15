@@ -1,4 +1,4 @@
-/*jslint undef: true*/
+/*jslint undef: true, white: true*/
 /*globals Hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
@@ -13,22 +13,22 @@
  */
 TestCase("ObserverTest", {
 	
-	tearDown: function() {
+	tearDown: function () {
 		Hub.reset();
 	},
 
-	"test abserver": function() {
+	"test abserver": function () {
 		
 		// The Observable singleton peer:
-		Hub.peer("Observable", (function() {
+		Hub.peer("Observable", (function () {
 			var observers = [];
 			return {
-				observe: function(observer) {
+				observe: function (observer) {
 					observers.push(observer);
 				},
-				notify: function() {
+				notify: function () {
 					var i, l;
-					for(i = 0, l = observers.length; i < l; i++) {
+					for (i = 0, l = observers.length; i < l; i++) {
 						observers[i].onChange();
 					}
 				}
@@ -39,10 +39,10 @@ TestCase("ObserverTest", {
 		var invocations = 0;
 		
 		// The Observer prototype peer:
-		Hub.peer("Observer", function() {
+		Hub.peer("Observer", function () {
 			instances++;
 			return {
-				onChange: function() {
+				onChange: function () {
 					invocations++;
 				}
 			};

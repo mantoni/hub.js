@@ -13,13 +13,13 @@
 		<script type="text/javascript">
 		<!--
 			Hub.peer("say", {
-				"hello": function(name) {
+				"hello": function (name) {
 					document.body.innerHTML = "<h1>Hello " + name + "!</h1>";
 				}
 			});
 			
 			Hub.peer("input", {
-				"name": function() {
+				"name": function () {
 					document.body.innerHTML =
 						'<form>' +
 							'<label for="input">Hello </label>' +
@@ -27,7 +27,7 @@
 							'<input type="submit" value="Go"/>' +
 						"</form>";
 					var promise = Hub.promise();
-					document.forms[0].onsubmit = function() {
+					document.forms[0].onsubmit = function () {
 						promise.resolve(this.input.value);
 						return false;
 					};
