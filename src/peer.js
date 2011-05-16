@@ -32,29 +32,6 @@
 	var emptyArray = [];
 	
 	/*
-	 * adds a function to the given peer under the specified message.
-	 */
-	function apply(peer, message, fn) {
-		var c = peer[message];
-		if (!c) {
-			peer[message] = c = hub.chain();
-		}
-		c.add(fn);
-	}
-	
-	/*
-	 * applies a mix-in to a peer.
-	 */
-	function mix(peer, mixin) {
-		var message;
-		for (message in mixin) {
-			if (mixin.hasOwnProperty(message)) {
-				apply(peer, message, mixin[message]);
-			}
-		}
-	}
-	
-	/*
 	 * returns a function that publishes the given topic on the hub and then
 	 * invokes the provided chain if the topic was not aborted on the hub.
 	 */
@@ -74,7 +51,7 @@
 	/*
 	 * returns a peer instance for the definition with the given topic.
 	 */
-	function getPeer(namespace) {
+	function getPeer(namespace, args) {
 		var peer = peers[namespace];
 		if (peer) {
 			return peer;
@@ -83,7 +60,7 @@
 		if (!definition) {
 			throw new Error("Peer is not defined: " + namespace);
 		}
-		peer = createPeer(definition);
+		peer = createPeer(definition, args);
 		var api = {};
 		var message;
 		for (message in peer) {
@@ -102,14 +79,18 @@
 	/*
 	 * creates a peer for the peer definition with the given name.
 	 */
-	createPeer = function createPeer(definition) {
+	createPeer = function createPeer(definition, args) {
 		var peer = {};
 		var is = definition.is;
 		var i, l;
 		for (i = 0, l = is.length; i < l; i++) {
-			mix(peer, getPeer(is[i]));
+			hub.mix(peer, getPeer(is[i]));
 		}
-		mix(peer, definition.instance || definition.factory());
+		var instance = definition.instance;
+		if (!instance) {
+			instance = hub.object(definition.factory, args);
+		}
+		hub.mix(peer, instance);
 		return peer;
 	};
 	
@@ -184,7 +165,9 @@
 	 * @return {Object} the API of the peer.
 	 */
 	hub.get = function (namespace) {
-		return getPeer(namespace).api;
+		var args = arguments.length === 1 ? emptyArray :
+			Array.prototype.slice.call(arguments, 1);
+		return getPeer(namespace, args).api;
 	};
 	
 	hub.resetPeers = function () {

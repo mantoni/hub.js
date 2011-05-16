@@ -93,5 +93,37 @@ TestCase("PeerTest", {
 		hub.publish("a/b");
 		assertSame(hub.get("a"), fn.scope);
 	}
+	
+});
+
+TestCase("PeerMixTest", {
+	
+	tearDown: function () {
+		hub.reset();
+	},
+	
+	"test should implement this.mix": function () {
+		var fn = stubFn();
+		hub.peer("a", fn);
+		hub.get("a");
+		assertFunction(fn.scope.mix);
+	},
+	
+	"test should override existing message": function () {
+		var fn1 = stubFn();
+		hub.peer("a", {
+			m: fn1
+		});
+		var fn2 = stubFn();
+		hub.peer("b", function () {
+			this.mix("a");
+			return {
+				m: fn2
+			};
+		});
+		hub.get("b").m();
+		assert(fn2.called);
+		assert(fn1.called);
+	}
 
 });

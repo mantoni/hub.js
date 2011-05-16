@@ -11,11 +11,13 @@
 	<body>
 		<h2>Benchmarks for hub.js</h2>
 		<p>
-			Each function is executed <select onchange="window.location.href='?' + this.value">
+			Each function is executed
+			<select onchange="window.location.href='?' + this.value">
 			<script type="text/javascript">
 				iterations = 50000;
-				if (window.location.search) {
-					iterations = Number(window.location.search.substring(1)) || iterations;
+				var search = window.location.search;
+				if (search) {
+					iterations = Number(search.substring(1)) || iterations;
 				}
 				function formatNumber(n) {
 					var p = n.length - 3;
@@ -46,6 +48,8 @@
 		<script type="text/javascript" src="../../src/error.js"></script>
 		<script type="text/javascript" src="../../src/iterator.js"></script>
 		<script type="text/javascript" src="../../src/chain.js"></script>
+		<script type="text/javascript" src="../../src/mix.js"></script>
+		<script type="text/javascript" src="../../src/object.js"></script>
 		<script type="text/javascript" src="../../src/peer.js"></script>
 		<script type="text/javascript" src="../../src/pubsub.js"></script>
 		<script type="text/javascript" src="../../src/promise.js"></script>

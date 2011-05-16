@@ -77,6 +77,13 @@ TestCase("GetTest", {
 		test.key();
 		assert(fn1.called);
 		assert(fn2.called);
+	},
+	
+	"test should pass additional arguments to prototype": function () {
+		var fn = stubFn({});
+		hub.peer("a", fn);
+		hub.get("a", "one", "two");
+		assertEquals({0: "one", 1: "two"}, fn.args);
 	}
 
 });
