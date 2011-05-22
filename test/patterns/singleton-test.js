@@ -11,7 +11,7 @@
 /*
  * Test cases for the singleton pattern.
  */
-TestCase("SingletonTest", {
+TestCase("SingletonPatternTest", {
 	
 	tearDown: function () {
 		hub.reset();
@@ -28,12 +28,12 @@ TestCase("SingletonTest", {
 
 	"test singleton module": function () {
 		var fn = stubFn();
-		hub.peer("singleton", (function () {
+		hub.singleton("singleton", function () {
 			// private variables go here.
 			return {
 				method: fn
 			};
-		}()));
+		});
 		hub.publish("singleton/method");
 		assert(fn.called);
 	}

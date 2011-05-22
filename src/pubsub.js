@@ -25,8 +25,8 @@
 	
 	/**
 	 * compares two topics. Returns 0 if the topics have the same priority,
-	 * -1 if the first given topic is "smaller"" the second one and 1 if
-	 * the first topic is "larger" than the second one. This means that a
+	 * -1 if the first given topic is "smaller" the second one and 1 if the
+	 * first topic is "larger" than the second one. This means that a
 	 * subscriber for the "smaller" topic gets invoked before a subscriber
 	 * for the "larger" topic.
 	 *

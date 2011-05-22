@@ -29,10 +29,13 @@ TestCase("MixinTest", {
 				chain.push("parent");
 			}
 		});
-		hub.peer("child", "parent", {
-			"test": function () {
-				chain.push("child");
-			}
+		hub.singleton("child", function () {
+			this.mix("parent");
+			return {
+				test: function () {
+					chain.push("child");
+				}
+			};
 		});
 		// child is called first, then the "super" implementation.
 		hub.publish("child/test");
@@ -51,11 +54,14 @@ TestCase("MixinTest", {
 				chain.push("parent");
 			}
 		});
-		hub.peer("child", "parent", {
-			"test": function () {
-				chain.push("child");
-				hub.stopPropagation();
-			}
+		hub.singleton("child", function () {
+			this.mix("parent");
+			return {
+				test: function () {
+					chain.push("child");
+					hub.stopPropagation();
+				}
+			};
 		});
 		hub.publish("child/test");
 		assertEquals("child", chain.join());
@@ -73,11 +79,14 @@ TestCase("MixinTest", {
 				chain.push("parent");
 			}
 		});
-		hub.peer("child", "parent", {
-			"test": function () {
-				hub.propagate();
-				chain.push("child");
-			}
+		hub.singleton("child", function () {
+			this.mix("parent");
+			return {
+				test: function () {
+					hub.propagate();
+					chain.push("child");
+				}
+			};
 		});
 		// explicit "super" invocation changes call order here.
 		hub.publish("child/test");
@@ -86,7 +95,9 @@ TestCase("MixinTest", {
 	
 	"test unknown mixin throws error": function () {
 		assertException(function () {
-			hub.peer("child", "parent", {});
+			hub.singleton("child", function () {
+				this.mixin("parent");
+			});
 		});
 	}
 

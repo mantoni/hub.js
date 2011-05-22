@@ -11,7 +11,7 @@
 /*
  * Test cases for the observer pattern.
  */
-TestCase("ObserverTest", {
+TestCase("ObserverPatternTest", {
 	
 	tearDown: function () {
 		hub.reset();
@@ -20,7 +20,7 @@ TestCase("ObserverTest", {
 	"test abserver": function () {
 		
 		// The Observable singleton peer:
-		hub.peer("Observable", (function () {
+		hub.singleton("Observable", function () {
 			var observers = [];
 			return {
 				observe: function (observer) {
@@ -33,7 +33,7 @@ TestCase("ObserverTest", {
 					}
 				}
 			};
-		}()));
+		});
 		
 		var instances = 0;
 		var invocations = 0;
