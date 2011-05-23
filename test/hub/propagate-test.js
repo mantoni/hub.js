@@ -38,7 +38,7 @@ TestCase("PropagateTest", {
 		assertEquals("x,a,b,y,a,b", calls.join());
 	},
 	
-	"test explcit argument propagation": function () {
+	"test explicit argument propagation": function () {
 		var calls = [];
 		hub.chain(function (a, b) {
 			hub.propagate();
@@ -47,6 +47,16 @@ TestCase("PropagateTest", {
 			calls.push("y", a, b);
 		})("a", "b");
 		assertEquals("y,a,b,x,a,b", calls.join());
+	},
+	
+	"test override result": function () {
+		assertEquals(["b", "c"], hub.chain(function () {
+			return ["a"];
+		}, function () {
+			hub.propagate(["b"]);
+		}, function () {
+			return ["c"];
+		})());
 	}
 
 });

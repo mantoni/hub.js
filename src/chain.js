@@ -103,6 +103,9 @@
 	 * call chain.
 	 */
 	hub.propagate = function () {
+		if (arguments.length) {
+			result = arguments[0];
+		}
 		next();
 	};
 	
