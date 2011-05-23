@@ -17,8 +17,14 @@ TestCase("SubscribeTest", {
 		hub.reset();
 	},
 	
-	testFunctionExists: function () {
+	"test should be function": function () {
 		assertFunction(hub.subscribe);
+	},
+	
+	"test should throw if callback is missing": function () {
+		assertException(function () {
+			hub.subscribe("namespace/topic");
+		}, "TypeError");
 	},
 	
 	"test subscribe invocation": function () {

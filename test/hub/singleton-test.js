@@ -29,7 +29,7 @@ TestCase("SingletonTest", {
 		assertFunction(hub.singleton);
 	},
 	
-	"test should invoke hub.peer with name and object": function () {
+	"test should use hub.peer": function () {
 		var object = {};
 		hub.singleton("name", object);
 		
@@ -38,14 +38,15 @@ TestCase("SingletonTest", {
 		assertSame(object, hub.peer.args[1]);
 	},
 	
-	"test should invoke hub.object with function and args": function () {
+	"test should use hub.object": function () {
 		var fn = function () {};
 		var args = [123];
 		hub.singleton("name", fn, args);
 		
 		assert(hub.object.called);
-		assertSame(fn, hub.object.args[0]);
-		assertSame(args, hub.object.args[1]);
+		assertSame("name", hub.object.args[0]);
+		assertSame(fn, hub.object.args[1]);
+		assertSame(args, hub.object.args[2]);
 	}
 	
 });

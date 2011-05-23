@@ -19,45 +19,29 @@ TestCase("ObserverPatternTest", {
 
 	"test abserver": function () {
 		
-		// The Observable singleton peer:
 		hub.singleton("Observable", function () {
-			var observers = [];
 			return {
-				observe: function (observer) {
-					observers.push(observer);
-				},
 				notify: function () {
-					var i, l;
-					for (i = 0, l = observers.length; i < l; i++) {
-						observers[i].onChange();
-					}
+					hub.publish("Observer/notify");
 				}
 			};
 		});
-		
-		var instances = 0;
-		var invocations = 0;
-		
-		// The Observer prototype peer:
+				
+		var invokations = 0;
 		hub.peer("Observer", function () {
-			instances++;
+			this.subscribe("notify", function () {
+				invokations++;
+			});
 			return {
-				onChange: function () {
-					invocations++;
-				}
+				/* ... */
 			};
 		});
 		
-		var observable = hub.get("Observable");
-		observable.observe(hub.get("Observer"));
-		assertEquals(1, instances);
-		observable.observe(hub.get("Observer"));
-		// ^-- same as hub.publish("Observable/observe", hub.get("Observer"));
-		assertEquals(2, instances);
-		assertEquals(0, invocations);
-		observable.notify();
-		// ^-- same as hub.publish("Observable/notify");
-		assertEquals(2, invocations);
+		hub.get("Observer");
+		hub.get("Observer");
+		hub.get("Observable").notify();
+		
+		assertEquals(2, invokations);
 	}
 
 });

@@ -7,7 +7,12 @@
  */
 (function () {
 	
-	function object(fn, args) {
+	function object(namespace, fn, args) {
+		if (typeof namespace !== "string") {
+			args = fn;
+			fn = namespace;
+			namespace = null;
+		}
 		if (typeof fn !== "function") {
 			throw new TypeError();
 		}
@@ -16,6 +21,15 @@
 			mix: function () {
 				var mixin = hub.get.apply(hub, arguments);
 				hub.mix(mixed, mixin);
+			},
+			subscribe: function (message, callback) {
+				if (!namespace) {
+					throw new TypeError("namespace is " + namespace);
+				}
+				if (!message) {
+					throw new TypeError("messsage is " + message);
+				}
+				hub.subscribe(namespace + "/" + message, callback);
 			}
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);

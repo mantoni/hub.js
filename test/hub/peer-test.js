@@ -19,14 +19,10 @@ TestCase("PeerTest", {
 	
 	"test should fail if defined twice": function () {
 		hub.peer("definedTwice", {});
-		try {
+		
+		assertException(function () {
 			hub.peer("definedTwice", {});
-		} catch (e) {
-			assertEquals("hub - peer already defined: definedTwice",
-				e.message);
-			return;
-		}
-		fail("Exception expected");
+		});
 	},
 	
 	"test should receive message": function () {
@@ -34,7 +30,9 @@ TestCase("PeerTest", {
 		hub.peer("simple", {
 			"message": fn
 		});
+		
 		hub.publish("simple/message");
+		
 		assert(fn.called);
 	},
 	
@@ -43,7 +41,9 @@ TestCase("PeerTest", {
 		hub.peer("a.b", {
 			"c.d": fn
 		});
+		
 		hub.publish("a.b/c");
+		
 		assertFalse(fn.called);
 		hub.publish("a.b/c.d");
 		assert(fn.called);
@@ -63,7 +63,9 @@ TestCase("PeerTest", {
 				chain.push("peer");
 			}
 		});
+		
 		hub.publish("a/b");
+		
 		// "peer" first, because it was added last.
 		assertEquals("peer,subscribe", chain.join());
 	},
@@ -80,7 +82,9 @@ TestCase("PeerTest", {
 				chain.push("y");
 			}
 		});
+		
 		hub.publish("a.*/m");
+		
 		// "y" first, because it was added last.
 		assertEquals("y,x", chain.join());
 	},
@@ -90,8 +94,22 @@ TestCase("PeerTest", {
 		hub.peer("a", {
 			"b": fn
 		});
+		
 		hub.publish("a/b");
+		
 		assertSame(hub.get("a"), fn.scope);
+	},
+	
+	"test should publish create notification message": function () {
+		var fn = stubFn();
+		hub.subscribe("hub.peer.new/a", fn);
+
+		hub.peer("a", {
+			b: function () {}
+		});
+		
+		assert(fn.called);
+		assertFunction(fn.args[0].b);
 	}
 	
 });
@@ -102,11 +120,17 @@ TestCase("PeerMixTest", {
 		hub.reset();
 	},
 	
-	"test should implement this.mix": function () {
-		var fn = stubFn();
-		hub.peer("a", fn);
-		hub.get("a");
-		assertFunction(fn.scope.mix);
+	"test should use hub.object": function () {
+		var obj = hub.object;
+		hub.object = stubFn({});
+		try {
+			hub.peer("a", function () {});
+			hub.get("a");
+			assert(hub.object.called);
+			assertEquals("a", hub.object.args[0]); // should pass namespace
+		} finally {
+			hub.object = obj;
+		}
 	},
 	
 	"test should override existing message": function () {
@@ -121,7 +145,9 @@ TestCase("PeerMixTest", {
 				m: fn2
 			};
 		});
+		
 		hub.get("b").m();
+		
 		assert(fn2.called);
 		assert(fn1.called);
 	}

@@ -61,6 +61,12 @@ TestCase("ObjectInvokeTest", {
 		
 		assertSame(fn.args[0], args[0]);
 		assertSame(fn.args[1], args[1]);
+	},
+	
+	"test should accept string and function": function () {
+		assertNoException(function () {
+			hub.object("some.string", function () {});
+		});
 	}
 	
 });
@@ -123,4 +129,57 @@ TestCase("ObjectMixTest", {
 		}
 	}
 
+});
+
+TestCase("ObjectSubscribeTest", {
+	
+	"test should have scope with subscribe function": function () {
+		var fn = stubFn();
+		
+		hub.object("namespace", fn);
+		
+		assertFunction(fn.scope.subscribe);
+	},
+	
+	"test should throw if no namespace is provided": function () {		
+		assertException(function () {
+			hub.object(function () {
+				this.subscribe("message", function () {});
+			});
+		}, "TypeError");
+	},
+	
+	"test should throw if no message is provided": function () {		
+		assertException(function () {
+			hub.object("namespace", function () {
+				this.subscribe(null, function () {});
+			});
+		}, "TypeError");
+	},
+	
+	"test should throw if no callback is provided": function () {		
+		assertException(function () {
+			hub.object("namespace", function () {
+				this.subscribe("message");
+			});
+		}, "TypeError");
+	},
+	
+	"test should invoke hub.subscribe prefixed with namespace": function () {
+		var subscribe = hub.subscribe;
+		hub.subscribe = stubFn();
+		try {
+			var fn = function () {};
+			hub.object("namespace", function () {
+				this.subscribe("message", fn);
+			});
+			
+			assert(hub.subscribe.called);
+			assertEquals("namespace/message", hub.subscribe.args[0]);
+			assertSame(fn, hub.subscribe.args[1]);
+		} finally {
+			hub.subscribe = subscribe;
+		}
+	}
+	
 });

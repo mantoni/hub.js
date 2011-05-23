@@ -56,6 +56,7 @@
 				}
 			}
 		}
+		hub.publish("hub.peer.new/" + namespace, api);
 	}
 
 	/**
@@ -77,7 +78,7 @@
 	 */
 	hub.peer = function (namespace, factory) {
 		if (definitions[namespace]) {
-			throw new Error("hub - peer already defined: " + namespace);
+			throw new Error("Peer \"" + namespace + "\" already defined");
 		}
 		var definition = {};
 		if (typeof factory === "function") {
@@ -89,8 +90,9 @@
 		definitions[namespace] = definition;
 	};
 	
-	hub.singleton = function (name, fn, args) {
-		hub.peer(name, typeof fn === "function" ? hub.object(fn, args) : fn);
+	hub.singleton = function (namespace, fn, args) {
+		hub.peer(namespace, typeof fn === "function" ?
+			hub.object(namespace, fn, args) : fn);
 	};
 	
 	/**
@@ -118,7 +120,7 @@
 		if (!definition) {
 			throw new Error("Peer is not defined: " + namespace);
 		}
-		peer = hub.object(definition.factory, args);
+		peer = hub.object(namespace, definition.factory, args);
 		wire(peer, namespace, true);
 		return peer.api;
 	};
