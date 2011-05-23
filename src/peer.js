@@ -45,11 +45,11 @@
 				var fn = peer[message];
 				if (typeof fn === "function") {
 					var topic = namespace + "/" + message;
-					var pub;
+					var pub = hub.publisher(topic);
 					if (isProto) {
-						api[message] = hub.chain(hub.publisher(topic), fn);
+						api[message] = hub.chain(pub, fn);
 					} else {
-						api[message] = hub.publisher(topic);
+						api[message] = pub;
 						var sub = subscriber(fn, api);
 						hub.subscribe(topic, sub);
 					}
