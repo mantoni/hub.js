@@ -255,13 +255,4 @@
 		}
 	};
 	
-	/**
-	 * whether the last publish was aborted or not.
-	 *
-	 * @return {Boolean} true if the last publish was aborted.
-	 */
-	hub.aborted = function () {
-		return Boolean(rootChain.aborted);
-	};
-	
 }());

@@ -48,7 +48,6 @@
 		var iterator = hub.iterator(arguments.length ?
 			Array.prototype.slice.call(arguments) : []);
 		function callChain() {
-			callChain.aborted = false;
 			var top = !iteratorStack.length;
 			if (top) {
 				aborted = false;
@@ -57,14 +56,14 @@
 			}
 			var previousScope = scope;
 			scope = this;
+			iteratorStack.push(iterator);
 			try {
-				iteratorStack.push(iterator);
-				var running = true;
-				do {
-					running = next();
-				} while (running);
+				while (true) {
+					if (!next()) {
+						break;
+					}
+				}
 			} finally {
-				callChain.aborted = aborted;
 				iterator.reset();
 				if (top) {
 					iteratorStack.length = 0;
@@ -107,6 +106,15 @@
 			result = arguments[0];
 		}
 		next();
+	};
+	
+	/**
+	 * whether the last publish was aborted or not.
+	 *
+	 * @return {Boolean} true if the last publish was aborted.
+	 */
+	hub.aborted = function () {
+		return aborted;
 	};
 	
 	hub.chain = chain;
