@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -18,31 +18,31 @@ TestCase("ForwardTest", {
 	},
 	
 	"test simple forward short": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("x/y", fn);
 		hub.forward("a/b", "x/y");
 		hub.publish("a/b");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	},
 	
 	"test multi forward simple": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("x/y", fn);
 		hub.forward({
 			"a/b": "x/y"
 		});
 		hub.publish("a/b");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	},
 	
 	testMultiForwardComplex: function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("x/y", fn);
 		hub.forward({
 			"a/b": ["x/y"]
 		});
 		hub.publish("a/b");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	}
 
 });

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -26,27 +26,27 @@ TestCase("PeerTest", {
 	},
 	
 	"test should receive message": function () {
-		var fn = stubFn();
+		var spy = sinon.spy();
 		hub.peer("simple", {
-			"message": fn
+			"message": spy
 		});
 		
 		hub.publish("simple/message");
 		
-		assert(fn.called);
+		sinon.assert.calledOnce(spy);
 	},
 	
 	"test should allow dot separated namespace and message": function () {
-		var fn = stubFn();
+		var spy = sinon.spy();
 		hub.peer("a.b", {
-			"c.d": fn
+			"c.d": spy
 		});
 		
 		hub.publish("a.b/c");
 		
-		assertFalse(fn.called);
+		sinon.assert.notCalled(spy);
 		hub.publish("a.b/c.d");
-		assert(fn.called);
+		sinon.assert.calledOnce(spy);
 	},
 	
 	/*
@@ -54,62 +54,56 @@ TestCase("PeerTest", {
 	 * get mixed and then invoked in the correct order.
 	 */
 	"test should override subscriber": function () {
-		var chain = [];
-		hub.subscribe("a/b", function () {
-			chain.push("subscribe");
-		});
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		hub.subscribe("a/b", spy1);
 		hub.peer("a", {
-			"b": function () {
-				chain.push("peer");
-			}
+			"b": spy2
 		});
 		
 		hub.publish("a/b");
-		
+
 		// "peer" first, because it was added last.
-		assertEquals("peer,subscribe", chain.join());
+		sinon.assert.callOrder(spy2, spy1);
 	},
 	
 	"test should receive multicast": function () {
-		var chain = [];
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
 		hub.peer("a.b", {
-			"m": function () {
-				chain.push("x");
-			}
+			"m": spy1
 		});
 		hub.peer("a.c", {
-			"m": function () {
-				chain.push("y");
-			}
+			"m": spy2
 		});
 		
 		hub.publish("a.*/m");
 		
 		// "y" first, because it was added last.
-		assertEquals("y,x", chain.join());
+		sinon.assert.callOrder(spy2, spy1);
 	},
 	
 	"test should receive message with peer as scope object": function () {
-		var fn = stubFn();
+		var spy = sinon.spy();
 		hub.peer("a", {
-			"b": fn
+			"b": spy
 		});
 		
 		hub.publish("a/b");
 		
-		assertSame(hub.get("a"), fn.scope);
+		sinon.assert.calledOn(spy, hub.get("a"));
 	},
 	
 	"test should publish create notification message": function () {
-		var fn = stubFn();
-		hub.subscribe("hub.peer.new/a", fn);
+		var spy = sinon.spy();
+		hub.subscribe("hub.peer.new/a", spy);
 
 		hub.peer("a", {
 			b: function () {}
 		});
 		
-		assert(fn.called);
-		assertFunction(fn.args[0].b);
+		sinon.assert.calledOnce(spy);
+		assertFunction(spy.getCall(0).args[0].b);
 	}
 	
 });
@@ -120,36 +114,34 @@ TestCase("PeerMixTest", {
 		hub.reset();
 	},
 	
-	"test should use hub.object": function () {
-		var obj = hub.object;
-		hub.object = stubFn({});
-		try {
-			hub.peer("a", function () {});
-			hub.get("a");
-			assert(hub.object.called);
-			assertEquals("a", hub.object.args[0]); // should pass namespace
-		} finally {
-			hub.object = obj;
-		}
-	},
+	"test should use hub.object": sinon.test(function () {
+		this.stub(hub, "object").returns({});
+		
+		hub.peer("a", function () {});
+		hub.get("a");
+		
+		sinon.assert.calledOnce(hub.object);
+		sinon.assert.calledWith(hub.object, "a");
+	}),
 	
 	"test should override existing message": function () {
-		var fn1 = stubFn();
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
 		hub.peer("a", {
-			m: fn1
+			m: spy1
 		});
-		var fn2 = stubFn();
 		hub.peer("b", function () {
 			this.mix("a");
 			return {
-				m: fn2
+				m: spy2
 			};
 		});
 		
 		hub.get("b").m();
 		
-		assert(fn2.called);
-		assert(fn1.called);
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.callOrder(spy2, spy1);
 	}
 
 });

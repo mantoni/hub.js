@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -18,10 +18,10 @@ TestCase("UnsubscribeTest", {
 	},
 	
 	"test simple unsubscribe": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("x/y", fn);
 		hub.publish("x/y");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 		fn.called = false;
 		hub.unsubscribe("x/y", fn);
 		hub.publish("x/y");
@@ -131,11 +131,11 @@ TestCase("UnsubscribeTest", {
 	},
 	
 	"test publish subscribe publish unsubscribe publish": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.publish("x/y");
 		hub.subscribe("x/y", fn);
 		hub.publish("x/y");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 		fn.called = false;
 		hub.unsubscribe("x/y", fn);
 		hub.publish("x/y");
@@ -143,10 +143,10 @@ TestCase("UnsubscribeTest", {
 	},
 	
 	"test subscribe publish wildcard and unsubscribe": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("x/y", fn);
 		hub.publish("x/*");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 		fn.called = false;
 		hub.unsubscribe("x/y", fn);
 		hub.publish("x/*");

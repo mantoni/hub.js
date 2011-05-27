@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -113,7 +113,7 @@
 		},
 	
 		"test should find matching subscriber for wildcards": function () {
-			var fn = stubFn();
+			var fn = sinon.spy();
 			hub.subscribe("a.b/c.d", fn);
 			assertInvoked("a.b/c.*", fn);
 			assertInvoked("a.b/c.**", fn);

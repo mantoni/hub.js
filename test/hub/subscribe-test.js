@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -28,7 +28,7 @@ TestCase("SubscribeTest", {
 	},
 	
 	"test subscribe invocation": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		assertNoException(function () {
 			hub.subscribe("a", fn);
 		});

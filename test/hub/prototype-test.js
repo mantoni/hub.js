@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -14,7 +14,7 @@
 TestCase("PrototypeTest", {
 	
 	setUp: function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.peer("test", function () {
 			return {
 				stub: fn
@@ -43,20 +43,20 @@ TestCase("PrototypeTest", {
 	},
 	
 	"test wildcard subscriber is invoked 1": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.subscribe("test/*", fn);
 		hub.get("test").stub();
 		assert(this.fn.called);
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	},
 	
 	"test wildcard subscriber is invoked 2": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		var instance = hub.get("test");
 		hub.subscribe("test/*", fn);
 		instance.stub();
 		assert(this.fn.called);
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	}
 	
 });

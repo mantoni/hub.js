@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -19,29 +19,32 @@ TestCase("ObserverPatternTest", {
 
 	"test abserver": function () {
 		
-		hub.singleton("Observable", function () {
+		hub.singleton("Document", function () {
+			var text = "";
 			return {
-				notify: function () {
-					hub.publish("Observer/notify");
+				change: function (newText) {
+					text = newText;
+					hub.publish("Observer/notify", text);
 				}
 			};
 		});
-				
-		var invokations = 0;
+
+		var spy = sinon.spy();
 		hub.peer("Observer", function () {
-			this.subscribe("notify", function () {
-				invokations++;
-			});
+			this.subscribe("notify", spy);
 			return {
-				/* ... */
+				// ...
 			};
 		});
 		
 		hub.get("Observer");
 		hub.get("Observer");
-		hub.get("Observable").notify();
 		
-		assertEquals(2, invokations);
+		var text = "Hello Observer!";
+		hub.publish("Document/change", text);
+		
+		sinon.assert.calledTwice(spy);
+		sinon.assert.alwaysCalledWith(spy, text);
 	}
 
 });

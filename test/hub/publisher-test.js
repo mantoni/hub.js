@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -95,22 +95,22 @@
 			assertFunction(api);
 			assertFunction(api.ab);
 			assertFunction(api.xy);
-			var ab = stubFn();
-			var xy = stubFn();
+			var ab = sinon.spy();
+			var xy = sinon.spy();
 			hub.subscribe("a/b", ab);
 			hub.subscribe("x/y", xy);
 			api();
-			assert(ab.called);
-			assert(xy.called);
+			sinon.assert.calledOnce(ab);
+			sinon.assert.calledOnce(xy);
 			ab.called = false;
 			xy.called = false;
 			api.ab();
-			assert(ab.called);
+			sinon.assert.called(ab);
 			assertFalse(xy.called);
 			ab.called = false;
 			api.xy();
 			assertFalse(ab.called);
-			assert(xy.called);
+			sinon.assert.called(xy);
 		}
 
 	});

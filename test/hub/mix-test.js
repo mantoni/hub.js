@@ -1,4 +1,4 @@
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -18,7 +18,7 @@ TestCase("MixTest", {
 	
 	"test should assign function": function() {
 		var object = {};
-		var fn = stubFn();
+		var fn = sinon.spy();
 		
 		hub.mix(object, { test: fn });
 		
@@ -34,13 +34,11 @@ TestCase("MixTest", {
 	},
 	
 	"test should create chain on override": function() {
-		var fn1 = stubFn();
-		var fn2 = stubFn();
 		var object = {
-			test: fn1
+			test: sinon.spy()
 		};
 		
-		hub.mix(object, { test: fn2 });
+		hub.mix(object, { test: sinon.spy() });
 
 		assertFunction(object.test.add);
 	},

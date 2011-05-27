@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -28,7 +28,7 @@ TestCase("GetTest", {
 	},
 	
 	"test should return singleton peer": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.peer("test", {
 			key: fn
 		});
@@ -39,7 +39,7 @@ TestCase("GetTest", {
 	},
 	
 	"test should return prototype peer": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		hub.peer("test", function () {
 			return {
 				key: fn
@@ -52,38 +52,38 @@ TestCase("GetTest", {
 	},
 	
 	"test should invoke singleton method and subscriber": function () {
-		var fn1 = stubFn();
+		var spy1 = sinon.spy();
 		hub.peer("test", {
-			key: fn1
+			key: spy1
 		});
-		var fn2 = stubFn();
-		hub.subscribe("test/key", fn2);
+		var spy2 = sinon.spy();
+		hub.subscribe("test/key", spy2);
 		var test = hub.get("test");
 		test.key();
-		assert(fn1.called);
-		assert(fn2.called);
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
 	},
 	
 	"test should invoke prototype method and subscriber": function () {
-		var fn1 = stubFn();
+		var spy1 = sinon.spy();
 		hub.peer("test", function () {
 			return {
-				key: fn1
+				key: spy1
 			};
 		});
-		var fn2 = stubFn();
-		hub.subscribe("test/key", fn2);
+		var spy2 = sinon.spy();
+		hub.subscribe("test/key", spy2);
 		var test = hub.get("test");
 		test.key();
-		assert(fn1.called);
-		assert(fn2.called);
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
 	},
 	
 	"test should pass additional arguments to prototype": function () {
-		var fn = stubFn({});
-		hub.peer("a", fn);
+		var stub = sinon.stub().returns({});
+		hub.peer("a", stub);
 		hub.get("a", "one", "two");
-		assertEquals({0: "one", 1: "two"}, fn.args);
+		sinon.assert.calledWithExactly(stub, "one", "two");
 	}
 
 });

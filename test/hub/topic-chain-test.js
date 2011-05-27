@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -24,11 +24,11 @@ TestCase("TopicChainTest", {
 	},
 	
 	"test invoke calls added function": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		var chain = hub.topicChain();
 		chain.add(fn, "**/**");
 		chain("**/**");
-		assert(fn.called);
+		sinon.assert.calledOnce(fn);
 	},
 	
 	"test insert 1": function () {
@@ -86,33 +86,37 @@ TestCase("TopicChainTest", {
 	
 	"test call invokes only matching": function () {
 		var chain = hub.topicChain();
-		var fn1 = stubFn();
-		var fn2 = stubFn();
-		chain.add(fn1, "a/b");
-		chain.add(fn2, "x/y");
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		chain.add(spy1, "a/b");
+		chain.add(spy2, "x/y");
+		
 		chain("x/y");
-		assertFalse(fn1.called);
-		assert(fn2.called);
+
+		sinon.assert.notCalled(spy1);
+		sinon.assert.calledOnce(spy2);
 	},
 	
 	"test invoke without topic falls back to chain topic": function () {
 		var chain = hub.topicChain("a/b");
-		var fn1 = stubFn();
-		var fn2 = stubFn();
-		chain.add(fn1, "a/b");
-		chain.add(fn2, "x/y");
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		chain.add(spy1, "a/b");
+		chain.add(spy2, "x/y");
+		
 		chain();
-		assert(fn1.called);
-		assertFalse(fn2.called);
+		
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.notCalled(spy2);
 	},
 	
 	"test scope is retained": function () {
 		var chain = hub.topicChain();
-		var fn = stubFn();
+		var fn = sinon.spy();
 		chain.add(fn, "**/**");
 		var object = {};
 		chain.call(object);
-		assertSame(object, fn.scope);
+		assert(fn.calledOn(object));
 	}
 	
 });

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn AsyncTestCase fail assert assertFalse assertNull
+/*globals hub sinon AsyncTestCase fail assert assertFalse assertNull
 	assertNotNull assertUndefined assertNotUndefined assertSame assertNotSame
 	assertEquals assertFunction assertObject assertArray assertException
 	assertNoException setTimeout

@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -14,15 +14,13 @@
 TestCase("SingletonTest", {
 	
 	setUp: function () {
-		this.peer = hub.peer;
-		this.object = hub.object;
-		hub.peer = stubFn();
-		hub.object = stubFn();
+		sinon.stub(hub, "peer");
+		sinon.stub(hub, "object");
 	},
 	
 	tearDown: function () {
-		hub.peer = this.peer;
-		hub.object = this.object;
+		hub.peer.restore();
+		hub.object.restore();
 	},
 	
 	"test should be function": function () {
@@ -31,22 +29,21 @@ TestCase("SingletonTest", {
 	
 	"test should use hub.peer": function () {
 		var object = {};
+		
 		hub.singleton("name", object);
 		
-		assert(hub.peer.called);
-		assertEquals("name", hub.peer.args[0]);
-		assertSame(object, hub.peer.args[1]);
+		sinon.assert.calledOnce(hub.peer);
+		sinon.assert.calledWith(hub.peer, "name", object);
 	},
 	
 	"test should use hub.object": function () {
 		var fn = function () {};
 		var args = [123];
+		
 		hub.singleton("name", fn, args);
 		
-		assert(hub.object.called);
-		assertSame("name", hub.object.args[0]);
-		assertSame(fn, hub.object.args[1]);
-		assertSame(args, hub.object.args[2]);
+		sinon.assert.calledOnce(hub.object);
+		sinon.assert.calledWithExactly(hub.object, "name", fn, args);
 	}
 	
 });

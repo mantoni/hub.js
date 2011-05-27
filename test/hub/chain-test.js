@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*globals hub stubFn TestCase fail assert assertFalse assertNull assertNotNull
+/*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
 	assertFunction assertObject assertArray assertException assertNoException
 */
@@ -25,18 +25,15 @@ TestCase("ChainCreateTest", {
 TestCase("ChainCallTest", {
 		
 	"test should invoke provided functions": function () {
-		var calls = [];
-		var f1 = function () {
-			calls.push("f1");
-		};
-		var f2 = function () {
-			calls.push("f2");
-		};
-		var chain = hub.chain(f1, f2);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var chain = hub.chain(spy1, spy2);
 		
 		chain();
 		
-		assertEquals("Called in argument order", "f1,f2", calls.join());
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.callOrder(spy1, spy2);
 	}
 	
 });
@@ -44,23 +41,23 @@ TestCase("ChainCallTest", {
 TestCase("StopPropagationTest", {
 	
 	"test should stop after invokation": function () {
-		var f = stubFn();
+		var spy = sinon.spy();
 		var chain = hub.chain(function () {
 			hub.stopPropagation();
-		}, f);
+		}, spy);
 		
 		chain();
 		
-		assertFalse(f.called);
+		sinon.assert.notCalled(spy);
 	},
 	
 	"test should not override result": function () {
-		var chain = hub.chain(function () {
-			return ["first"];
-		}, function () {
-			hub.stopPropagation();
-			return ["second"];
-		});
+		var chain = hub.chain(sinon.stub().returns(["first"]),
+			function () {
+				hub.stopPropagation();
+				return ["second"];
+			}
+		);
 		
 		var result = chain();
 		
@@ -68,11 +65,11 @@ TestCase("StopPropagationTest", {
 	},
 	
 	"test should override result": function () {
-		var chain = hub.chain(function () {
-			return ["first"];
-		}, function () {
-			hub.stopPropagation(["override"]);
-		});
+		var chain = hub.chain(sinon.stub().returns(["first"]),
+			function () {
+				hub.stopPropagation(["override"]);
+			}
+		);
 		
 		var result = chain();
 		
@@ -84,59 +81,61 @@ TestCase("StopPropagationTest", {
 TestCase("ChainRemoveTest", {
 	
 	"test remove first of two": function () {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var chain = hub.chain(f1, f2);
-		chain.remove(f1);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var chain = hub.chain(spy1, spy2);
+		
+		chain.remove(spy1);
 		chain();
-		assertFalse(f1.called);
-		assert(f2.called);
+		
+		sinon.assert.notCalled(spy1);
+		sinon.assert.called(spy2);
 	},
 	
 	"test remove second of two": function () {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var chain = hub.chain(f1, f2);
-		chain.remove(f2);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var chain = hub.chain(spy1, spy2);
+		chain.remove(spy2);
 		chain();
-		assert(f1.called);
-		assertFalse(f2.called);
+		sinon.assert.calledOnce(spy1);
+		assertFalse(spy2.called);
 	},
 	
 	"test remove first of three": function () {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var f3 = stubFn();
-		var chain = hub.chain(f1, f2, f3);
-		chain.remove(f1);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var spy3 = sinon.spy();
+		var chain = hub.chain(spy1, spy2, spy3);
+		chain.remove(spy1);
 		chain();
-		assertFalse(f1.called);
-		assert(f2.called);
-		assert(f3.called);
+		assertFalse(spy1.called);
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.calledOnce(spy3);
 	},
 	
 	"test remove second of three": function () {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var f3 = stubFn();
-		var chain = hub.chain(f1, f2, f3);
-		chain.remove(f2);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var spy3 = sinon.spy();
+		var chain = hub.chain(spy1, spy2, spy3);
+		chain.remove(spy2);
 		chain();
-		assert(f1.called);
-		assertFalse(f2.called);
-		assert(f3.called);
+		sinon.assert.calledOnce(spy1);
+		assertFalse(spy2.called);
+		sinon.assert.calledOnce(spy3);
 	},
 	
 	"test remove third of three": function () {
-		var f1 = stubFn();
-		var f2 = stubFn();
-		var f3 = stubFn();
-		var chain = hub.chain(f1, f2, f3);
-		chain.remove(f3);
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var spy3 = sinon.spy();
+		var chain = hub.chain(spy1, spy2, spy3);
+		chain.remove(spy3);
 		chain();
-		assert(f1.called);
-		assert(f2.called);
-		assertFalse(f3.called);
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
+		assertFalse(spy3.called);
 	}
 
 });
@@ -145,7 +144,7 @@ TestCase("ChainConcurrencyTest", {
 	
 	"test should allow add during invocation": function () {
 		var calls = 0;
-		var sf = stubFn();
+		var sf = sinon.spy();
 		var chain = hub.chain();
 		chain.add(function () {
 			calls++;
@@ -161,12 +160,12 @@ TestCase("ChainConcurrencyTest", {
 TestCase("ChainScopeTest", {
 	
 	"test should retain scope": function () {
-		var fn = stubFn();
+		var fn = sinon.spy();
 		var chain = hub.chain();
 		chain.add(fn);
 		var object = {};
 		chain.call(object);
-		assertSame(object, fn.scope);
+		assert(fn.calledOn(object));
 	}
 	
 });
@@ -174,28 +173,28 @@ TestCase("ChainScopeTest", {
 TestCase("ChainNestingTest", {
 	
 	"test should invoke nested chain": function () {
-		var f = stubFn();
+		var f = sinon.spy();
 		var ca = hub.chain(f);
 		var cb = hub.chain(ca);
 		cb();
-		assert(f.called);
+		sinon.assert.calledOnce(f);
 	},
 	
 	"test should abort parent": function () {
 		var ca = hub.chain(function () {
 			hub.stopPropagation();
 		});
-		var f = stubFn();
+		var f = sinon.spy();
 		var cb = hub.chain(ca, f);
 		cb();
 		assertFalse(f.called);
 	},
 	
 	"test should propagate to parent": function () {
-		var f = stubFn();
+		var f = sinon.spy();
 		var ca = hub.chain(function () {
 			hub.propagate();
-			assert(f.called);
+			sinon.assert.calledOnce(f);
 		});
 		var cb = hub.chain(ca, f);
 		cb();
