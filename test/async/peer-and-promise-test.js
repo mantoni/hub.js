@@ -29,7 +29,7 @@ AsyncTestCase("PeerAndPromiseTest", {
 		});
 		
 		queue.call(function (pool) {
-			hub.publish("test/defer").then(pool.add(function (value) {
+			hub.publish("test.defer").then(pool.add(function (value) {
 				assertEquals("Tadaa!", value);
 			}));
 		});
@@ -47,7 +47,7 @@ AsyncTestCase("PeerAndPromiseTest", {
 		});
 		
 		queue.call(function (pool) {
-			hub.publish("test/defer").then(pool.add(function (value1, value2) {
+			hub.publish("test.defer").then(pool.add(function (value1, value2) {
 				assertEquals("Deferred", value1);
 				assertEquals("Tadaa!", value2);
 			}));

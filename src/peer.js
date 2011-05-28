@@ -44,7 +44,7 @@
 			if (peer.hasOwnProperty(message)) {
 				var fn = peer[message];
 				if (typeof fn === "function") {
-					var topic = namespace + "/" + message;
+					var topic = namespace + "." + message;
 					var pub = hub.publisher(topic);
 					if (isProto) {
 						api[message] = hub.chain(pub, fn);
@@ -56,7 +56,7 @@
 				}
 			}
 		}
-		hub.publish("hub.peer.new/" + namespace, api);
+		hub.publish("hub.peer.new." + namespace, api);
 	}
 
 	/**

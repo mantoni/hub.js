@@ -49,10 +49,10 @@ TestCase("PromiseTest", {
 	
 	"test publish with then": function () {
 		var chain = [];
-		hub.subscribe("test/promise", function () {
+		hub.subscribe("test.promise", function () {
 			chain.push("a");
 		});
-		hub.publish("test/promise").then(function () {
+		hub.publish("test.promise").then(function () {
 			chain.push("b");
 		});
 		assertEquals("a,b", chain.join());
@@ -60,46 +60,46 @@ TestCase("PromiseTest", {
 	
 	"test then with promise publish": function () {
 		var chain = [];
-		hub.subscribe("test/promise", function () {
+		hub.subscribe("test.promise", function () {
 			chain.push("a");
 		});
-		hub.promise().publish("test/promise").then(function () {
+		hub.promise().publish("test.promise").then(function () {
 			chain.push("b");
 		}).resolve();
 		assertEquals("a,b", chain.join());
 	},
 	
 	"test return value is not used as parameter on publish": function () {
-		hub.subscribe("test/promise", function () {
+		hub.subscribe("test.promise", function () {
 			return "Test";
 		});
 		var value = "replaced with undefined";
-		hub.subscribe("test/other", function (arg) {
+		hub.subscribe("test.other", function (arg) {
 			value = arg;
 		});
-		hub.promise().publish("test/promise").publish("test/other").resolve();
+		hub.promise().publish("test.promise").publish("test.other").resolve();
 		assertUndefined(value);
 	},
 
 	"test return value is used as parameter on publishResult": function () {
-		hub.subscribe("test/promise", function () {
+		hub.subscribe("test.promise", function () {
 			return "Test";
 		});
 		var value = "replaced with return value";
-		hub.subscribe("test/other", function (arg) {
+		hub.subscribe("test.other", function (arg) {
 			value = arg;
 		});
-		hub.publish("test/promise").publishResult("test/other");
+		hub.publish("test.promise").publishResult("test.other");
 		assertEquals("Test", value);
 	},
 
 	"test return value is used as parameter on publishResult (explicit resolve)": function () {
-		hub.subscribe("test/promise", sinon.stub().returns("Test"));
+		hub.subscribe("test.promise", sinon.stub().returns("Test"));
 		var spy = sinon.spy();
-		hub.subscribe("test/other", spy);
+		hub.subscribe("test.other", spy);
 		
-		hub.promise().publish("test/promise").publishResult(
-			"test/other"
+		hub.promise().publish("test.promise").publishResult(
+			"test.other"
 		).resolve();
 		
 		sinon.assert.calledOnce(spy);
@@ -110,9 +110,9 @@ TestCase("PromiseTest", {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
-		hub.subscribe("test/promise", spy1);
+		hub.subscribe("test.promise", spy1);
 		var nested = function () {
-			hub.publish("test/promise").then(spy2);
+			hub.publish("test.promise").then(spy2);
 		};
 		
 		hub.promise().then(nested).then(spy3).resolve();
@@ -127,41 +127,41 @@ TestCase("PromiseTest", {
 	 * argument the promise.
 	 */
 	"test callback return string": function () {
-		hub.subscribe("test/promise", sinon.stub().returns("Hello"));
+		hub.subscribe("test.promise", sinon.stub().returns("Hello"));
 		var spy = sinon.spy();
 		
-		hub.publish("test/promise").then(spy);
+		hub.publish("test.promise").then(spy);
 		
 		sinon.assert.calledWithExactly(spy, "Hello");
 	},
 
 	"test callback return string multicasting": function () {
-		hub.subscribe("test/promise", sinon.stub().returns("Hello"));
+		hub.subscribe("test.promise", sinon.stub().returns("Hello"));
 		var spy = sinon.spy();
 
-		hub.publish("test/*").then(spy);
+		hub.publish("test.*").then(spy);
 		
 		sinon.assert.calledWithExactly(spy, "Hello");
 	},
 	
 	"test callback return merge": function () {
-		hub.subscribe("test/promise.a", sinon.stub().returns(["World"]));
-		hub.subscribe("test/promise.b", sinon.stub().returns(["Hello"]));
+		hub.subscribe("test.promise.a", sinon.stub().returns(["World"]));
+		hub.subscribe("test.promise.b", sinon.stub().returns(["Hello"]));
 		var spy = sinon.spy();
 
-		hub.publish("test/promise.*").then(spy);
+		hub.publish("test.promise.*").then(spy);
 		
 		sinon.assert.calledWithExactly(spy, ["Hello", "World"]);
 	},
 	
 	"test publish result": function () {
-		hub.subscribe("test/promise.a", function () {
+		hub.subscribe("test.promise.a", function () {
 			return "Check";
 		});
 		var spy = sinon.spy();
-		hub.subscribe("test/promise.b", spy);
+		hub.subscribe("test.promise.b", spy);
 		
-		hub.publish("test/promise.a").publishResult("test/promise.b");
+		hub.publish("test.promise.a").publishResult("test.promise.b");
 
 		sinon.assert.calledOnce(spy);
 		sinon.assert.calledWithExactly(spy, "Check");
@@ -169,13 +169,13 @@ TestCase("PromiseTest", {
 	
 	"test joined promises resolve #1 first": function () {
 		var p1, p2, done = false;
-		hub.subscribe("test/promise.a", function () {
+		hub.subscribe("test.promise.a", function () {
 			p1 = hub.promise();
 		});
-		hub.subscribe("test/promise.b", function () {
+		hub.subscribe("test.promise.b", function () {
 			p2 = hub.promise();
 		});
-		var p3 = hub.publish("test/promise.*").then(function () {
+		var p3 = hub.publish("test.promise.*").then(function () {
 			done = true;
 		});
 		assertFalse(p1 === p2);
@@ -196,13 +196,13 @@ TestCase("PromiseTest", {
 
 	"test joined promises resolve #2 first": function () {
 		var p1, p2, done = false;
-		hub.subscribe("test/promise.a", function () {
+		hub.subscribe("test.promise.a", function () {
 			p1 = hub.promise();
 		});
-		hub.subscribe("test/promise.b", function () {
+		hub.subscribe("test.promise.b", function () {
 			p2 = hub.promise();
 		});
-		var p3 = hub.publish("test/promise.*").then(function () {
+		var p3 = hub.publish("test.promise.*").then(function () {
 			done = true;
 		});
 		assertFalse(p1 === p2);
@@ -253,11 +253,11 @@ TestCase("PromiseTest", {
 	},
 	
 	"test join promise proxy": function () {
-		hub.subscribe("a/b", sinon.spy());
-		hub.subscribe("a/c", sinon.spy());
+		hub.subscribe("a.b", sinon.spy());
+		hub.subscribe("a.c", sinon.spy());
 		var fn = sinon.spy();
 		
-		hub.publish("a/b").join(hub.publish("a/c")).then(fn);
+		hub.publish("a.b").join(hub.publish("a.c")).then(fn);
 		
 		assert(fn.calledOnce);
 	},
@@ -287,17 +287,17 @@ TestCase("PromiseTest", {
 	},
 	
 	"test promise rejected": function () {
-		hub.subscribe("test/throw", function () {
+		hub.subscribe("test.throw", function () {
 			hub.promise();
 			throw new Error();
 		});
-		var f = sinon.spy();
+		var spy = sinon.spy();
 		
-		hub.publish("test/throw").then(function () {
+		hub.publish("test.throw").then(function () {
 			fail("Unexpected success");
-		}, f);
+		}, spy);
 		
-		assert(f.calledOnce);
+		sinon.assert.calledOnce(spy);
 	}
 	
 });

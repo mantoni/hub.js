@@ -23,8 +23,14 @@ TestCase("SubscribeTest", {
 	
 	"test should throw if callback is missing": function () {
 		assertException(function () {
-			hub.subscribe("namespace/topic");
+			hub.subscribe("namespace.topic");
 		}, "TypeError");
+	},
+	
+	"test should throw if topic contains illegal characters": function () {
+		assertException(function () {
+			hub.subscribe("namespace/topic", function () {});
+		}, "Error");
 	},
 	
 	"test subscribe invocation": function () {
@@ -33,52 +39,52 @@ TestCase("SubscribeTest", {
 			hub.subscribe("a", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a/b", fn);
+			hub.subscribe("a.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a/*", fn);
+			hub.subscribe("a.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*/b", fn);
+			hub.subscribe("*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.*/b", fn);
+			hub.subscribe("a.*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a/b.*", fn);
+			hub.subscribe("a.b.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.*/b.*", fn);
+			hub.subscribe("a.*.b.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*.a/b", fn);
+			hub.subscribe("*.a.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*.a/*.b", fn);
+			hub.subscribe("*.a.*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("**/b", fn);
+			hub.subscribe("**.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a/**", fn);
+			hub.subscribe("a.**", fn);
 		});
 	},
 	
 	"test subscribe throws if callback is not function": function () {
 		assertException(function () {
-			hub.subscribe("x/y");
+			hub.subscribe("x.y");
 		});
 		assertException(function () {
-			hub.subscribe("x/y", null);
+			hub.subscribe("x.y", null);
 		});
 		assertException(function () {
-			hub.subscribe("x/y", true);
+			hub.subscribe("x.y", true);
 		});
 		assertException(function () {
-			hub.subscribe("x/y", {});
+			hub.subscribe("x.y", {});
 		});
 		assertException(function () {
-			hub.subscribe("x/y", []);
+			hub.subscribe("x.y", []);
 		});
 	}
 	

@@ -19,12 +19,12 @@ TestCase("UnsubscribeTest", {
 	
 	"test simple unsubscribe": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x/y", fn);
-		hub.publish("x/y");
+		hub.subscribe("x.y", fn);
+		hub.publish("x.y");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x/y", fn);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", fn);
+		hub.publish("x.y");
 		assertFalse(fn.called);
 	},
 	
@@ -36,13 +36,13 @@ TestCase("UnsubscribeTest", {
 		var f2 = function () {
 			a.push("f2");
 		};
-		hub.subscribe("x/y", f1);
-		hub.subscribe("x/y", f2);
-		hub.publish("x/y");
+		hub.subscribe("x.y", f1);
+		hub.subscribe("x.y", f2);
+		hub.publish("x.y");
 		assertEquals("f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x/y", f1);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", f1);
+		hub.publish("x.y");
 		assertEquals("f2", a.join());
 	},
 	
@@ -54,13 +54,13 @@ TestCase("UnsubscribeTest", {
 		var f2 = function () {
 			a.push("f2");
 		};
-		hub.subscribe("x/y", f1);
-		hub.subscribe("x/y", f2);
-		hub.publish("x/y");
+		hub.subscribe("x.y", f1);
+		hub.subscribe("x.y", f2);
+		hub.publish("x.y");
 		assertEquals("f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x/y", f2);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", f2);
+		hub.publish("x.y");
 		assertEquals("f1", a.join());
 	},
 	
@@ -75,14 +75,14 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x/y", f1);
-		hub.subscribe("x/y", f2);
-		hub.subscribe("x/y", f3);
-		hub.publish("x/y");
+		hub.subscribe("x.y", f1);
+		hub.subscribe("x.y", f2);
+		hub.subscribe("x.y", f3);
+		hub.publish("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x/y", f1);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", f1);
+		hub.publish("x.y");
 		assertEquals("f3,f2", a.join());
 	},
 	
@@ -97,14 +97,14 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x/y", f1);
-		hub.subscribe("x/y", f2);
-		hub.subscribe("x/y", f3);
-		hub.publish("x/y");
+		hub.subscribe("x.y", f1);
+		hub.subscribe("x.y", f2);
+		hub.subscribe("x.y", f3);
+		hub.publish("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x/y", f2);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", f2);
+		hub.publish("x.y");
 		assertEquals("f3,f1", a.join());
 	},
 	
@@ -119,66 +119,66 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x/y", f1);
-		hub.subscribe("x/y", f2);
-		hub.subscribe("x/y", f3);
-		hub.publish("x/y");
+		hub.subscribe("x.y", f1);
+		hub.subscribe("x.y", f2);
+		hub.subscribe("x.y", f3);
+		hub.publish("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x/y", f3);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", f3);
+		hub.publish("x.y");
 		assertEquals("f2,f1", a.join());
 	},
 	
 	"test publish subscribe publish unsubscribe publish": function () {
 		var fn = sinon.spy();
-		hub.publish("x/y");
-		hub.subscribe("x/y", fn);
-		hub.publish("x/y");
+		hub.publish("x.y");
+		hub.subscribe("x.y", fn);
+		hub.publish("x.y");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x/y", fn);
-		hub.publish("x/y");
+		hub.unsubscribe("x.y", fn);
+		hub.publish("x.y");
 		assertFalse(fn.called);
 	},
 	
 	"test subscribe publish wildcard and unsubscribe": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x/y", fn);
-		hub.publish("x/*");
+		hub.subscribe("x.y", fn);
+		hub.publish("x.*");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x/y", fn);
-		hub.publish("x/*");
+		hub.unsubscribe("x.y", fn);
+		hub.publish("x.*");
 		assertFalse(fn.called);
 	},
 	
 	"test unsubscribe throws if callback is not a function": function () {
 		assertException(function () {
-			hub.unsubscribe("x/y");
+			hub.unsubscribe("x.y");
 		});
 		assertException(function () {
-			hub.unsubscribe("x/y", null);
+			hub.unsubscribe("x.y", null);
 		});
 		assertException(function () {
-			hub.unsubscribe("x/y", true);
+			hub.unsubscribe("x.y", true);
 		});
 		assertException(function () {
-			hub.unsubscribe("x/y", {});
+			hub.unsubscribe("x.y", {});
 		});
 		assertException(function () {
-			hub.unsubscribe("x/y", []);
+			hub.unsubscribe("x.y", []);
 		});
 	},
 	
 	"test unsubscribe returns true on success": function () {
 		var fn = function () {};
-		hub.subscribe("x/y", fn);
-		assert(hub.unsubscribe("x/y", fn));
+		hub.subscribe("x.y", fn);
+		assert(hub.unsubscribe("x.y", fn));
 	},
 	
 	"test unsubscribe returns false on failure": function () {
-		assertFalse(hub.unsubscribe("x/y", function () {}));
+		assertFalse(hub.unsubscribe("x.y", function () {}));
 	}
 	
 });

@@ -26,46 +26,46 @@ TestCase("TopicChainTest", {
 	"test invoke calls added function": function () {
 		var fn = sinon.spy();
 		var chain = hub.topicChain();
-		chain.add(fn, "**/**");
-		chain("**/**");
+		chain.add(fn, "**");
+		chain("**");
 		sinon.assert.calledOnce(fn);
 	},
 	
 	"test insert 1": function () {
-		this.verifyInsertOrder(["foo/*", "*/bar"], ["*/bar", "foo/*"]);
+		this.verifyInsertOrder(["foo.*", "*.bar"], ["*.bar", "foo.*"]);
 	},
 	
 	"test insert 2": function () {
-		this.verifyInsertOrder(["foo/bar", "foo/*", "*/bar"],
-			["*/bar", "foo/*", "foo/bar"]);
+		this.verifyInsertOrder(["foo.bar", "foo.*", "*.bar"],
+			["*.bar", "foo.*", "foo.bar"]);
 	},
 	
 	"test insert 3": function () {
-		this.verifyInsertOrder(["foo/*", "foo/bar", "*/bar"],
-			["*/bar", "foo/*", "foo/bar"]);
+		this.verifyInsertOrder(["foo.*", "foo.bar", "*.bar"],
+			["*.bar", "foo.*", "foo.bar"]);
 	},
 	
 	"test insert 4": function () {
-		this.verifyInsertOrder(["*/bar", "foo/bar", "foo/*"],
-			["*/bar", "foo/*", "foo/bar"]);
+		this.verifyInsertOrder(["*.bar", "foo.bar", "foo.*"],
+			["*.bar", "foo.*", "foo.bar"]);
 	},
 	
 	"test insert 5": function () {
-		this.verifyInsertOrder(["foo/bar", "*/bar", "foo/*"],
-			["*/bar", "foo/*", "foo/bar"]);
+		this.verifyInsertOrder(["foo.bar", "*.bar", "foo.*"],
+			["*.bar", "foo.*", "foo.bar"]);
 	},
 	
 	"test insert 7": function () {
-		this.verifyInsertOrder(["*/b", "*/y", "a/b", "x/y"],
-			["*/y", "*/b", "x/y", "a/b"]);
+		this.verifyInsertOrder(["*.b", "*.y", "a.b", "x.y"],
+			["*.y", "*.b", "x.y", "a.b"]);
 	},
 	
 	"test insert two equal": function () {
-		this.verifyInsertOrder(["a/b", "x/y"], ["x/y", "a/b"]);
+		this.verifyInsertOrder(["a.b", "x.y"], ["x.y", "a.b"]);
 	},
 	
 	"test insert two wildcard": function () {
-		this.verifyInsertOrder(["a/*", "x/*"], ["x/*", "a/*"]);
+		this.verifyInsertOrder(["a.*", "x.*"], ["x.*", "a.*"]);
 	},
 	
 	verifyInsertOrder: function (inserts, expected) {
@@ -80,7 +80,7 @@ TestCase("TopicChainTest", {
 		for (i = 0, l = inserts.length; i < l; i++) {
 			chain.add(caller(inserts[i]), inserts[i]);
 		}
-		chain("**/**");
+		chain("**");
 		assertEquals(expected.join(), calls.join());
 	},
 	
@@ -88,21 +88,21 @@ TestCase("TopicChainTest", {
 		var chain = hub.topicChain();
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
-		chain.add(spy1, "a/b");
-		chain.add(spy2, "x/y");
+		chain.add(spy1, "a.b");
+		chain.add(spy2, "x.y");
 		
-		chain("x/y");
+		chain("x.y");
 
 		sinon.assert.notCalled(spy1);
 		sinon.assert.calledOnce(spy2);
 	},
 	
 	"test invoke without topic falls back to chain topic": function () {
-		var chain = hub.topicChain("a/b");
+		var chain = hub.topicChain("a.b");
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
-		chain.add(spy1, "a/b");
-		chain.add(spy2, "x/y");
+		chain.add(spy1, "a.b");
+		chain.add(spy2, "x.y");
 		
 		chain();
 		
@@ -112,11 +112,11 @@ TestCase("TopicChainTest", {
 	
 	"test scope is retained": function () {
 		var chain = hub.topicChain();
-		var fn = sinon.spy();
-		chain.add(fn, "**/**");
+		var spy = sinon.spy();
+		chain.add(spy, "**");
 		var object = {};
 		chain.call(object);
-		assert(fn.calledOn(object));
+		assert(spy.calledOn(object));
 	}
 	
 });

@@ -24,7 +24,7 @@ TestCase("ObserverPatternTest", {
 			return {
 				change: function (newText) {
 					text = newText;
-					hub.publish("Observer/notify", text);
+					hub.publish("Observer.notify", text);
 				}
 			};
 		});
@@ -41,7 +41,7 @@ TestCase("ObserverPatternTest", {
 		hub.get("Observer");
 		
 		var text = "Hello Observer!";
-		hub.publish("Document/change", text);
+		hub.publish("Document.change", text);
 		
 		sinon.assert.calledTwice(spy);
 		sinon.assert.alwaysCalledWith(spy, text);

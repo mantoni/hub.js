@@ -26,10 +26,10 @@ TestCase("AbortedTest", {
 	},
 	
 	"test should return true after stopPropagation": function () {
-		hub.subscribe("a/b", function () {
+		hub.subscribe("a.b", function () {
 			hub.stopPropagation();
 		});
-		hub.publish("a/b");
+		hub.publish("a.b");
 		assert(hub.aborted());
 	}
 

@@ -36,7 +36,7 @@
 		try {
 			result = callback.apply(null, args);
 		} catch (e) {
-			hub.invoke("hub.error/promise.callback", new hub.Error("error",
+			hub.invoke("hub.error.promise.callback", new hub.Error("error",
 				"Error in promise callback: ${error}", {
 					error: e.message
 				}));
@@ -60,7 +60,7 @@
 	 * already resolved. Publishes an error message on the hub.
 	 */
 	function promiseAlreadyResolved() {
-		hub.invoke("hub.error/promise.resolved", new hub.Error("validation",
+		hub.invoke("hub.error.promise.resolved", new hub.Error("validation",
 			"Promise already resolved"));
 	}
 	

@@ -57,7 +57,7 @@ TestCase("GetTest", {
 			key: spy1
 		});
 		var spy2 = sinon.spy();
-		hub.subscribe("test/key", spy2);
+		hub.subscribe("test.key", spy2);
 		var test = hub.get("test");
 		test.key();
 		sinon.assert.calledOnce(spy1);
@@ -72,7 +72,7 @@ TestCase("GetTest", {
 			};
 		});
 		var spy2 = sinon.spy();
-		hub.subscribe("test/key", spy2);
+		hub.subscribe("test.key", spy2);
 		var test = hub.get("test");
 		test.key();
 		sinon.assert.calledOnce(spy1);

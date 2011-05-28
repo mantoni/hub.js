@@ -19,12 +19,12 @@ AsyncTestCase("PublishTimeoutTest", {
 	},
 	
 	testSimpleTimeout: function (queue) {
-		hub.subscribe("a/b", function () {
+		hub.subscribe("a.b", function () {
 			hub.promise(10); // promise with small timeout, never resolved.
 		});
 		queue.call(function (pool) {
 			var time = new Date().getTime();
-			hub.publish("a/b").then(function () {
+			hub.publish("a.b").then(function () {
 				fail("Unexpected success callback");
 			}, pool.add(function (error) {
 				assertObject(error);

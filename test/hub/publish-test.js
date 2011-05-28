@@ -66,10 +66,7 @@
 	
 		"test should throw if topic is invalid": function () {
 			assertException(function () {
-				hub.publish("foo/bar/doo");
-			});
-			assertException(function () {
-				hub.publish("foo /doo");
+				hub.publish("foo .doo");
 			});
 			assertException(function () {
 				hub.publish("foo:doo");
@@ -81,48 +78,48 @@
 				hub.publish("a");
 			});
 			assertNoException(function () {
-				hub.publish("a/b");
+				hub.publish("a.b");
 			});
 			assertNoException(function () {
-				hub.publish("a/*");
+				hub.publish("a.*");
 			});
 			assertNoException(function () {
-				hub.publish("*/b");
+				hub.publish("*.b");
 			});
 			assertNoException(function () {
-				hub.publish("a.*/b");
+				hub.publish("a.*.b");
 			});
 			assertNoException(function () {
-				hub.publish("a/b.*");
+				hub.publish("a.b.*");
 			});
 			assertNoException(function () {
-				hub.publish("a.*/b.*");
+				hub.publish("a.*.b.*");
 			});
 			assertNoException(function () {
-				hub.publish("*.a/b");
+				hub.publish("*.a.b");
 			});
 			assertNoException(function () {
-				hub.publish("*.a/*.b");
+				hub.publish("*.a.*.b");
 			});
 			assertNoException(function () {
-				hub.publish("**/b");
+				hub.publish("**.b");
 			});
 			assertNoException(function () {
-				hub.publish("a/**");
+				hub.publish("a.**");
 			});
 		},
 	
 		"test should find matching subscriber for wildcards": function () {
 			var fn = sinon.spy();
-			hub.subscribe("a.b/c.d", fn);
-			assertInvoked("a.b/c.*", fn);
-			assertInvoked("a.b/c.**", fn);
-			assertNotInvoked("a.b/*", fn);
-			assertInvoked("a.b/**", fn);
-			assertInvoked("a.*/c.d", fn);
-			assertInvoked("a.**/c.d", fn);
-			assertNotInvoked("*/c.d", fn);
-			assertInvoked("**/c.d", fn);
+			hub.subscribe("a.b.c.d", fn);
+			assertInvoked("a.b.c.*", fn);
+			assertInvoked("a.b.c.**", fn);
+			assertNotInvoked("a.b.*", fn);
+			assertInvoked("a.b.**", fn);
+			assertInvoked("a.*.c.d", fn);
+			assertInvoked("a.**.c.d", fn);
+			assertNotInvoked("*.c.d", fn);
+			assertInvoked("**.c.d", fn);
 		}
 
 	});

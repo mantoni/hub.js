@@ -38,7 +38,7 @@ TestCase("MixinTest", {
 			};
 		});
 		// child is called first, then the "super" implementation.
-		hub.publish("child/test");
+		hub.publish("child.test");
 		assertEquals("child,parent", chain.join());
 	},
 	
@@ -63,7 +63,7 @@ TestCase("MixinTest", {
 				}
 			};
 		});
-		hub.publish("child/test");
+		hub.publish("child.test");
 		assertEquals("child", chain.join());
 	},
 	
@@ -89,7 +89,7 @@ TestCase("MixinTest", {
 			};
 		});
 		// explicit "super" invocation changes call order here.
-		hub.publish("child/test");
+		hub.publish("child.test");
 		assertEquals("parent,child", chain.join());
 	},
 	

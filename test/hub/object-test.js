@@ -156,7 +156,7 @@ TestCase("ObjectSubscribeTest", {
 		});
 		
 		sinon.assert.calledOnce(hub.subscribe);
-		sinon.assert.calledWithExactly(hub.subscribe, "namespace/message", fn);
+		sinon.assert.calledWithExactly(hub.subscribe, "namespace.message", fn);
 	})
 	
 });

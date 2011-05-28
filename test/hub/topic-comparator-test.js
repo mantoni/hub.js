@@ -22,18 +22,18 @@ TestCase("TopicComparatorTest", {
 	},
 	
 	"test wildcard message": function () {
-		assertEquals(-1, hub.topicComparator("foo/*", "foo/bar"));
-		assertEquals(1, hub.topicComparator("foo/bar", "foo/*"));
+		assertEquals(-1, hub.topicComparator("foo.*", "foo.bar"));
+		assertEquals(1, hub.topicComparator("foo.bar", "foo.*"));
 	},
 
 	"test wildcard namespace": function () {
-		assertEquals(-1, hub.topicComparator("*/bar", "foo/bar"));
-		assertEquals(1, hub.topicComparator("foo/bar", "*/bar"));
+		assertEquals(-1, hub.topicComparator("*.bar", "foo.bar"));
+		assertEquals(1, hub.topicComparator("foo.bar", "*.bar"));
 	},
 
 	"test namespace before message": function () {
-		assertEquals(-1, hub.topicComparator("*/foo", "foo/*"));
-		assertEquals(1, hub.topicComparator("foo/*", "*/foo"));
+		assertEquals(-1, hub.topicComparator("*.foo", "foo.*"));
+		assertEquals(1, hub.topicComparator("foo.*", "*.foo"));
 	}
 	
 });

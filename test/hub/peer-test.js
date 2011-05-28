@@ -31,7 +31,7 @@ TestCase("PeerTest", {
 			"message": spy
 		});
 		
-		hub.publish("simple/message");
+		hub.publish("simple.message");
 		
 		sinon.assert.calledOnce(spy);
 	},
@@ -42,10 +42,10 @@ TestCase("PeerTest", {
 			"c.d": spy
 		});
 		
-		hub.publish("a.b/c");
+		hub.publish("a.b.c");
 		
 		sinon.assert.notCalled(spy);
-		hub.publish("a.b/c.d");
+		hub.publish("a.b.c.d");
 		sinon.assert.calledOnce(spy);
 	},
 	
@@ -56,12 +56,12 @@ TestCase("PeerTest", {
 	"test should override subscriber": function () {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
-		hub.subscribe("a/b", spy1);
+		hub.subscribe("a.b", spy1);
 		hub.peer("a", {
 			"b": spy2
 		});
 		
-		hub.publish("a/b");
+		hub.publish("a.b");
 
 		// "peer" first, because it was added last.
 		sinon.assert.callOrder(spy2, spy1);
@@ -77,7 +77,7 @@ TestCase("PeerTest", {
 			"m": spy2
 		});
 		
-		hub.publish("a.*/m");
+		hub.publish("a.*.m");
 		
 		// "y" first, because it was added last.
 		sinon.assert.callOrder(spy2, spy1);
@@ -89,14 +89,14 @@ TestCase("PeerTest", {
 			"b": spy
 		});
 		
-		hub.publish("a/b");
+		hub.publish("a.b");
 		
 		sinon.assert.calledOn(spy, hub.get("a"));
 	},
 	
 	"test should publish create notification message": function () {
 		var spy = sinon.spy();
-		hub.subscribe("hub.peer.new/a", spy);
+		hub.subscribe("hub.peer.new.a", spy);
 
 		hub.peer("a", {
 			b: function () {}

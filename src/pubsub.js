@@ -10,7 +10,7 @@
  */
 (function () {
 	
-	var rootTopic = "**/**";
+	var rootTopic = "**";
 	
 	function pathMatcher(name) {
 		var exp = name.replace(/\./g, "\\.").replace(
@@ -43,8 +43,8 @@
 		if (rightStar === -1) {
 			return -1;
 		}
-		var leftSlash = left.indexOf("/");
-		var rightSlash = right.indexOf("/");
+		var leftSlash = left.indexOf(".");
+		var rightSlash = right.indexOf(".");
 		if (leftStar < leftSlash) {
 			if (rightStar > rightSlash) {
 				return -1;
@@ -169,7 +169,7 @@
 		if (!topic) {
 			throw new Error("Topic is empty");
 		}
-		if (!(/^[a-zA-Z0-9\.\{\}\*]+(\/[a-zA-Z0-9\.\{\}\*]+)?$/.test(topic))) {
+		if (!(/^[a-zA-Z0-9\.\{\}\*]+$/.test(topic))) {
 			throw new Error("Illegal topic: " + topic);
 		}
 	}

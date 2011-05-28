@@ -22,7 +22,7 @@ TestCase("SingletonPatternTest", {
 		hub.peer("singleton", {
 			method: fn
 		});
-		hub.publish("singleton/method");
+		hub.publish("singleton.method");
 		sinon.assert.calledOnce(fn);
 	},
 
@@ -34,7 +34,7 @@ TestCase("SingletonPatternTest", {
 				method: fn
 			};
 		});
-		hub.publish("singleton/method");
+		hub.publish("singleton.method");
 		sinon.assert.calledOnce(fn);
 	}
 

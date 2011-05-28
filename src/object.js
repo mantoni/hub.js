@@ -29,7 +29,7 @@
 				if (!message) {
 					throw new TypeError("messsage is " + message);
 				}
-				hub.subscribe(namespace + "/" + message, callback);
+				hub.subscribe(namespace + "." + message, callback);
 			}
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);
