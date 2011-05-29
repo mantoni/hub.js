@@ -92,7 +92,7 @@
 	
 	hub.singleton = function (namespace, fn, args) {
 		hub.peer(namespace, typeof fn === "function" ?
-			hub.object(namespace, fn, args) : fn);
+			hub.create(namespace, fn, args) : fn);
 	};
 	
 	/**
@@ -120,7 +120,7 @@
 		if (!definition) {
 			throw new Error("Peer is not defined: " + namespace);
 		}
-		peer = hub.object(namespace, definition.factory, args);
+		peer = hub.create(namespace, definition.factory, args);
 		wire(peer, namespace, true);
 		return peer.api;
 	};

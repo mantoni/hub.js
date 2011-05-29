@@ -114,14 +114,14 @@ TestCase("PeerMixTest", {
 		hub.reset();
 	},
 	
-	"test should use hub.object": sinon.test(function () {
-		this.stub(hub, "object").returns({});
+	"test should use hub.create": sinon.test(function () {
+		this.stub(hub, "create").returns({});
 		
 		hub.peer("a", function () {});
 		hub.get("a");
 		
-		sinon.assert.calledOnce(hub.object);
-		sinon.assert.calledWith(hub.object, "a");
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWith(hub.create, "a");
 	}),
 	
 	"test should override existing message": function () {

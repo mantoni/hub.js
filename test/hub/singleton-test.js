@@ -15,12 +15,12 @@ TestCase("SingletonTest", {
 	
 	setUp: function () {
 		sinon.stub(hub, "peer");
-		sinon.stub(hub, "object");
+		sinon.stub(hub, "create");
 	},
 	
 	tearDown: function () {
 		hub.peer.restore();
-		hub.object.restore();
+		hub.create.restore();
 	},
 	
 	"test should be function": function () {
@@ -42,8 +42,8 @@ TestCase("SingletonTest", {
 		
 		hub.singleton("name", fn, args);
 		
-		sinon.assert.calledOnce(hub.object);
-		sinon.assert.calledWithExactly(hub.object, "name", fn, args);
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWithExactly(hub.create, "name", fn, args);
 	}
 	
 });

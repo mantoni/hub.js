@@ -7,7 +7,7 @@
  */
 (function () {
 	
-	function object(namespace, fn, args) {
+	function create(namespace, fn, args) {
 		if (typeof namespace !== "string") {
 			args = fn;
 			fn = namespace;
@@ -36,6 +36,6 @@
 		return hub.mix(mixed, result);
 	}
 	
-	hub.object = object;
+	hub.create = create;
 	
 }());

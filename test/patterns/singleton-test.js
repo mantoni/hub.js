@@ -18,24 +18,24 @@ TestCase("SingletonPatternTest", {
 	},
 
 	"test singleton object": function () {
-		var fn = sinon.spy();
+		var spy = sinon.spy();
 		hub.peer("singleton", {
-			method: fn
+			method: spy
 		});
 		hub.publish("singleton.method");
-		sinon.assert.calledOnce(fn);
+		sinon.assert.calledOnce(spy);
 	},
 
 	"test singleton module": function () {
-		var fn = sinon.spy();
+		var spy = sinon.spy();
 		hub.singleton("singleton", function () {
 			// private variables go here.
 			return {
-				method: fn
+				method: spy
 			};
 		});
 		hub.publish("singleton.method");
-		sinon.assert.calledOnce(fn);
+		sinon.assert.calledOnce(spy);
 	}
 
 });

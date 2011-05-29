@@ -11,28 +11,28 @@
 /*
  * Test cases for hub.object.
  */
-TestCase("ObjectInvokeTest", {
+TestCase("CreateInvokeTest", {
 
 	"test should be function": function () {
-		assertFunction(hub.object);
+		assertFunction(hub.create);
 	},
 	
 	"test should require function argument": function () {
 		assertException(function () {
-			hub.object({});
+			hub.create({});
 		}, "TypeError");
 	},
 	
 	"test should invoke function": function () {
 		var fn = sinon.spy();
 		
-		hub.object(fn);
+		hub.create(fn);
 		
 		sinon.assert.calledOnce(fn);
 	},
 	
 	"test should return object": function () {
-		var result = hub.object(sinon.spy());
+		var result = hub.create(sinon.spy());
 		
 		assertObject(result);
 	},
@@ -42,7 +42,7 @@ TestCase("ObjectInvokeTest", {
 		var test = {
 			foo: 123
 		};
-		hub.object(sinon.stub().returns(test));
+		hub.create(sinon.stub().returns(test));
 		
 		assert(hub.mix.called);
 		assert(hub.mix.calledWithExactly({}, test));
@@ -52,25 +52,25 @@ TestCase("ObjectInvokeTest", {
 		var fn = sinon.spy();
 		var args = [123, "abc"];
 		
-		hub.object(fn, args);
+		hub.create(fn, args);
 		
 		assert(fn.calledWithExactly(args[0], args[1]));
 	},
 	
 	"test should accept string and function": function () {
 		assertNoException(function () {
-			hub.object("some.string", function () {});
+			hub.create("some.string", function () {});
 		});
 	}
 	
 });
 
-TestCase("ObjectMixTest", {
+TestCase("CreateMixTest", {
 	
 	"test should have scope with mix function": function () {
 		var fn = sinon.spy();
 		
-		hub.object(fn);
+		hub.create(fn);
 		
 		assertFunction(fn.thisValues[0].mix);
 	},
@@ -78,7 +78,7 @@ TestCase("ObjectMixTest", {
 	"test should invoke hub.get": sinon.test(function () {
 		this.stub(hub, "get");
 		
-		hub.object(function () {
+		hub.create(function () {
 			this.mix();
 		});
 		
@@ -88,7 +88,7 @@ TestCase("ObjectMixTest", {
 	"test should pass arguments to hub.get": sinon.test(function () {
 		this.stub(hub, "get");
 		
-		hub.object(function () {
+		hub.create(function () {
 			this.mix("test", 123, "abc");
 		});
 		
@@ -100,7 +100,7 @@ TestCase("ObjectMixTest", {
 		this.stub(hub, "get").returns(mixin);
 		this.stub(hub, "mix");	
 			
-		hub.object(function () {
+		hub.create(function () {
 			this.mix();
 		});
 		
@@ -113,19 +113,19 @@ TestCase("ObjectMixTest", {
 
 });
 
-TestCase("ObjectSubscribeTest", {
+TestCase("CreateSubscribeTest", {
 	
 	"test should have scope with subscribe function": function () {
 		var fn = sinon.spy();
 		
-		hub.object("namespace", fn);
+		hub.create("namespace", fn);
 		
 		assertFunction(fn.thisValues[0].subscribe);
 	},
 	
 	"test should throw if no namespace is provided": function () {		
 		assertException(function () {
-			hub.object(function () {
+			hub.create(function () {
 				this.subscribe("message", function () {});
 			});
 		}, "TypeError");
@@ -133,7 +133,7 @@ TestCase("ObjectSubscribeTest", {
 	
 	"test should throw if no message is provided": function () {		
 		assertException(function () {
-			hub.object("namespace", function () {
+			hub.create("namespace", function () {
 				this.subscribe(null, function () {});
 			});
 		}, "TypeError");
@@ -141,7 +141,7 @@ TestCase("ObjectSubscribeTest", {
 	
 	"test should throw if no callback is provided": function () {		
 		assertException(function () {
-			hub.object("namespace", function () {
+			hub.create("namespace", function () {
 				this.subscribe("message");
 			});
 		}, "TypeError");
@@ -151,7 +151,7 @@ TestCase("ObjectSubscribeTest", {
 		this.stub(hub, "subscribe");
 		var fn = function () {};
 		
-		hub.object("namespace", function () {
+		hub.create("namespace", function () {
 			this.subscribe("message", fn);
 		});
 		
