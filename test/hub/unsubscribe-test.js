@@ -179,6 +179,11 @@ TestCase("UnsubscribeTest", {
 	
 	"test unsubscribe returns false on failure": function () {
 		assertFalse(hub.unsubscribe("x.y", function () {}));
+	},
+	
+	"test should implement un as an alias to unsubscribe": function () {
+		assertFunction(hub.un);
+		assertSame(hub.unsubscribe, hub.un);
 	}
 	
 });

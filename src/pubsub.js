@@ -210,7 +210,7 @@
 	 * @param {string} topic the topic.
 	 * @param {function (object)} fn the callback function.
 	 */
-	hub.subscribe = function (topic, fn) {
+	hub.subscribe = hub.on = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		rootChain.add(fn, topic);
@@ -224,7 +224,7 @@
 	 * @return {Boolean} false if the callback was not registered, otherwise
 	 *			true.
 	 */
-	hub.unsubscribe = function (topic, fn) {
+	hub.unsubscribe = hub.un = function (topic, fn) {
 		validateCallback(fn);
 		validateTopic(topic);
 		return rootChain.remove(fn, topic);

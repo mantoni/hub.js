@@ -86,6 +86,11 @@ TestCase("SubscribeTest", {
 		assertException(function () {
 			hub.subscribe("x.y", []);
 		});
+	},
+	
+	"test should implement on as an alias to subscribe": function () {
+		assertFunction(hub.on);
+		assertSame(hub.subscribe, hub.on);
 	}
 	
 });
