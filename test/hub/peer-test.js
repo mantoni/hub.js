@@ -81,6 +81,16 @@ TestCase("PeerTest", {
 		
 		sinon.assert.calledOnce(hub.on);
 		sinon.assert.calledWithExactly(hub.on, "topic", "test");
+	}),
+	
+	"test should pass topic and object to hub.on": sinon.test(function () {
+		this.stub(hub, "on");
+		var object = {};
+		
+		hub.peer("topic", object);
+		
+		sinon.assert.calledOnce(hub.on);
+		sinon.assert.calledWithExactly(hub.on, "topic", object);
 	})
 	
 });

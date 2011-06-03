@@ -40,7 +40,7 @@
 				hub.on(topic, object);
 			}
 		} else {
-			hub.on(factory);
+			hub.on(topic, factory);
 		}
 	};
 	
