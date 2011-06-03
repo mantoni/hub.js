@@ -79,6 +79,10 @@
 			}
 		}
 		callChain.add = function (fn) {
+			var fnType = typeof fn;
+			if (fnType !== "function") {
+				throw new TypeError("Callback is " + fnType);
+			}
 			iterator.insert(0, fn);
 		};
 		callChain.insert = iterator.insert;

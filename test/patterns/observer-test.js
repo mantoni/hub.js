@@ -12,14 +12,14 @@
  * Test cases for the observer pattern.
  */
 TestCase("ObserverPatternTest", {
-	
+	/*
 	tearDown: function () {
 		hub.reset();
 	},
 
 	"test abserver": function () {
 		
-		hub.singleton("Document", function () {
+		hub.peer("Document", function () {
 			var text = "";
 			return {
 				change: function (newText) {
@@ -45,6 +45,6 @@ TestCase("ObserverPatternTest", {
 		
 		sinon.assert.calledTwice(spy);
 		sinon.assert.alwaysCalledWith(spy, text);
-	}
+	}*/
 
 });

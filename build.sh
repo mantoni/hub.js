@@ -41,7 +41,7 @@ COVERAGE_FILENAME="coverage-$COVERAGE_VERSION.jar"
 COVERAGE_DOWNLOAD="http://js-test-driver.googlecode.com/files/$COVERAGE_FILENAME"
 COVERAGE_CONFIG=".jstd-coverage.conf"
 
-SOURCE_FILES="src/head.js src/merge.js src/resolve.js src/substitute.js src/error.js src/iterator.js src/chain.js src/mix.js src/create.js src/peer.js src/pubsub.js src/promise.js src/publisher.js src/forward.js"
+SOURCE_FILES="src/head.js src/merge.js src/resolve.js src/substitute.js src/error.js src/iterator.js src/chain.js src/mix.js src/create.js src/pubsub.js src/peer.js src/promise.js src/publisher.js src/forward.js"
 
 download() {
 	if [ ! -e lib ]; then

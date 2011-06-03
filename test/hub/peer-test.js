@@ -17,131 +17,70 @@ TestCase("PeerTest", {
 		hub.reset();
 	},
 	
-	"test should fail if defined twice": function () {
-		hub.peer("definedTwice", {});
-		
-		assertException(function () {
-			hub.peer("definedTwice", {});
-		});
+	"test should be function": function () {
+		assertFunction(hub.peer);
 	},
 	
-	"test should receive message": function () {
-		var spy = sinon.spy();
-		hub.peer("simple", {
-			"message": spy
-		});
+	"test should invoke create with function": sinon.test(function () {
+		this.stub(hub, "create");
+		var factory = function () {};
 		
-		hub.publish("simple.message");
-		
-		sinon.assert.calledOnce(spy);
-	},
-	
-	"test should allow dot separated namespace and message": function () {
-		var spy = sinon.spy();
-		hub.peer("a.b", {
-			"c.d": spy
-		});
-		
-		hub.publish("a.b.c");
-		
-		sinon.assert.notCalled(spy);
-		hub.publish("a.b.c.d");
-		sinon.assert.calledOnce(spy);
-	},
-	
-	/*
-	 * ensure a peer can be defined after an existing subscription and both
-	 * get mixed and then invoked in the correct order.
-	 */
-	"test should override subscriber": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-		hub.subscribe("a.b", spy1);
-		hub.peer("a", {
-			"b": spy2
-		});
-		
-		hub.publish("a.b");
-
-		// "peer" first, because it was added last.
-		sinon.assert.callOrder(spy2, spy1);
-	},
-	
-	"test should receive multicast": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-		hub.peer("a.b", {
-			"m": spy1
-		});
-		hub.peer("a.c", {
-			"m": spy2
-		});
-		
-		hub.publish("a.*.m");
-		
-		// "y" first, because it was added last.
-		sinon.assert.callOrder(spy2, spy1);
-	},
-	
-	"test should receive message with peer as scope object": function () {
-		var spy = sinon.spy();
-		hub.peer("a", {
-			"b": spy
-		});
-		
-		hub.publish("a.b");
-		
-		sinon.assert.calledOn(spy, hub.get("a"));
-	},
-	
-	"test should publish create notification message": function () {
-		var spy = sinon.spy();
-		hub.subscribe("hub.peer.new.a", spy);
-
-		hub.peer("a", {
-			b: function () {}
-		});
-		
-		sinon.assert.calledOnce(spy);
-		assertFunction(spy.getCall(0).args[0].b);
-	}
-	
-});
-
-TestCase("PeerMixTest", {
-	
-	tearDown: function () {
-		hub.reset();
-	},
-	
-	"test should use hub.create": sinon.test(function () {
-		this.stub(hub, "create").returns({});
-		
-		hub.peer("a", function () {});
-		hub.get("a");
+		hub.peer(factory);
 		
 		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWith(hub.create, "a");
+		sinon.assert.calledWith(hub.create, factory);
 	}),
 	
-	"test should override existing message": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-		hub.peer("a", {
-			m: spy1
-		});
-		hub.peer("b", function () {
-			this.mix("a");
-			return {
-				m: spy2
-			};
-		});
+	"test should invoke create with function and args": sinon.test(function () {
+		this.stub(hub, "create");
+		var factory = function () {};
+		var args = [123];
 		
-		hub.get("b").m();
+		hub.peer(factory, args);
 		
-		sinon.assert.calledOnce(spy1);
-		sinon.assert.calledOnce(spy2);
-		sinon.assert.callOrder(spy2, spy1);
-	}
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWith(hub.create, factory, args);
+	}),
 
+	"test should invoke create with topic and function": sinon.test(function () {
+		this.stub(hub, "create");
+		var factory = function () {};
+				
+		hub.peer("topic", factory);
+		
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWith(hub.create, "topic", factory);
+	}),
+
+	"test should invoke create with topic, function and args": sinon.test(function () {
+		this.stub(hub, "create");
+		var factory = function () {};
+		var args = [123];
+
+		hub.peer("topic", factory, args);
+
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWithExactly(hub.create, "topic", factory, args);
+	}),
+
+	"test should pass create result to hub.on": sinon.test(function () {
+		this.stub(hub, "create").returns("test");
+		this.stub(hub, "on");
+
+		hub.peer(function () {});
+
+		sinon.assert.calledOnce(hub.on);
+		sinon.assert.calledWithExactly(hub.on, "test");
+	}),
+	
+	"test should pass topic and create result to hub.on": sinon.test(function () {
+		this.stub(hub, "create").returns("test");
+		this.stub(hub, "on");
+		
+		hub.peer("topic", function () {});
+		
+		sinon.assert.calledOnce(hub.on);
+		sinon.assert.calledWithExactly(hub.on, "topic", "test");
+	})
+	
 });

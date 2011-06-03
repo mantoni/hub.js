@@ -75,40 +75,43 @@ TestCase("CreateMixTest", {
 		assertFunction(fn.thisValues[0].mix);
 	},
 	
-	"test should invoke hub.get": sinon.test(function () {
-		this.stub(hub, "get");
-		
-		hub.create(function () {
-			this.mix();
+	"test should publish topic": sinon.test(function () {
+		this.stub(hub, "publish").returns({
+			then: function () {}
 		});
 		
-		sinon.assert.calledOnce(hub.get);
+		hub.create(function () {
+			this.mix("topic");
+		});
+		
+		sinon.assert.calledOnce(hub.publish);
+		sinon.assert.calledWith(hub.publish, "topic");
 	}),
 	
-	"test should pass arguments to hub.get": sinon.test(function () {
-		this.stub(hub, "get");
-		
+	"test should pass arguments to publish": sinon.test(function () {
+		this.stub(hub, "publish").returns({
+			then: function () {}
+		});
+
 		hub.create(function () {
-			this.mix("test", 123, "abc");
+			this.mix("topic", 123, "abc");
 		});
 		
-		sinon.assert.calledWithExactly(hub.get, "test", 123, "abc");
+		sinon.assert.calledWithExactly(hub.publish, "topic", 123, "abc");
 	}),
 	
-	"test should call hub.mix with result": sinon.test(function () {
-		var mixin = {};
-		this.stub(hub, "get").returns(mixin);
-		this.stub(hub, "mix");	
-			
-		hub.create(function () {
-			this.mix();
-		});
+	"test should invoke hub.mix with result": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "publish").returns(promise);
+		this.stub(hub, "mix");
 		
-		// Once called directly and once by hub.object:
+		hub.create(function () {
+			this.mix("topic");
+		});
+		promise.resolve("test");
+		
 		sinon.assert.calledTwice(hub.mix);
-		var call = hub.mix.getCall(0);
-		assertObject(call.args[0]);
-		assertSame(mixin, call.args[1]);
+		assertEquals("test", hub.mix.getCall(1).args[1]);
 	})
 
 });

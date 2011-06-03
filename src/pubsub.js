@@ -23,6 +23,20 @@
 		return new RegExp("^" + exp + "$");
 	}
 	
+	// ensures the given argument is a valid topic. Throws an error otherwise.
+	function validateTopic(topic) {
+		var type = typeof topic;
+		if (type !== "string") {
+			throw new Error("Topic is " + type);
+		}
+		if (!topic) {
+			throw new Error("Topic is empty");
+		}
+		if (!(/^[a-zA-Z0-9\.\{\}\*]+$/.test(topic))) {
+			throw new Error("Illegal topic: " + topic);
+		}
+	}
+	
 	/**
 	 * compares two topics. Returns 0 if the topics have the same priority,
 	 * -1 if the first given topic is "smaller" the second one and 1 if the
@@ -58,6 +72,8 @@
 	function topicChain(chainTopic, firstChild) {
 		if (!chainTopic) {
 			chainTopic = rootTopic;
+		} else {
+			validateTopic(chainTopic);
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var fns = hub.chain();
@@ -155,43 +171,25 @@
 					}
 				}
 			}
+			validateTopic(topic);
+			var fnType = typeof fn;
+			if (fnType !== "function") {
+				throw new TypeError("Callback is " + fnType);
+			}
 			return false;
 		};
 		return callChain;
 	}
 	
-	// ensures the given argument is a valid topic. Throws an error otherwise.
-	function validateTopic(topic) {
-		var type = typeof topic;
-		if (type !== "string") {
-			throw new Error("Topic is " + type);
-		}
-		if (!topic) {
-			throw new Error("Topic is empty");
-		}
-		if (!(/^[a-zA-Z0-9\.\{\}\*]+$/.test(topic))) {
-			throw new Error("Illegal topic: " + topic);
-		}
-	}
-	
-	// ensures the given argument is a function. Throws an error otherwise.
-	function validateCallback(fn) {
-		var fnType = typeof fn;
-		if (fnType !== "function") {
-			throw new TypeError("Callback is " + fnType);
-		}
-	}
+	// Public API:
 	
 	/**
 	 * The root topic chain.
 	 *
 	 * @type {Function}
 	 */
-	var rootChain = topicChain();
-	
-	// Public API:
-	
-	hub.topicChain = topicChain; // exposed for unit testing only.
+	var rootChain = hub.root = topicChain();
+	hub.topicChain = topicChain;
 	hub.topicComparator = topicComparator;
 	
 	/**
@@ -199,10 +197,28 @@
 	 * testing.
 	 */
 	hub.reset = function () {
-		rootChain = topicChain();
-		hub.resetPeers();
+		hub.root = rootChain = topicChain();
 		hub.resetPromise();
 	};
+	
+	function isObject(object) {
+		return Object.prototype.toString.call(object) === "[object Object]";
+	}
+	
+	function subscribeAll(object, prefix) {
+		var k;
+		for (k in object) {
+			if (object.hasOwnProperty(k)) {
+				rootChain.add(object[k], prefix + k);
+			}
+		}
+	}
+	
+	function objectResolver(object) {
+		return function () {
+			return object;
+		};
+	}
 	
 	/**
 	 * subscribes a callback function to the given topic.
@@ -211,8 +227,14 @@
 	 * @param {function (object)} fn the callback function.
 	 */
 	hub.subscribe = hub.on = function (topic, fn) {
-		validateCallback(fn);
-		validateTopic(topic);
+		if (isObject(topic)) {
+			subscribeAll(topic, "");
+			return;
+		}
+		if (isObject(fn)) {
+			subscribeAll(fn, topic + ".");
+			fn = objectResolver(fn);
+		}
 		rootChain.add(fn, topic);
 	};
 	
@@ -225,8 +247,6 @@
 	 *			true.
 	 */
 	hub.unsubscribe = hub.un = function (topic, fn) {
-		validateCallback(fn);
-		validateTopic(topic);
 		return rootChain.remove(fn, topic);
 	};
 	

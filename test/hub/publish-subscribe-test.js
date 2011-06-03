@@ -105,11 +105,14 @@ TestCase("PublishSubscribeTest", {
 		var spy1 = sinon.spy();
 		hub.subscribe("x.a", spy1);
 		hub.publish("x.*");
+		
 		sinon.assert.calledOnce(spy1);
+		
 		var spy2 = sinon.spy();
 		hub.subscribe("x.b", spy2);
 		spy1.called = false;
 		hub.publish("x.*");
+		
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
 	},
@@ -120,6 +123,7 @@ TestCase("PublishSubscribeTest", {
 		hub.publish("y.a");
 		assertFalse(spy.called);
 		hub.publish("x.a");
+		
 		sinon.assert.called(spy);
 	},
 	
@@ -127,9 +131,12 @@ TestCase("PublishSubscribeTest", {
 		var spy = sinon.spy();
 		hub.subscribe("x.y", spy);
 		hub.publish("x.{0}", "y");
+		
 		sinon.assert.called(spy);
+		
 		spy.called = false;
 		hub.publish("x.{0.m}", {m: "y"});
+		
 		sinon.assert.called(spy);
 	},
 	
@@ -142,6 +149,7 @@ TestCase("PublishSubscribeTest", {
 		var spy2 = sinon.spy();
 		hub.subscribe("x.y", spy2);
 		hub.publish("x.y");
+		
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
 	},
@@ -155,6 +163,7 @@ TestCase("PublishSubscribeTest", {
 		var spy2 = sinon.spy();
 		hub.subscribe("x.y", spy2);
 		hub.publish("x.{0}", "y");
+		
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
 	},
@@ -163,6 +172,7 @@ TestCase("PublishSubscribeTest", {
 		var spy = sinon.spy();
 		hub.subscribe("x.*", spy);
 		hub.publish("x.*");
+		
 		sinon.assert.called(spy);
 	},
 	
@@ -177,6 +187,7 @@ TestCase("PublishSubscribeTest", {
 		hub.subscribe("x.b", fnb);
 		hub.subscribe("x.*", fn);
 		hub.publish("x.*");
+		
 		sinon.assert.called(fna);
 		sinon.assert.called(fnb);
 		assertEquals(1, count);

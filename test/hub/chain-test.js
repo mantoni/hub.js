@@ -211,15 +211,15 @@ TestCase("ChainNestingTest", {
 	},
 	
 	"test should pass arguments through": function () {
-		var args = [];
-		var c1 = hub.chain(function (a) {
-			args.push(a);
-		});
-		var c2 = hub.chain(function (a) {
-			args.push(a);
-		});
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		var c1 = hub.chain(spy1);
+		var c2 = hub.chain(spy2);
+		
 		hub.chain(c1, c2)("x");
-		assertEquals(["x", "x"], args);
+		
+		sinon.assert.calledWithExactly(spy1, "x");
+		sinon.assert.calledWithExactly(spy2, "x");
 	}
 	
 });

@@ -16,11 +16,12 @@
 		if (typeof fn !== "function") {
 			throw new TypeError();
 		}
-		var mixed = {};
+		var object = {};
 		var scope = {
-			mix: function () {
-				var mixin = hub.get.apply(hub, arguments);
-				hub.mix(mixed, mixin);
+			mix: function (topic) {
+				hub.publish.apply(hub, arguments).then(function (mixin) {
+					hub.mix(object, mixin);
+				});
 			},
 			subscribe: function (message, callback) {
 				if (!namespace) {
@@ -33,7 +34,7 @@
 			}
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);
-		return hub.mix(mixed, result);
+		return hub.mix(object, result);
 	}
 	
 	hub.create = create;
