@@ -132,12 +132,11 @@ TestCase("PublishSubscribeTest", {
 		hub.subscribe("x.y", spy);
 		hub.publish("x.{0}", "y");
 		
-		sinon.assert.called(spy);
+		sinon.assert.calledOnce(spy);
 		
-		spy.called = false;
 		hub.publish("x.{0.m}", {m: "y"});
 		
-		sinon.assert.called(spy);
+		sinon.assert.calledTwice(spy);
 	},
 	
 	"test subscribe publish subscribe same message": function () {
@@ -145,13 +144,12 @@ TestCase("PublishSubscribeTest", {
 		hub.subscribe("x.y", spy1);
 		hub.publish("x.y");
 		sinon.assert.called(spy1);
-		spy1.called = false;
 		var spy2 = sinon.spy();
 		hub.subscribe("x.y", spy2);
 		hub.publish("x.y");
 		
-		sinon.assert.called(spy1);
-		sinon.assert.called(spy2);
+		sinon.assert.calledTwice(spy1);
+		sinon.assert.calledOnce(spy2);
 	},
 	
 	"test subscribe publish subscribe same message w/ placeholder": function () {

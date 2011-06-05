@@ -20,7 +20,7 @@ TestCase("PropagateTest", {
 	"test propagate explicitly": function () {
 		var calls = [];
 		hub.chain(function () {
-			hub.propagate();
+			this.propagate();
 			calls.push("a");
 		}, function () {
 			calls.push("b");
@@ -41,7 +41,7 @@ TestCase("PropagateTest", {
 	"test explicit argument propagation": function () {
 		var calls = [];
 		hub.chain(function (a, b) {
-			hub.propagate();
+			this.propagate();
 			calls.push("x", a, b);
 		}, function (a, b) {
 			calls.push("y", a, b);
@@ -53,7 +53,7 @@ TestCase("PropagateTest", {
 		assertEquals(["b", "c"], hub.chain(function () {
 			return ["a"];
 		}, function () {
-			hub.propagate(["b"]);
+			this.propagate(["b"]);
 		}, function () {
 			return ["c"];
 		})());
