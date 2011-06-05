@@ -124,7 +124,7 @@
 		if (topic.indexOf("{") !== -1) {
 			args[0] = hub.substitute(topic, slicedArgs);
 		}
-		var thiz = hub.scope(slicedArgs);
+		var thiz = this.propagate ? this : hub.scope(slicedArgs);
 		enrichScope(thiz, args[0]);
 		try {
 			return hub.root.apply(thiz, args);

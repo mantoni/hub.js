@@ -147,6 +147,16 @@
 			hub.reset();
 		},
 	
+		"test should use given scope": sinon.test(function () {
+			this.stub(hub, "root");
+			var scope = hub.scope();
+			scope.test = "test";
+
+			hub.publish.call(scope, "x");
+
+			assertEquals("test", hub.root.thisValues[0].test);
+		}),
+
 		"test should create new scope and use with root": sinon.test(function () {
 			this.stub(hub, "root");
 			this.stub(hub, "scope").returns("test");
