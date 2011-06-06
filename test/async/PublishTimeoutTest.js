@@ -10,21 +10,21 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for hub.publish timeouts.
+ * Test cases for hub.emit timeouts.
  */
-AsyncTestCase("PublishTimeoutTest", {
+AsyncTestCase("EmitTimeoutTest", {
 	
 	tearDown: function () {
 		hub.reset();
 	},
 	
 	testSimpleTimeout: function (queue) {
-		hub.subscribe("a.b", function () {
+		hub.on("a.b", function () {
 			hub.promise(10); // promise with small timeout, never resolved.
 		});
 		queue.call(function (pool) {
 			var time = new Date().getTime();
-			hub.publish("a.b").then(function () {
+			hub.emit("a.b").then(function () {
 				fail("Unexpected success callback");
 			}, pool.add(function (error) {
 				assertObject(error);

@@ -22,7 +22,7 @@
 		hub.peer("singleton", {
 			method: spy
 		});
-		hub.publish("singleton.method");
+		hub.emit("singleton.method");
 		sinon.assert.calledOnce(spy);
 	},
 
@@ -34,7 +34,7 @@
 				method: spy
 			};
 		});
-		hub.publish("singleton.method");
+		hub.emit("singleton.method");
 		sinon.assert.calledOnce(spy);
 	}
 

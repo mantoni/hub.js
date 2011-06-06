@@ -12,7 +12,7 @@
 	
 	/**
 	 * The current promise. Also indicates whether currently executing
-	 * hub.publish.
+	 * hub.emit.
 	 *
 	 * @type {object}
 	 */
@@ -25,7 +25,7 @@
 
 	/*
 	 * invoke the given callback and pass in the data. If an error occurs
-	 * during execution, an error message is published on the hub. Used by
+	 * during execution, an error message is emitted on the hub. Used by
 	 * promises to invoke the success or error callbacks.
 	 *
 	 * @param {Function} callback the callback function.
@@ -118,7 +118,7 @@
 			},
 			
 			/**
-			 * publishes the given topic with optional arguments. The return
+			 * emits the given topic with optional arguments. The return
 			 * value of the call will replace the current value of this 
 			 * promise.
 			 *
@@ -126,7 +126,7 @@
 			 * @param {...*} arguments the arguments.
 			 * @return {Object} this promise.
 			 */
-			publish: function (topic) {
+			emit: function (topic) {
 				if (resolved) {
 					args = [hub.invoke.apply(hub, arguments)];
 					return this;
@@ -139,14 +139,14 @@
 			},
 			
 			/**
-			 * publishes the given topic with the current result of this
+			 * emits the given topic with the current result of this
 			 * promise as the argument. The return value of the call will
 			 * replace the current result of this promise.
 			 *
 			 * @param {String} topic the topic.
 			 * @return {Object} this promise.
 			 */
-			publishResult: function (topic) {
+			emitResult: function (topic) {
 				if (resolved) {
 					args = [hub.invoke.apply(hub, [topic].concat(args))];
 					return this;
@@ -269,8 +269,8 @@
 	function replacePromiseProxy(proxy) {
 		var real = createPromise(true);
 		proxy.then = real.then;
-		proxy.publish = real.publish;
-		proxy.publishResult = real.publishResult;
+		proxy.emit = real.emit;
+		proxy.emitResult = real.emitResult;
 		return real;
 	}
 	
@@ -287,11 +287,11 @@
 		then: function (success, error) {
 			return replacePromiseProxy(this).then(success, error);
 		},
-		publish: function () {
-			return replacePromiseProxy(this).publish.apply(null, arguments);
+		emit: function () {
+			return replacePromiseProxy(this).emit.apply(null, arguments);
 		},
-		publishResult: function (namespace, message, data) {
-			return replacePromiseProxy(this).publishResult.apply(
+		emitResult: function (namespace, message, data) {
+			return replacePromiseProxy(this).emitResult.apply(
 				null,
 				arguments
 			);
@@ -311,7 +311,7 @@
 	};
 	
 	/**
-	 * publishes a topic with optional arguments. Invokes the call chain
+	 * emits a topic with optional arguments. Invokes the call chain
 	 * associated with the given topic and returns either a promise created by
 	 * one or more subscribers, or a new promise. Multiple promises are
 	 * automatically joined.
@@ -321,7 +321,7 @@
 	 * @param {String} topic the topic
 	 * @param {...Object} args the arguments to pass
 	 */
-	hub.publish = function (topic) {
+	hub.emit = function (topic) {
 		var previousPromise = promise;
 		promise = false;
 		var result;

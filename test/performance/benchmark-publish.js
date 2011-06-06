@@ -4,85 +4,85 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Benchmarks for hub.publish.
+ * Benchmarks for hub.emit.
  */
-runBenchmark("hub.publish", {
+runBenchmark("hub.emit", {
 	
-	'No subscribers - hub.publish("a.b")': function (l) {
+	'No subscribers - hub.emit("a.b")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b");
+			hub.emit("a.b");
 		}
 	},
 	
-	'No subscribers - hub.publish("a.*")': function (l) {
+	'No subscribers - hub.emit("a.*")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.*");
+			hub.emit("a.*");
 		}
 	},
 	
-	'No subscribers - hub.publish("*.b")': function (l) {
+	'No subscribers - hub.emit("*.b")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("*.b");
+			hub.emit("*.b");
 		}
 	},
 	
-	'No subscribers - hub.publish("*.*")': function (l) {
+	'No subscribers - hub.emit("*.*")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("*.*");
+			hub.emit("*.*");
 		}
 	},
 		
-	'No subscribers - hub.publish("a.b", "hello")': function (l) {
+	'No subscribers - hub.emit("a.b", "hello")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b", "hello");
+			hub.emit("a.b", "hello");
 		}
 	},
 
-	'No subscribers - hub.publish("a.b", "hello", "world")': function (l) {
+	'No subscribers - hub.emit("a.b", "hello", "world")': function (l) {
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b", "hello", "world");
+			hub.emit("a.b", "hello", "world");
 		}
 	},
 
-	'One empty subscriber - hub.publish("a.b")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("a.b")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b");
+			hub.emit("a.b");
 		}
 	},
 	
-	'One empty subscriber - hub.publish("a.*")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("a.*")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.*");
+			hub.emit("a.*");
 		}
 	},
 	
-	'One empty subscriber - hub.publish("*.b")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("*.b")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("*.b");
+			hub.emit("*.b");
 		}
 	},
 	
-	'One empty subscriber - hub.publish("*.*")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("*.*")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("*.*");
+			hub.emit("*.*");
 		}
 	},
 	
-	'One empty subscriber - hub.publish("a.b", "hello")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("a.b", "hello")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b", "hello");
+			hub.emit("a.b", "hello");
 		}
 	},
 
-	'One empty subscriber - hub.publish("a.b", "hello", "world")': function (l) {
-		hub.subscribe("a.b", function () {});
+	'One empty subscriber - hub.emit("a.b", "hello", "world")': function (l) {
+		hub.on("a.b", function () {});
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b", "hello", "world");
+			hub.emit("a.b", "hello", "world");
 		}
 	}
 	

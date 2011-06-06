@@ -18,22 +18,13 @@
 	hub.root = hub.topicChain();
 	
 	var scopeFunctionCache = {};
-	
-	/**
-	 * resets the hub to it's initial state. Primarily required for unit
-	 * testing.
-	 */
-	hub.reset = function () {
-		scopeFunctionCache = {};
-		hub.root = hub.topicChain();
-		hub.resetPromise();
-	};
+	var array_slice = Array.prototype.slice;
 	
 	function isObject(object) {
 		return Object.prototype.toString.call(object) === "[object Object]";
 	}
 	
-	function subscribeAll(topicPrefix, object) {
+	function onAll(topicPrefix, object) {
 		var k;
 		for (k in object) {
 			if (object.hasOwnProperty(k)) {
@@ -48,35 +39,16 @@
 		};
 	}
 	
-	function scoped(topic, property) {
-		var fn = hub[property];
+	function scoped(topic, fn) {
 		topic += ".";
 		return function () {
-			var args = Array.prototype.slice.call(arguments);
+			var args = array_slice.call(arguments);
+			if (!args[0]) {
+				throw new TypeError("Topic is " + args[0]);
+			}
 			args[0] = topic + args[0];
 			return fn.apply(this, args);
 		};
-	}
-	
-	function enrichScope(scope, topic) {
-		var cache = scopeFunctionCache[topic];
-		if (!cache) {
-			cache = {
-				on: scoped(topic, "on"),
-				un: scoped(topic, "un"),
-				peer: scoped(topic, "peer"),
-				publish: scoped(topic, "publish")
-			};
-			cache.subscribe = cache.on;
-			cache.unsubscribe = cache.un;
-			scopeFunctionCache[topic] = cache;
-		}
-		var k;
-		for (k in cache) {
-			if (cache.hasOwnProperty(k)) {
-				scope[k] = cache[k];
-			}
-		}
 	}
 	
 	/**
@@ -85,13 +57,13 @@
 	 * @param {string} topic the topic.
 	 * @param {function (object)} fn the callback function.
 	 */
-	hub.subscribe = hub.on = function (topic, fn) {
+	hub.on = function (topic, fn) {
 		if (isObject(topic)) {
-			subscribeAll("", topic);
+			onAll("", topic);
 			return;
 		}
 		if (isObject(fn)) {
-			subscribeAll(topic + ".", fn);
+			onAll(topic + ".", fn);
 			fn = getter(fn);
 		}
 		hub.root.add(topic, fn);
@@ -105,8 +77,31 @@
 	 * @return {Boolean} false if the callback was not registered, otherwise
 	 *			true.
 	 */
-	hub.unsubscribe = hub.un = function (topic, fn) {
+	hub.un = function (topic, fn) {
 		return hub.root.remove(topic, fn);
+	};
+	
+	hub.topicScope = function (topic, scope) {
+		if (!scope) {
+			scope = hub.scope();
+		}
+		var cache = scopeFunctionCache[topic];
+		if (!cache) {
+			cache = {
+				on: scoped(topic, hub.on),
+				un: scoped(topic, hub.un),
+				peer: scoped(topic, hub.peer),
+				emit: scoped(topic, hub.emit),
+				create: scoped(topic, hub.create)
+			};
+			scopeFunctionCache[topic] = cache;
+		}
+		scope.on = cache.on;
+		scope.un = cache.un;
+		scope.peer = cache.peer;
+		scope.emit = cache.emit;
+		scope.create = cache.create;
+		return scope;
 	};
 	
 	/**
@@ -119,13 +114,13 @@
 	 */
 	hub.invoke = function (topic) {
 		hub.validateTopic(topic);
-		var args = Array.prototype.slice.call(arguments);
+		var args = array_slice.call(arguments);
 		var slicedArgs = args.slice(1);
 		if (topic.indexOf("{") !== -1) {
 			args[0] = hub.substitute(topic, slicedArgs);
 		}
 		var thiz = this.propagate ? this : hub.scope(slicedArgs);
-		enrichScope(thiz, args[0]);
+		thiz = hub.topicScope(args[0], thiz);
 		try {
 			return hub.root.apply(thiz, args);
 		} catch (e) {
@@ -139,7 +134,7 @@
 	
 	/**
 	 * <p>
-	 * defines a peer in the hub that publishes and receives messages.
+	 * defines a peer in the hub that emits and receives messages.
 	 * </p>
 	 * <p>
 	 * Configuration parameters:
@@ -169,6 +164,16 @@
 		} else {
 			hub.on(topic, factory);
 		}
+	};
+	
+	/**
+	 * resets the hub to it's initial state. Primarily required for unit
+	 * testing.
+	 */
+	hub.reset = function () {
+		scopeFunctionCache = {};
+		hub.root = hub.topicChain();
+		hub.resetPromise();
 	};
 	
 }());

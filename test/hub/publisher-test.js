@@ -9,13 +9,13 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for hub.publisher.
+ * Test cases for hub.emitter.
  */
 (function () {
 	
-	function publishData(fn) {
+	function emitData(fn) {
 		var result;
-		hub.subscribe("a.b", function (data) {
+		hub.on("a.b", function (data) {
 			result = data;
 		});
 		fn.apply(null, Array.prototype.slice.call(arguments, 1));
@@ -28,67 +28,67 @@
 			hub.reset();
 		},
 	
-		"test should implement publisher": function () {
-			assertFunction(hub.publisher);
+		"test should implement emitter": function () {
+			assertFunction(hub.emitter);
 		},
 		
 		"test should return function": function () {
-			var publisher = hub.publisher("a.b");
-			assertFunction(publisher);
+			var emitter = hub.emitter("a.b");
+			assertFunction(emitter);
 		},
 	
 		"test should not throw on invocation": function () {
-			var publisher = hub.publisher("a.b");
+			var emitter = hub.emitter("a.b");
 			assertNoException(function () {
-				publisher();
+				emitter();
 			});
 			assertNoException(function () {
-				publisher(null);
+				emitter(null);
 			});
 			assertNoException(function () {
-				publisher({});
+				emitter({});
 			});
 			assertNoException(function () {
-				publisher([]);
+				emitter([]);
 			});
 		},
 	
 		"test should pass single argument to subscriber": function () {
-			var fn = hub.publisher("a.b");
-			assertEquals("data", publishData(fn, "data"));
+			var fn = hub.emitter("a.b");
+			assertEquals("data", emitData(fn, "data"));
 		},
 	
 		"test should merge argument": function () {
-			var fn = hub.publisher("a.b", {x: "x"});
-			var d = publishData(fn, {});
+			var fn = hub.emitter("a.b", {x: "x"});
+			var d = emitData(fn, {});
 			assertEquals("x", d.x);
 		},
 			
 		"test should invoke transformer with one argument": function () {
-			var fn = hub.publisher("a.b", function (msg) {
+			var fn = hub.emitter("a.b", function (msg) {
 				return msg + "!";
 			});
-			assertEquals("Hi!", publishData(fn, "Hi"));
+			assertEquals("Hi!", emitData(fn, "Hi"));
 		},
 	
 		"test should invoke transform with two arguments": function () {
-			var fn = hub.publisher("a.b", function (msg1, msg2) {
+			var fn = hub.emitter("a.b", function (msg1, msg2) {
 				return msg1 + " " + msg2 + "!";
 			});
-			assertEquals("Hi there!", publishData(fn, "Hi", "there"));
+			assertEquals("Hi there!", emitData(fn, "Hi", "there"));
 		},
 	
 		"test should merge data and transform result": function () {
-			var fn = hub.publisher("a.b", function (data) {
+			var fn = hub.emitter("a.b", function (data) {
 				return { x: data };
 			}, { y: "y" });
-			var d = publishData(fn, "x");
+			var d = emitData(fn, "x");
 			assertEquals("x", d.x);
 			assertEquals("y", d.y);
 		},
 		
 		"test create api": function () {
-			var api = hub.publisher({
+			var api = hub.emitter({
 				ab: "a.b",
 				xy: "x.y"
 			});
@@ -97,8 +97,8 @@
 			assertFunction(api.xy);
 			var ab = sinon.spy();
 			var xy = sinon.spy();
-			hub.subscribe("a.b", ab);
-			hub.subscribe("x.y", xy);
+			hub.on("a.b", ab);
+			hub.on("x.y", xy);
 			api();
 			sinon.assert.calledOnce(ab);
 			sinon.assert.calledOnce(xy);

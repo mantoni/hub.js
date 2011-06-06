@@ -19,29 +19,29 @@ TestCase("ForwardTest", {
 	
 	"test simple forward short": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x.y", fn);
+		hub.on("x.y", fn);
 		hub.forward("a.b", "x.y");
-		hub.publish("a.b");
+		hub.emit("a.b");
 		sinon.assert.calledOnce(fn);
 	},
 	
 	"test multi forward simple": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x.y", fn);
+		hub.on("x.y", fn);
 		hub.forward({
 			"a.b": "x.y"
 		});
-		hub.publish("a.b");
+		hub.emit("a.b");
 		sinon.assert.calledOnce(fn);
 	},
 	
 	testMultiForwardComplex: function () {
 		var fn = sinon.spy();
-		hub.subscribe("x.y", fn);
+		hub.on("x.y", fn);
 		hub.forward({
 			"a.b": ["x.y"]
 		});
-		hub.publish("a.b");
+		hub.emit("a.b");
 		sinon.assert.calledOnce(fn);
 	}
 

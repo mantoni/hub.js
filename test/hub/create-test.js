@@ -75,8 +75,8 @@ TestCase("CreateMixTest", {
 		assertFunction(fn.thisValues[0].mix);
 	},
 	
-	"test should publish topic": sinon.test(function () {
-		this.stub(hub, "publish").returns({
+	"test should emit topic": sinon.test(function () {
+		this.stub(hub, "emit").returns({
 			then: function () {}
 		});
 		
@@ -84,12 +84,12 @@ TestCase("CreateMixTest", {
 			this.mix("topic");
 		});
 		
-		sinon.assert.calledOnce(hub.publish);
-		sinon.assert.calledWith(hub.publish, "topic");
+		sinon.assert.calledOnce(hub.emit);
+		sinon.assert.calledWith(hub.emit, "topic");
 	}),
 	
-	"test should pass arguments to publish": sinon.test(function () {
-		this.stub(hub, "publish").returns({
+	"test should pass arguments to emit": sinon.test(function () {
+		this.stub(hub, "emit").returns({
 			then: function () {}
 		});
 
@@ -97,12 +97,12 @@ TestCase("CreateMixTest", {
 			this.mix("topic", 123, "abc");
 		});
 		
-		sinon.assert.calledWithExactly(hub.publish, "topic", 123, "abc");
+		sinon.assert.calledWithExactly(hub.emit, "topic", 123, "abc");
 	}),
 	
 	"test should invoke hub.mix with result": sinon.test(function () {
 		var promise = hub.promise();
-		this.stub(hub, "publish").returns(promise);
+		this.stub(hub, "emit").returns(promise);
 		this.stub(hub, "mix");
 		
 		hub.create(function () {
@@ -116,50 +116,55 @@ TestCase("CreateMixTest", {
 
 });
 
-TestCase("CreateSubscribeTest", {
+TestCase("CreateOnTest", {
 	
-	"test should have scope with subscribe function": function () {
-		var fn = sinon.spy();
-		
-		hub.create("namespace", fn);
-		
-		assertFunction(fn.thisValues[0].subscribe);
+	tearDown: function () {
+		hub.reset();
 	},
 	
-	"test should throw if no namespace is provided": function () {		
-		assertException(function () {
-			hub.create(function () {
-				this.subscribe("message", function () {});
-			});
-		}, "TypeError");
-	},
+	"test should use scope provided by hub.topicScope": sinon.test(
+		function () {
+			this.stub(hub, "topicScope").returns("test");
+			var spy = sinon.spy();
+			
+			hub.create("foo", spy);
+			
+			sinon.assert.calledOnce(hub.topicScope);
+			sinon.assert.calledWith(hub.topicScope, "foo");
+			sinon.assert.calledOn(spy, "test");
+		}
+	),
 	
-	"test should throw if no message is provided": function () {		
-		assertException(function () {
-			hub.create("namespace", function () {
-				this.subscribe(null, function () {});
-			});
-		}, "TypeError");
-	},
+	"test should use scope provided by hub.scope": sinon.test(
+		function () {
+			this.stub(hub, "scope").returns("test");
+			var spy = sinon.spy();
+			
+			hub.create(spy);
+			
+			sinon.assert.calledOnce(hub.scope);
+			sinon.assert.calledOn(spy, "test");
+		}
+	),
 	
 	"test should throw if no callback is provided": function () {		
 		assertException(function () {
-			hub.create("namespace", function () {
-				this.subscribe("message");
+			hub.create("topic", function () {
+				this.on("message");
 			});
 		}, "TypeError");
 	},
 	
-	"test should invoke hub.subscribe prefixed with namespace": sinon.test(function () {
-		this.stub(hub, "subscribe");
+	"test should invoke hub.on prefixed with namespace": sinon.test(function () {
+		this.stub(hub, "on");
 		var fn = function () {};
 		
 		hub.create("namespace", function () {
-			this.subscribe("message", fn);
+			this.on("message", fn);
 		});
 		
-		sinon.assert.calledOnce(hub.subscribe);
-		sinon.assert.calledWithExactly(hub.subscribe, "namespace.message", fn);
+		sinon.assert.calledOnce(hub.on);
+		sinon.assert.calledWithExactly(hub.on, "namespace.message", fn);
 	})
 	
 });

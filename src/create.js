@@ -7,31 +7,21 @@
  */
 (function () {
 	
-	function create(namespace, fn, args) {
-		if (typeof namespace !== "string") {
+	function create(topic, fn, args) {
+		if (typeof topic !== "string") {
 			args = fn;
-			fn = namespace;
-			namespace = null;
+			fn = topic;
+			topic = null;
 		}
 		if (typeof fn !== "function") {
 			throw new TypeError();
 		}
 		var object = {};
-		var scope = {
-			mix: function (topic) {
-				hub.publish.apply(hub, arguments).then(function (mixin) {
-					hub.mix(object, mixin);
-				});
-			},
-			subscribe: function (message, callback) {
-				if (!namespace) {
-					throw new TypeError("namespace is " + namespace);
-				}
-				if (!message) {
-					throw new TypeError("messsage is " + message);
-				}
-				hub.subscribe(namespace + "." + message, callback);
-			}
+		var scope = topic ? hub.topicScope(topic) : hub.scope();
+		scope.mix = function () {
+			hub.emit.apply(hub, arguments).then(function (mixin) {
+				hub.mix(object, mixin);
+			});
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);
 		return hub.mix(object, result);

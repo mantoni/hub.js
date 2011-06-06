@@ -9,7 +9,7 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for publish and subscribe.
+ * Test cases for emit and subscribe.
  */
 TestCase("PublishSubscribeTest", {
 	
@@ -17,49 +17,49 @@ TestCase("PublishSubscribeTest", {
 		hub.reset();
 	},
 	
-	"test publish calls subscriber with same topic": function () {
+	"test emit calls subscriber with same topic": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.y", spy);
+		hub.on("x.y", spy);
 		
-		hub.publish("x.y");
+		hub.emit("x.y");
 		
 		sinon.assert.calledOnce(spy);
 	},
 	
-	"test publish does not call subscriber with different topic": function () {
+	"test emit does not call subscriber with different topic": function () {
 		var spy = sinon.spy();
-		hub.subscribe("a.b", spy);
+		hub.on("a.b", spy);
 		
-		hub.publish("x.y");
+		hub.emit("x.y");
 		
 		sinon.assert.notCalled(spy);
 	},
 	
-	"test publish one argument": function () {
+	"test emit one argument": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.y", spy);
+		hub.on("x.y", spy);
 		
-		hub.publish("x.y", "first");
+		hub.emit("x.y", "first");
 		
 		sinon.assert.calledWith(spy, "first");
 	},
 	
-	"test publish two arguments": function () {
+	"test emit two arguments": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.y", spy);
+		hub.on("x.y", spy);
 		
-		hub.publish("x.y", "first", "second");
+		hub.emit("x.y", "first", "second");
 		
 		sinon.assert.calledWith(spy, "first", "second");
 	},
 	
-	"test publish on topic with two subscribers": function () {
+	"test emit on topic with two subscribers": function () {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
-		hub.subscribe("x.y", spy1);
-		hub.subscribe("x.y", spy2);
+		hub.on("x.y", spy1);
+		hub.on("x.y", spy2);
 
-		hub.publish("x.y");
+		hub.emit("x.y");
 
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
@@ -67,15 +67,15 @@ TestCase("PublishSubscribeTest", {
 		sinon.assert.callOrder(spy2, spy1);
 	},
 	
-	"test publish to two subscribers via wildcard message": function () {
+	"test emit to two subscribers via wildcard message": function () {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
-		hub.subscribe("x.a", spy1);
-		hub.subscribe("x.b", spy2);
-		hub.subscribe("y.c", spy3);
+		hub.on("x.a", spy1);
+		hub.on("x.b", spy2);
+		hub.on("y.c", spy3);
 		
-		hub.publish("x.*");
+		hub.emit("x.*");
 		
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
@@ -84,15 +84,15 @@ TestCase("PublishSubscribeTest", {
 		sinon.assert.callOrder(spy2, spy1);
 	},
 	
-	"test publish to two subscribers via wildcard namespace": function () {
+	"test emit to two subscribers via wildcard namespace": function () {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
-		hub.subscribe("x.a", spy1);
-		hub.subscribe("y.a", spy2);
-		hub.subscribe("z.b", spy3);
+		hub.on("x.a", spy1);
+		hub.on("y.a", spy2);
+		hub.on("z.b", spy3);
 		
-		hub.publish("*.a");
+		hub.emit("*.a");
 
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
@@ -101,17 +101,17 @@ TestCase("PublishSubscribeTest", {
 		sinon.assert.callOrder(spy2, spy1);
 	},
 	
-	"test publish to wildcard, subscribe another, publish again": function () {
+	"test emit to wildcard, subscribe another, emit again": function () {
 		var spy1 = sinon.spy();
-		hub.subscribe("x.a", spy1);
-		hub.publish("x.*");
+		hub.on("x.a", spy1);
+		hub.emit("x.*");
 		
 		sinon.assert.calledOnce(spy1);
 		
 		var spy2 = sinon.spy();
-		hub.subscribe("x.b", spy2);
+		hub.on("x.b", spy2);
 		spy1.called = false;
-		hub.publish("x.*");
+		hub.emit("x.*");
 		
 		sinon.assert.called(spy1);
 		sinon.assert.called(spy2);
@@ -119,57 +119,60 @@ TestCase("PublishSubscribeTest", {
 	
 	"test subscribe to wildcard": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.*", spy);
-		hub.publish("y.a");
+		hub.on("x.*", spy);
+		hub.emit("y.a");
 		assertFalse(spy.called);
-		hub.publish("x.a");
+		hub.emit("x.a");
 		
 		sinon.assert.called(spy);
 	},
 	
-	"test publish with placeholder in message": function () {
+	"test emit with placeholder in message": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.y", spy);
-		hub.publish("x.{0}", "y");
+		hub.on("x.y", spy);
+		hub.emit("x.{0}", "y");
 		
 		sinon.assert.calledOnce(spy);
 		
-		hub.publish("x.{0.m}", {m: "y"});
+		hub.emit("x.{0.m}", {m: "y"});
 		
 		sinon.assert.calledTwice(spy);
 	},
 	
-	"test subscribe publish subscribe same message": function () {
+	"test subscribe emit subscribe same message": function () {
 		var spy1 = sinon.spy();
-		hub.subscribe("x.y", spy1);
-		hub.publish("x.y");
+		hub.on("x.y", spy1);
+		hub.emit("x.y");
+		
 		sinon.assert.called(spy1);
+		
 		var spy2 = sinon.spy();
-		hub.subscribe("x.y", spy2);
-		hub.publish("x.y");
+		hub.on("x.y", spy2);
+		hub.emit("x.y");
 		
 		sinon.assert.calledTwice(spy1);
 		sinon.assert.calledOnce(spy2);
 	},
 	
-	"test subscribe publish subscribe same message w/ placeholder": function () {
+	"test subscribe emit subscribe same message w/ placeholder": function () {
 		var spy1 = sinon.spy();
-		hub.subscribe("x.y", spy1);
-		hub.publish("x.{0}", "y");
-		sinon.assert.called(spy1);
-		spy1.called = false;
-		var spy2 = sinon.spy();
-		hub.subscribe("x.y", spy2);
-		hub.publish("x.{0}", "y");
+		hub.on("x.y", spy1);
+		hub.emit("x.{0}", "y");
 		
 		sinon.assert.called(spy1);
+		
+		var spy2 = sinon.spy();
+		hub.on("x.y", spy2);
+		hub.emit("x.{0}", "y");
+		
+		sinon.assert.calledTwice(spy1);
 		sinon.assert.called(spy2);
 	},
 	
-	"test multicast publish and subscribe": function () {
+	"test multicast emit and subscribe": function () {
 		var spy = sinon.spy();
-		hub.subscribe("x.*", spy);
-		hub.publish("x.*");
+		hub.on("x.*", spy);
+		hub.emit("x.*");
 		
 		sinon.assert.called(spy);
 	},
@@ -181,34 +184,34 @@ TestCase("PublishSubscribeTest", {
 		};
 		var fna = sinon.spy();
 		var fnb = sinon.spy();
-		hub.subscribe("x.a", fna);
-		hub.subscribe("x.b", fnb);
-		hub.subscribe("x.*", fn);
-		hub.publish("x.*");
+		hub.on("x.a", fna);
+		hub.on("x.b", fnb);
+		hub.on("x.*", fn);
+		hub.emit("x.*");
 		
 		sinon.assert.called(fna);
 		sinon.assert.called(fnb);
 		assertEquals(1, count);
 	},
 	
-	"test multicast publish twice": function () {
+	"test multicast emit twice": function () {
 		var count = 0;
 		var fn = function () {
 			count++;
 		};
-		hub.subscribe("x.a", fn);
-		hub.publish("x.*");
+		hub.on("x.a", fn);
+		hub.emit("x.*");
 		assertEquals(1, count);
-		hub.publish("x.*");
+		hub.emit("x.*");
 		assertEquals(2, count);
 	},
 	
 	"test throw in subscriber": function () {
-		hub.subscribe("test.throw", function () {
+		hub.on("test.throw", function () {
 			throw new Error();
 		});
 		assertException(function () {
-			hub.publish("test.throw");
+			hub.emit("test.throw");
 		});
 	}
 	

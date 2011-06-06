@@ -19,8 +19,8 @@
  *			on the callback.
  */
 (function () {
-	var publisher = hub.publisher;
-	var subscribe = hub.subscribe;
+	var emitter = hub.emitter;
+	var on = hub.on;
 	
 	hub.forward = function (alias, topic, dataTransformer, dataToMerge) {
 		if (typeof alias === "object") {
@@ -29,14 +29,14 @@
 				if (alias.hasOwnProperty(k)) {
 					t = alias[k];
 					if (typeof t === "string") {
-						subscribe(k, publisher(t));
+						on(k, emitter(t));
 					} else {
-						subscribe(k, publisher(t[0], t[1], t[2]));
+						on(k, emitter(t[0], t[1], t[2]));
 					}
 				}
 			}
 		} else {
-			subscribe(alias, publisher(topic, dataTransformer, dataToMerge));
+			on(alias, emitter(topic, dataTransformer, dataToMerge));
 		}
 	};
 }());

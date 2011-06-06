@@ -24,14 +24,14 @@ TestCase("ObserverPatternTest", {
 			return {
 				change: function (newText) {
 					text = newText;
-					hub.publish("Observer.notify", text);
+					hub.emit("Observer.notify", text);
 				}
 			};
 		});
 
 		var spy = sinon.spy();
 		hub.peer("Observer", function () {
-			this.subscribe("notify", spy);
+			this.on("notify", spy);
 			return {
 				// ...
 			};
@@ -41,7 +41,7 @@ TestCase("ObserverPatternTest", {
 		hub.get("Observer");
 		
 		var text = "Hello Observer!";
-		hub.publish("Document.change", text);
+		hub.emit("Document.change", text);
 		
 		sinon.assert.calledTwice(spy);
 		sinon.assert.alwaysCalledWith(spy, text);

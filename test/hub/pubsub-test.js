@@ -9,18 +9,18 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
- * Test cases for hub.publish.
+ * Test cases for hub.emit.
  */
 (function () {
 
 	function assertInvoked(topic, fn) {
-		hub.publish(topic);
+		hub.emit(topic);
 		assert(topic, fn.called);
 		fn.called = false;
 	}
 	
 	function assertNotInvoked(topic, fn) {
-		hub.publish(topic);
+		hub.emit(topic);
 		assertFalse(topic, fn.called);
 	}
 	
@@ -30,88 +30,88 @@
 			hub.reset();
 		},
 	
-		"test should implement publish": function () {
-			assertFunction(hub.publish);
+		"test should implement emit": function () {
+			assertFunction(hub.emit);
 		},
 	
 		"test should throw if topic is not string": function () {
 			assertException(function () {
-				hub.publish(null);
+				hub.emit(null);
 			});
 			assertException(function () {
-				hub.publish(undefined);
+				hub.emit(undefined);
 			});
 			assertException(function () {
-				hub.publish(false);
+				hub.emit(false);
 			});
 			assertException(function () {
-				hub.publish(true);
+				hub.emit(true);
 			});
 			assertException(function () {
-				hub.publish({});
+				hub.emit({});
 			});
 			assertException(function () {
-				hub.publish([]);
+				hub.emit([]);
 			});
 			assertException(function () {
-				hub.publish(77);
+				hub.emit(77);
 			});
 		},
 	
 		"test should throw if topic is empty": function () {
 			assertException(function () {
-				hub.publish("");
+				hub.emit("");
 			});
 		},
 	
 		"test should throw if topic is invalid": function () {
 			assertException(function () {
-				hub.publish("foo .doo");
+				hub.emit("foo .doo");
 			});
 			assertException(function () {
-				hub.publish("foo:doo");
+				hub.emit("foo:doo");
 			});
 		},
 	
 		"test should not throw if topic is valid": function () {
 			assertNoException(function () {
-				hub.publish("a");
+				hub.emit("a");
 			});
 			assertNoException(function () {
-				hub.publish("a.b");
+				hub.emit("a.b");
 			});
 			assertNoException(function () {
-				hub.publish("a.*");
+				hub.emit("a.*");
 			});
 			assertNoException(function () {
-				hub.publish("*.b");
+				hub.emit("*.b");
 			});
 			assertNoException(function () {
-				hub.publish("a.*.b");
+				hub.emit("a.*.b");
 			});
 			assertNoException(function () {
-				hub.publish("a.b.*");
+				hub.emit("a.b.*");
 			});
 			assertNoException(function () {
-				hub.publish("a.*.b.*");
+				hub.emit("a.*.b.*");
 			});
 			assertNoException(function () {
-				hub.publish("*.a.b");
+				hub.emit("*.a.b");
 			});
 			assertNoException(function () {
-				hub.publish("*.a.*.b");
+				hub.emit("*.a.*.b");
 			});
 			assertNoException(function () {
-				hub.publish("**.b");
+				hub.emit("**.b");
 			});
 			assertNoException(function () {
-				hub.publish("a.**");
+				hub.emit("a.**");
 			});
 		},
 	
 		"test should find matching subscriber for wildcards": function () {
 			var fn = sinon.spy();
-			hub.subscribe("a.b.c.d", fn);
+			hub.on("a.b.c.d", fn);
 			assertInvoked("a.b.c.*", fn);
 			assertInvoked("a.b.c.**", fn);
 			assertNotInvoked("a.b.*", fn);
@@ -126,122 +126,138 @@
 
 }());
 
+
 (function () {
 	
-	var checkScopeFunctionPrefix = sinon.test(function (local, global) {
-		var publish = hub.publish; // publish gets stubbed in one test case.
+	var checkScopeFunctionPrefix = sinon.test(function (property) {
 		this.stub(hub, "root");
-		this.stub(hub, global);
+		this.stub(hub, property);
+		
+		var scope = hub.topicScope(property);
+		scope[property]("test", function () {});
 	
-		publish("x");	
-		var scope = hub.root.thisValues[0];
-		scope[local]("test", function () {});
-	
-		sinon.assert.calledOnce(hub[global]);
-		sinon.assert.calledWith(hub[global], "x.test");
+		sinon.assert.calledOnce(hub[property]);
+		sinon.assert.calledWith(hub[property], property + ".test");
 	});
 	
-	TestCase("PublishScopeTest", {
-	
-		tearDown: function () {
-			hub.reset();
+	TestCase("TopicScopeTest", {
+		
+		"test should be function": function () {
+			assertFunction(hub.topicScope);
 		},
-	
-		"test should use given scope": sinon.test(function () {
-			this.stub(hub, "root");
-			var scope = hub.scope();
-			scope.test = "test";
-
-			hub.publish.call(scope, "x");
-
-			assertEquals("test", hub.root.thisValues[0].test);
-		}),
-
-		"test should create new scope and use with root": sinon.test(function () {
-			this.stub(hub, "root");
-			this.stub(hub, "scope").returns("test");
-				
-			hub.publish("x");
 		
-			sinon.assert.calledOnce(hub.scope);
-			assertEquals("test", hub.root.thisValues[0]);
-		}),
-	
-		"test should implement methods on scope": sinon.test(function () {
-			this.stub(hub, "root");
-		
-			hub.publish("x");
-		
-			var scope = hub.root.thisValues[0];
-			assertNotSame(hub, scope);
+		"test should implement methods on scope": sinon.test(function () {		
+			var scope = hub.topicScope("x");
+			
 			assertFunction(scope.on);
-			assertFunction(scope.subscribe);
 			assertFunction(scope.un);
-			assertFunction(scope.unsubscribe);
 			assertFunction(scope.peer);
-			assertFunction(scope.publish);
+			assertFunction(scope.emit);
+			assertFunction(scope.create);
 		}),
 	
 		"test on should invoke on with topic prefix": function () {
-			checkScopeFunctionPrefix("on", "on");
-		},
-
-		"test subscribe should invoke on with topic prefix": function () {
-			checkScopeFunctionPrefix("subscribe", "on");
+			checkScopeFunctionPrefix("on");
 		},
 
 		"test un should invoke un with topic prefix": function () {
-			checkScopeFunctionPrefix("un", "un");
-		},
-	
-		"test unsubscribe should invoke un with topic prefix": function () {
-			checkScopeFunctionPrefix("unsubscribe", "un");
+			checkScopeFunctionPrefix("un");
 		},
 	
 		"test peer should invoke peer with topic prefix": function () {
-			checkScopeFunctionPrefix("peer", "peer");
+			checkScopeFunctionPrefix("peer");
 		},
 	
-		"test publish should invoke publish with topic prefix": function () {
-			checkScopeFunctionPrefix("publish", "publish");
-		}
+		"test emit should invoke emit with topic prefix": function () {
+			checkScopeFunctionPrefix("emit");
+		},
+			
+		"test create should invoke create with topic prefix": function () {
+			checkScopeFunctionPrefix("create");
+		},
+		
+		"test should throw if no topic is provided": function () {		
+			var scope = hub.topicScope("x");
+			
+			assertException(function () {
+				scope.on(null, function () {});
+			}, "TypeError");
+			assertException(function () {
+				scope.un(null, function () {});
+			}, "TypeError");
+			assertException(function () {
+				scope.create(null, function () {});
+			}, "TypeError");
+			assertException(function () {
+				scope.peer(null, function () {});
+			}, "TypeError");
+			assertException(function () {
+				scope.emit(null, function () {});
+			}, "TypeError");
+		},
+		
 		
 	});
+
 }());
 
+TestCase("PublishScopeTest", {
+
+	tearDown: function () {
+		hub.reset();
+	},
+
+	"test should use given scope": sinon.test(function () {
+		this.stub(hub, "root");
+		var scope = hub.scope();
+		scope.test = "test";
+
+		hub.emit.call(scope, "x");
+
+		assertEquals("test", hub.root.thisValues[0].test);
+	}),
+
+	"test should create new scope and use with root": sinon.test(function () {
+		this.stub(hub, "root");
+		this.stub(hub, "scope").returns("test");
+			
+		hub.emit("x");
+	
+		sinon.assert.calledOnce(hub.scope);
+		assertEquals("test", hub.root.thisValues[0]);
+	})
+	
+});
+
+
 /*
- * Test cases for hub.subscribe.
+ * Test cases for hub.on.
  */
-TestCase("SubscribeTest", {
+TestCase("OnTest", {
 	
 	tearDown: function () {
 		hub.reset();
 	},
 	
 	"test should be function": function () {
-		assertFunction(hub.subscribe);
-	},
-	
-	"test should implement on as an alias": function () {
 		assertFunction(hub.on);
-		assertSame(hub.subscribe, hub.on);
 	},
 	
 	"test should throw if callback is missing": function () {
 		assertException(function () {
-			hub.subscribe("topic");
+			hub.on("topic");
 		}, "TypeError");
 	},
 	
 	"test should throw if topic contains illegal characters": function () {
 		assertException(function () {
-			hub.subscribe("some/topic", function () {});
+			hub.on("some/topic", function () {});
 		}, "Error");
 	}
 	
 });
 	
-TestCase("SubscribeFunctionTest", {
+TestCase("OnFunctionTest", {
 
 	tearDown: function () {
 		hub.reset();
@@ -251,81 +267,81 @@ TestCase("SubscribeFunctionTest", {
 		var stub = this.stub(hub.root, "add");
 		var callback = function () {};
 		
-		hub.subscribe("topic", callback);
+		hub.on("topic", callback);
 		
 		sinon.assert.calledOnce(stub);
 		sinon.assert.calledWithExactly(stub, "topic", callback);
 	}),
 	
-	"test subscribe invocation": function () {
+	"test should not throw for valid topics": function () {
 		var fn = sinon.spy();
 		assertNoException(function () {
-			hub.subscribe("a", fn);
+			hub.on("a", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.b", fn);
+			hub.on("a.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.*", fn);
+			hub.on("a.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*.b", fn);
+			hub.on("*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.*.b", fn);
+			hub.on("a.*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.b.*", fn);
+			hub.on("a.b.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.*.b.*", fn);
+			hub.on("a.*.b.*", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*.a.b", fn);
+			hub.on("*.a.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("*.a.*.b", fn);
+			hub.on("*.a.*.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("**.b", fn);
+			hub.on("**.b", fn);
 		});
 		assertNoException(function () {
-			hub.subscribe("a.**", fn);
+			hub.on("a.**", fn);
 		});
 	},
 	
-	"test subscribe throws if callback is not object or function": function () {
+	"test should throw if callback is not object or function": function () {
 		assertException(function () {
-			hub.subscribe("x.y");
+			hub.on("x.y");
 		});
 		assertException(function () {
-			hub.subscribe("x.y", null);
+			hub.on("x.y", null);
 		});
 		assertException(function () {
-			hub.subscribe("x.y", true);
+			hub.on("x.y", true);
 		});
 		assertException(function () {
-			hub.subscribe("x.y", "fail");
+			hub.on("x.y", "fail");
 		});
 		assertException(function () {
-			hub.subscribe("x.y", []);
+			hub.on("x.y", []);
 		});
 	}
 		
 });
 
-TestCase("SubscribeObjectTest", {
+TestCase("OnObjectTest", {
 	
 	tearDown: function () {
 		hub.reset();
 	},
 	
 	"test should accept a map": function () {
-		hub.subscribe({});
+		hub.on({});
 	},
 	
 	"test should accept topic and a map": function () {
-		hub.subscribe("topic", {});
+		hub.on("topic", {});
 	},
 	
 	"test should invoke hub.root.add with each pair": sinon.test(function () {
@@ -333,7 +349,7 @@ TestCase("SubscribeObjectTest", {
 		var callback1 = function () {};
 		var callback2 = function () {};
 		
-		hub.subscribe({
+		hub.on({
 			topic1: callback1,
 			topic2: callback2
 		});
@@ -343,29 +359,31 @@ TestCase("SubscribeObjectTest", {
 		sinon.assert.calledWithExactly(stub, "topic2", callback2);
 	}),
 	
-	"test should invoke hub.root.add with topic and each pair": sinon.test(function () {
-		var stub = this.stub(hub.root, "add");
-		var callback1 = function () {};
-		var callback2 = function () {};
-		
-		hub.subscribe("prefix", {
-			topic1: callback1,
-			topic2: callback2
-		});
-		
-		sinon.assert.calledThrice(stub);
-		sinon.assert.calledWithExactly(stub, "prefix.topic1", callback1);
-		sinon.assert.calledWithExactly(stub, "prefix.topic2", callback2);
-	}),
+	"test should invoke hub.root.add with topic and each pair": sinon.test(
+		function () {
+			var stub = this.stub(hub.root, "add");
+			var callback1 = function () {};
+			var callback2 = function () {};
 	
-	"test should store object and return it with hub.publish": function () {
+			hub.on("prefix", {
+				topic1: callback1,
+				topic2: callback2
+			});
+	
+			sinon.assert.calledThrice(stub);
+			sinon.assert.calledWithExactly(stub, "prefix.topic1", callback1);
+			sinon.assert.calledWithExactly(stub, "prefix.topic2", callback2);
+		}
+	),
+	
+	"test should store object and return it with hub.emit": function () {
 		var object = {
 			foo: function () {}
 		};
-		hub.subscribe("a", object);
+		hub.on("a", object);
 		
 		var spy = sinon.spy();
-		hub.publish("a").then(spy);
+		hub.emit("a").then(spy);
 		
 		var result = spy.getCall(0).args[0];
 		assertObject(result);
@@ -375,9 +393,9 @@ TestCase("SubscribeObjectTest", {
 });
 
 /*
- * Test cases for hub.unsubscribe.
+ * Test cases for hub.un.
  */
-TestCase("UnsubscribeTest", {
+TestCase("UnTest", {
 	
 	tearDown: function () {
 		hub.reset();
@@ -385,12 +403,12 @@ TestCase("UnsubscribeTest", {
 	
 	"test simple unsubscribe": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x.y", fn);
-		hub.publish("x.y");
+		hub.on("x.y", fn);
+		hub.emit("x.y");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x.y", fn);
-		hub.publish("x.y");
+		hub.un("x.y", fn);
+		hub.emit("x.y");
 		assertFalse(fn.called);
 	},
 	
@@ -402,13 +420,13 @@ TestCase("UnsubscribeTest", {
 		var f2 = function () {
 			a.push("f2");
 		};
-		hub.subscribe("x.y", f1);
-		hub.subscribe("x.y", f2);
-		hub.publish("x.y");
+		hub.on("x.y", f1);
+		hub.on("x.y", f2);
+		hub.emit("x.y");
 		assertEquals("f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x.y", f1);
-		hub.publish("x.y");
+		hub.un("x.y", f1);
+		hub.emit("x.y");
 		assertEquals("f2", a.join());
 	},
 	
@@ -420,13 +438,13 @@ TestCase("UnsubscribeTest", {
 		var f2 = function () {
 			a.push("f2");
 		};
-		hub.subscribe("x.y", f1);
-		hub.subscribe("x.y", f2);
-		hub.publish("x.y");
+		hub.on("x.y", f1);
+		hub.on("x.y", f2);
+		hub.emit("x.y");
 		assertEquals("f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x.y", f2);
-		hub.publish("x.y");
+		hub.un("x.y", f2);
+		hub.emit("x.y");
 		assertEquals("f1", a.join());
 	},
 	
@@ -441,14 +459,14 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x.y", f1);
-		hub.subscribe("x.y", f2);
-		hub.subscribe("x.y", f3);
-		hub.publish("x.y");
+		hub.on("x.y", f1);
+		hub.on("x.y", f2);
+		hub.on("x.y", f3);
+		hub.emit("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x.y", f1);
-		hub.publish("x.y");
+		hub.un("x.y", f1);
+		hub.emit("x.y");
 		assertEquals("f3,f2", a.join());
 	},
 	
@@ -463,14 +481,14 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x.y", f1);
-		hub.subscribe("x.y", f2);
-		hub.subscribe("x.y", f3);
-		hub.publish("x.y");
+		hub.on("x.y", f1);
+		hub.on("x.y", f2);
+		hub.on("x.y", f3);
+		hub.emit("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x.y", f2);
-		hub.publish("x.y");
+		hub.un("x.y", f2);
+		hub.emit("x.y");
 		assertEquals("f3,f1", a.join());
 	},
 	
@@ -485,73 +503,68 @@ TestCase("UnsubscribeTest", {
 		var f3 = function () {
 			a.push("f3");
 		};
-		hub.subscribe("x.y", f1);
-		hub.subscribe("x.y", f2);
-		hub.subscribe("x.y", f3);
-		hub.publish("x.y");
+		hub.on("x.y", f1);
+		hub.on("x.y", f2);
+		hub.on("x.y", f3);
+		hub.emit("x.y");
 		assertEquals("f3,f2,f1", a.join());
 		a.length = 0;
-		hub.unsubscribe("x.y", f3);
-		hub.publish("x.y");
+		hub.un("x.y", f3);
+		hub.emit("x.y");
 		assertEquals("f2,f1", a.join());
 	},
 	
-	"test publish subscribe publish unsubscribe publish": function () {
+	"test emit subscribe emit unsubscribe emit": function () {
 		var fn = sinon.spy();
-		hub.publish("x.y");
-		hub.subscribe("x.y", fn);
-		hub.publish("x.y");
+		hub.emit("x.y");
+		hub.on("x.y", fn);
+		hub.emit("x.y");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x.y", fn);
-		hub.publish("x.y");
+		hub.un("x.y", fn);
+		hub.emit("x.y");
 		assertFalse(fn.called);
 	},
 	
-	"test subscribe publish wildcard and unsubscribe": function () {
+	"test subscribe emit wildcard and unsubscribe": function () {
 		var fn = sinon.spy();
-		hub.subscribe("x.y", fn);
-		hub.publish("x.*");
+		hub.on("x.y", fn);
+		hub.emit("x.*");
 		sinon.assert.calledOnce(fn);
 		fn.called = false;
-		hub.unsubscribe("x.y", fn);
-		hub.publish("x.*");
+		hub.un("x.y", fn);
+		hub.emit("x.*");
 		assertFalse(fn.called);
 	},
 	
 	"test unsubscribe throws if callback is not a function": function () {
 		assertException(function () {
-			hub.unsubscribe("x.y");
+			hub.un("x.y");
 		});
 		assertException(function () {
-			hub.unsubscribe("x.y", null);
+			hub.un("x.y", null);
 		});
 		assertException(function () {
-			hub.unsubscribe("x.y", true);
+			hub.un("x.y", true);
 		});
 		assertException(function () {
-			hub.unsubscribe("x.y", {});
+			hub.un("x.y", {});
 		});
 		assertException(function () {
-			hub.unsubscribe("x.y", []);
+			hub.un("x.y", []);
 		});
 	},
 	
 	"test unsubscribe returns true on success": function () {
 		var fn = function () {};
-		hub.subscribe("x.y", fn);
-		assert(hub.unsubscribe("x.y", fn));
+		hub.on("x.y", fn);
+		assert(hub.un("x.y", fn));
 	},
 	
 	"test unsubscribe returns false on failure": function () {
-		assertFalse(hub.unsubscribe("x.y", function () {}));
-	},
-	
-	"test should implement un as an alias to unsubscribe": function () {
-		assertFunction(hub.un);
-		assertSame(hub.unsubscribe, hub.un);
+		assertFalse(hub.un("x.y", function () {}));
 	}
-	
+		
 });
 
 /*
@@ -577,37 +590,43 @@ TestCase("PeerTest", {
 		sinon.assert.calledWith(hub.create, factory);
 	}),
 	
-	"test should invoke create with function and args": sinon.test(function () {
-		this.stub(hub, "create");
-		var factory = function () {};
-		var args = [123];
+	"test should invoke create with function and args": sinon.test(
+		function () {
+			this.stub(hub, "create");
+			var factory = function () {};
+			var args = [123];
 		
-		hub.peer(factory, args);
+			hub.peer(factory, args);
 		
-		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWith(hub.create, factory, args);
-	}),
+			sinon.assert.calledOnce(hub.create);
+			sinon.assert.calledWith(hub.create, factory, args);
+		}
+	),
 
-	"test should invoke create with topic and function": sinon.test(function () {
-		this.stub(hub, "create");
-		var factory = function () {};
+	"test should invoke create with topic and function": sinon.test(
+		function () {
+			this.stub(hub, "create");
+			var factory = function () {};
 				
-		hub.peer("topic", factory);
+			hub.peer("topic", factory);
 		
-		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWith(hub.create, "topic", factory);
-	}),
+			sinon.assert.calledOnce(hub.create);
+			sinon.assert.calledWith(hub.create, "topic", factory);
+		}
+	),
 
-	"test should invoke create with topic, function and args": sinon.test(function () {
-		this.stub(hub, "create");
-		var factory = function () {};
-		var args = [123];
+	"test should invoke create with topic, function and args": sinon.test(
+		function () {
+			this.stub(hub, "create");
+			var factory = function () {};
+			var args = [123];
 
-		hub.peer("topic", factory, args);
+			hub.peer("topic", factory, args);
 
-		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWithExactly(hub.create, "topic", factory, args);
-	}),
+			sinon.assert.calledOnce(hub.create);
+			sinon.assert.calledWithExactly(hub.create, "topic", factory, args);
+		}
+	),
 
 	"test should pass create result to hub.on": sinon.test(function () {
 		this.stub(hub, "create").returns("test");
@@ -619,15 +638,17 @@ TestCase("PeerTest", {
 		sinon.assert.calledWithExactly(hub.on, "test");
 	}),
 	
-	"test should pass topic and create result to hub.on": sinon.test(function () {
-		this.stub(hub, "create").returns("test");
-		this.stub(hub, "on");
+	"test should pass topic and create result to hub.on": sinon.test(
+		function () {
+			this.stub(hub, "create").returns("test");
+			this.stub(hub, "on");
 		
-		hub.peer("topic", function () {});
+			hub.peer("topic", function () {});
 		
-		sinon.assert.calledOnce(hub.on);
-		sinon.assert.calledWithExactly(hub.on, "topic", "test");
-	}),
+			sinon.assert.calledOnce(hub.on);
+			sinon.assert.calledWithExactly(hub.on, "topic", "test");
+		}
+	),
 	
 	"test should pass topic and object to hub.on": sinon.test(function () {
 		this.stub(hub, "on");

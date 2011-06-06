@@ -15,11 +15,11 @@ runBenchmark("hub.promise", {
 	},
 	
 	'hub.promise() from within listener': function (l) {
-		hub.subscribe("a.b", function () {
+		hub.on("a.b", function () {
 			hub.promise();
 		});
 		for (var i = 0; i < l; i++) {
-			hub.publish("a.b");
+			hub.emit("a.b");
 		}
 	}
 	
