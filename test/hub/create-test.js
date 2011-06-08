@@ -37,24 +37,28 @@ TestCase("CreateInvokeTest", {
 		assertObject(result);
 	},
 	
-	"test should invoke hub.mix with object and result": sinon.test(function () {
-		this.stub(hub, "mix");
-		var test = {
-			foo: 123
-		};
-		hub.create(sinon.stub().returns(test));
+	"test should invoke hub.mix with object and result": sinon.test(
+		function () {
+			this.stub(hub, "mix");
+			var test = {
+				foo: 123
+			};
+			var stub = sinon.stub().returns(test);
 		
-		assert(hub.mix.called);
-		assert(hub.mix.calledWithExactly({}, test));
-	}),
+			hub.create(stub);
+		
+			sinon.assert.calledOnce(hub.mix);
+			sinon.assert.calledWithExactly(hub.mix, {}, test);
+		}
+	),
 	
 	"test should pass arguments to function": function () {
-		var fn = sinon.spy();
+		var spy = sinon.spy();
 		var args = [123, "abc"];
 		
-		hub.create(fn, args);
+		hub.create(spy, args);
 		
-		assert(fn.calledWithExactly(args[0], args[1]));
+		sinon.assert.calledWithExactly(spy, args[0], args[1]);
 	},
 	
 	"test should accept string and function": function () {
@@ -68,11 +72,11 @@ TestCase("CreateInvokeTest", {
 TestCase("CreateMixTest", {
 	
 	"test should have scope with mix function": function () {
-		var fn = sinon.spy();
+		var spy = sinon.spy();
 		
-		hub.create(fn);
+		hub.create(spy);
 		
-		assertFunction(fn.thisValues[0].mix);
+		assertFunction(spy.thisValues[0].mix);
 	},
 	
 	"test should emit topic": sinon.test(function () {
@@ -155,16 +159,18 @@ TestCase("CreateOnTest", {
 		}, "TypeError");
 	},
 	
-	"test should invoke hub.on prefixed with namespace": sinon.test(function () {
-		this.stub(hub, "on");
-		var fn = function () {};
+	"test should invoke hub.on prefixed with namespace": sinon.test(
+		function () {
+			this.stub(hub, "on");
+			var fn = function () {};
 		
-		hub.create("namespace", function () {
-			this.on("message", fn);
-		});
+			hub.create("namespace", function () {
+				this.on("message", fn);
+			});
 		
-		sinon.assert.calledOnce(hub.on);
-		sinon.assert.calledWithExactly(hub.on, "namespace.message", fn);
-	})
+			sinon.assert.calledOnce(hub.on);
+			sinon.assert.calledWithExactly(hub.on, "namespace.message", fn);
+		}
+	)
 	
 });

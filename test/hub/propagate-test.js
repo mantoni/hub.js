@@ -25,6 +25,7 @@ TestCase("PropagateTest", {
 		}, function () {
 			calls.push("b");
 		})();
+		
 		assertEquals("b,a", calls.join());
 	},
 	
@@ -35,6 +36,7 @@ TestCase("PropagateTest", {
 		}, function (a, b) {
 			calls.push("y", a, b);
 		})("a", "b");
+		
 		assertEquals("x,a,b,y,a,b", calls.join());
 	},
 	
@@ -46,6 +48,7 @@ TestCase("PropagateTest", {
 		}, function (a, b) {
 			calls.push("y", a, b);
 		})("a", "b");
+		
 		assertEquals("y,a,b,x,a,b", calls.join());
 	},
 	

@@ -96,10 +96,12 @@ TestCase("ChainRemoveTest", {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
 		var chain = hub.chain(spy1, spy2);
+		
 		chain.remove(spy2);
 		chain();
+		
 		sinon.assert.calledOnce(spy1);
-		assertFalse(spy2.called);
+		sinon.assert.notCalled(spy2);
 	},
 	
 	"test remove first of three": function () {
@@ -107,9 +109,11 @@ TestCase("ChainRemoveTest", {
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
 		var chain = hub.chain(spy1, spy2, spy3);
+		
 		chain.remove(spy1);
 		chain();
-		assertFalse(spy1.called);
+		
+		sinon.assert.notCalled(spy1);
 		sinon.assert.calledOnce(spy2);
 		sinon.assert.calledOnce(spy3);
 	},
@@ -119,10 +123,12 @@ TestCase("ChainRemoveTest", {
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
 		var chain = hub.chain(spy1, spy2, spy3);
+
 		chain.remove(spy2);
 		chain();
+
 		sinon.assert.calledOnce(spy1);
-		assertFalse(spy2.called);
+		sinon.assert.notCalled(spy2);
 		sinon.assert.calledOnce(spy3);
 	},
 	
@@ -131,11 +137,13 @@ TestCase("ChainRemoveTest", {
 		var spy2 = sinon.spy();
 		var spy3 = sinon.spy();
 		var chain = hub.chain(spy1, spy2, spy3);
+		
 		chain.remove(spy3);
 		chain();
+		
 		sinon.assert.calledOnce(spy1);
 		sinon.assert.calledOnce(spy2);
-		assertFalse(spy3.called);
+		sinon.assert.notCalled(spy3);
 	}
 
 });
@@ -144,15 +152,17 @@ TestCase("ChainConcurrencyTest", {
 	
 	"test should allow add during invocation": function () {
 		var calls = 0;
-		var sf = sinon.spy();
+		var spy = sinon.spy();
 		var chain = hub.chain();
+		
 		chain.add(function () {
 			calls++;
-			chain.add(sf);
+			chain.add(spy);
 		});
 		chain();
+		
 		assertEquals(1, calls);
-		assertFalse(sf.called);
+		sinon.assert.notCalled(spy);
 	}
 
 });
@@ -253,41 +263,50 @@ TestCase("ScopeTest", {
 TestCase("ChainNestingTest", {
 	
 	"test should invoke nested chain": function () {
-		var f = sinon.spy();
-		var ca = hub.chain(f);
-		var cb = hub.chain(ca);
-		cb();
-		sinon.assert.calledOnce(f);
+		var spy = sinon.spy();
+		var chain1 = hub.chain(spy);
+		var chain2 = hub.chain(chain1);
+		
+		chain2();
+		
+		sinon.assert.calledOnce(spy);
 	},
 	
 	"test should abort parent": function () {
-		var ca = hub.chain(function () {
+		var chain1 = hub.chain(function () {
 			this.stopPropagation();
 		});
-		var f = sinon.spy();
-		var cb = hub.chain(ca, f);
-		cb();
-		assertFalse(f.called);
+		var spy = sinon.spy();
+		var chain2 = hub.chain(chain1, spy);
+		
+		chain2();
+		
+		sinon.assert.notCalled(spy);
 	},
 	
 	"test should propagate to parent": function () {
-		var f = sinon.spy();
-		var ca = hub.chain(function () {
+		var spy = sinon.spy();
+		var chain1 = hub.chain(function () {
 			this.propagate();
-			sinon.assert.calledOnce(f);
+			sinon.assert.calledOnce(spy);
 		});
-		var cb = hub.chain(ca, f);
-		cb();
+		var chain2 = hub.chain(chain1, spy);
+		
+		chain2();
 	},
 	
 	"test should merge results": function () {
-		var c1 = hub.chain(function () {
+		var chain1 = hub.chain(function () {
 			return [1];
 		});
-		var c2 = hub.chain(function () {
+		var chain2 = hub.chain(function () {
 			return [2];
 		});
-		assertEquals([1, 2], hub.chain(c1, c2)());
+		
+		var chain3 = hub.chain(chain1, chain2);
+		var merged = chain3();
+		
+		assertEquals([1, 2], merged);
 	},
 	
 	"test should pass arguments through": function () {
@@ -314,11 +333,13 @@ TestCase("ChainNestingTest", {
 				calls.push(name);
 			};
 		}
+		
 		var i, l;
 		for (i = 0, l = inserts.length; i < l; i++) {
 			chain.add(inserts[i], caller(inserts[i]));
 		}
 		chain("**");
+		
 		assertEquals(expected.join(), calls.join());
 	}
 	
@@ -396,9 +417,9 @@ TestCase("ChainNestingTest", {
 			var chain = hub.topicChain("a.b");
 			var spy1 = sinon.spy();
 			var spy2 = sinon.spy();
+			
 			chain.add("a.b", spy1);
 			chain.add("x.y", spy2);
-		
 			chain();
 		
 			sinon.assert.calledOnce(spy1);
@@ -450,26 +471,35 @@ TestCase("ChainNestingTest", {
 
 TestCase("TopicComparatorTest", {
 	
-	"test method exists": function () {
+	"test should be function": function () {
 		assertFunction(hub.topicComparator);
 	},
 	
-	"test equal": function () {
+	"test should return 0 for two simple strings": function () {
 		assertEquals(0, hub.topicComparator("foo", "bar"));
 	},
 	
-	"test wildcard message": function () {
+	"test should return -1 for * suffix left only": function () {
 		assertEquals(-1, hub.topicComparator("foo.*", "foo.bar"));
+	},
+
+	"test should return +1 for * suffix right only": function () {
 		assertEquals(1, hub.topicComparator("foo.bar", "foo.*"));
 	},
 
-	"test wildcard namespace": function () {
+	"test should return -1 for * prefix left only": function () {
 		assertEquals(-1, hub.topicComparator("*.bar", "foo.bar"));
+	},
+
+	"test should return +1 for * prefix right only": function () {
 		assertEquals(1, hub.topicComparator("foo.bar", "*.bar"));
 	},
 
-	"test namespace before message": function () {
+	"test should return -1 for * prefix left and * suffix right": function () {
 		assertEquals(-1, hub.topicComparator("*.foo", "foo.*"));
+	},
+	
+	"test should return +1 for * suffix left and * prefix right": function () {
 		assertEquals(1, hub.topicComparator("foo.*", "*.foo"));
 	}
 	

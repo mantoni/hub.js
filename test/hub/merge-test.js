@@ -20,9 +20,11 @@
 		} catch (e) {
 			error = e;
 		}
+		
 		assertNotNull(error);
 		assertObject(error);
 		assertEquals("validation", error.type);
+		
 		return error;
 	}
 
@@ -30,29 +32,35 @@
 
 		"test empty object": function () {
 			var o = hub.merge({}, {});
+			
 			assertEquals("[object Object]", Object.prototype.toString.call(o));
 		},
 
 		"test empty array": function () {
 			var a = hub.merge([], []);
+			
 			assertEquals("[object Array]", Object.prototype.toString.call(a));
 		},
 
 		"test should merge object properties": function () {
 			var o = hub.merge({ foo: "foo" }, { bar: "bar" });
+			
 			assertEquals("foo", o.foo);
 			assertEquals("bar", o.bar);
 		},
 
 		"test should concatenate arrays": function () {
 			var a = hub.merge(["foo"], ["bar"]);
+			
 			assertEquals("foo,bar", a.join());
 		},
 
 		"test should throw for different string values": function () {
 			var target = { x: "foo" };
 			var source = { x: "bar" };
+			
 			var error = mergeError(target, source);
+			
 			assertEquals("foo", target.x);
 			assertEquals("Cannot merge value foo with bar", error.toString());
 			assertEquals("foo", error.context.target);
@@ -66,6 +74,7 @@
 			assertNoException(function () {
 				o = hub.merge({ x: "foo" }, { x: "foo" });
 			});
+			
 			assertEquals("foo", o.x);
 		},
 
@@ -97,6 +106,7 @@
 
 		"test should fail on true and false": function () {
 			var error = mergeError(true, false);
+			
 			assertSame(true, error.context.target);
 			assertSame(false, error.context.source);
 			assertEquals("[object Boolean]", error.context.targetType);
@@ -110,6 +120,7 @@
 
 		"test should fail on different strings": function () {
 			var error = mergeError("", "a");
+			
 			assertSame("", error.context.target);
 			assertSame("a", error.context.source);
 			assertEquals("[object String]", error.context.targetType);
@@ -118,6 +129,7 @@
 
 		"test should fail on object and array": function () {
 			var error = mergeError({}, []);
+			
 			assertEquals("validation", error.type);
 			assertEquals("Cannot merge type [object Object] with [object Array]",
 				error.toString());
