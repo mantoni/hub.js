@@ -60,11 +60,10 @@
 	}
 	
 	/**
-	 * creates a call chain for the given functions. The returned
-	 * chain is a function itself which will invoke all functions in
-	 * the given order.
-	 * The chain implements add(Function) and remove(Function) to add
-	 * and remove functions from the chain.
+	 * creates a call chain for the given functions. The returned chain is a
+	 * function itself which will invoke all functions in the given order.
+	 * The chain implements add(Function) and remove(Function) to add and
+	 * remove functions from the chain.
 	 * Chain iteration can be aborted via this.stopPropagation() or
 	 * explicitly triggered via this.propagate().
 	 * 
