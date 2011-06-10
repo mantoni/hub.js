@@ -38,6 +38,74 @@ TestCase("ChainCallTest", {
 	
 });
 
+TestCase("PropagateTest", {
+	
+	"test should be function": function () {
+		var spy = sinon.spy();
+		var chain = hub.chain(spy);
+		
+		chain();
+		
+		assertFunction(spy.thisValues[0].propagate);
+	},
+	
+	"test should invoke next chain element": function () {
+		var calls = [];
+		var chain = hub.chain(function () {
+			this.propagate();
+			calls.push("a");
+		}, function () {
+				calls.push("b");
+			});
+		
+		chain();
+		
+		assertEquals("b,a", calls.join());
+	},
+	
+	"test implicit argument propagation": function () {
+		var calls = [];
+		var chain = hub.chain(function (a, b) {
+			calls.push("x", a, b);
+		}, function (a, b) {
+			calls.push("y", a, b);
+		});
+		
+		chain("a", "b");
+		
+		assertEquals("x,a,b,y,a,b", calls.join());
+	},
+	
+	"test explicit argument propagation": function () {
+		var calls = [];
+		var chain = hub.chain(function (a, b) {
+			this.propagate();
+			calls.push("x", a, b);
+		}, function (a, b) {
+			calls.push("y", a, b);
+		});
+		
+		chain("a", "b");
+		
+		assertEquals("y,a,b,x,a,b", calls.join());
+	},
+	
+	"test override result": function () {
+		var chain = hub.chain(function () {
+			return ["a"];
+		}, function () {
+			this.propagate(["b"]);
+		}, function () {
+			return ["c"];
+		});
+		
+		var result = chain();
+		
+		assertEquals(["b", "c"], result);
+	}
+
+});
+
 TestCase("StopPropagationTest", {
 	
 	"test should stop after invokation": function () {
