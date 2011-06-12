@@ -38,14 +38,14 @@
 			callbacks.length = 0;
 			errbacks.length = 0;
 		}
-
+		
 		function thenWait() {
 			blockers--;
 			if (!blockers && result) {
 				resolve();
 			}
 		}
-
+		
 		thiz = {
 			then: function (callback, errback) {
 				if (typeof callback !== "function") {
@@ -97,6 +97,11 @@
 					});
 				});				
 				return joined;
+			},
+			emit: function (topic) {
+				thiz.then(function () {
+					hub.emit.apply(hub, [topic].concat(result));
+				});
 			}
 		};
 		if (timeout) {

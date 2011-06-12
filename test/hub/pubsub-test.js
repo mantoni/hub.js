@@ -120,57 +120,20 @@
 			assertInvoked("a.**.c.d", fn);
 			assertNotInvoked("*.c.d", fn);
 			assertInvoked("**.c.d", fn);
-		}
+		},
+		
+		"test should create and return promise": sinon.test(function () {
+			var spy = this.spy(hub, "promise");
 
+			var result = hub.emit("x");
+
+			sinon.assert.calledOnce(spy);
+			assertSame(spy.returnValues[0], result);
+		})
+		
 	});
 
 }());
-
-TestCase("EmitPromiseTest", {
-	
-	"test should be function": function () {
-		assertFunction(hub.emitPromise);
-	},
-	
-	"test should create and return promise": sinon.test(function () {
-		var spy = this.spy(hub, "promise");
-		
-		var result = hub.emitPromise();
-		
-		sinon.assert.calledOnce(spy);
-		assertSame(spy.returnValues[0], result);
-	}),
-	
-	"test should implement emit": function () {
-		var promise = hub.emitPromise();
-		
-		assertFunction(promise.emit);
-	},
-	
-	"test emit should emit constructor argument": sinon.test(function () {
-		this.stub(hub, "emit");
-		var promise = hub.emitPromise("Test");
-		
-		promise.emit("x");
-		
-		sinon.assert.calledOnce(hub.emit);
-		sinon.assert.calledWith(hub.emit, "x", "Test");
-	})
-	
-});
-
-TestCase("EmitReturnedPromiseTest", {
-	
-	"test should create and return emitPromise": sinon.test(function () {
-		var spy = this.spy(hub, "emitPromise");
-		
-		var result = hub.emit("x");
-		
-		sinon.assert.calledOnce(spy);
-		assertSame(spy.returnValues[0], result);
-	})
-		
-});
 
 (function () {
 	
@@ -421,13 +384,13 @@ TestCase("OnObjectTest", {
 		}
 	),
 	
-	"test should store object and return it with hub.emit": function () {
+	"test should store object and return it for hub.emit": function () {
 		var object = {
 			foo: function () {}
 		};
 		hub.on("a", object);
-		
 		var spy = sinon.spy();
+		
 		hub.emit("a").then(spy);
 		
 		var result = spy.getCall(0).args[0];

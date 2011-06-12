@@ -361,3 +361,24 @@ TestCase("Promise2JoinTest", {
 	}
 	
 });
+
+TestCase("PromiseEmitTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.emit);
+	},
+	
+	"test should emit result": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "emit");
+		
+		promise.emit("x");
+		promise.resolve("Test");
+		
+		sinon.assert.calledOnce(hub.emit);
+		sinon.assert.calledWith(hub.emit, "x", "Test");
+	})
+	
+});

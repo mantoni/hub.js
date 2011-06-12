@@ -34,7 +34,17 @@ TestCase("ChainCallTest", {
 		sinon.assert.calledOnce(spy1);
 		sinon.assert.calledOnce(spy2);
 		sinon.assert.callOrder(spy1, spy2);
-	}
+	},
+	
+	"test should create and return promise": sinon.test(function () {
+		var spy = this.spy(hub, "promise");
+		var chain = hub.chain();
+		
+		var promise = chain();
+		
+		sinon.assert.calledOnce(spy);
+		assertSame(spy.returnValues[0], promise);
+	})
 	
 });
 
@@ -55,8 +65,8 @@ TestCase("PropagateTest", {
 			this.propagate();
 			calls.push("a");
 		}, function () {
-				calls.push("b");
-			});
+			calls.push("b");
+		});
 		
 		chain();
 		
@@ -98,11 +108,24 @@ TestCase("PropagateTest", {
 		}, function () {
 			return ["c"];
 		});
+		var spy = sinon.spy();
 		
-		var result = chain();
+		chain().then(spy);
 		
-		assertEquals(["b", "c"], result);
-	}
+		sinon.assert.calledWith(spy, ["b", "c"]);
+	},
+	
+	"test should return promise": sinon.test(function () {
+		var spy = this.spy(hub, "promise");
+		var result;
+		var chain = hub.chain(function () {
+			result = this.propagate();
+		});
+		
+		chain();
+		
+		assertSame(spy.returnValues[0], result);
+	})
 
 });
 
@@ -126,10 +149,11 @@ TestCase("StopPropagationTest", {
 				return ["second"];
 			}
 		);
+		var spy = sinon.spy();
 		
-		var result = chain();
+		chain().then(spy);
 		
-		assertEquals(["first", "second"], result);
+		sinon.assert.calledWith(spy, ["first", "second"]);
 	},
 	
 	"test should override result": function () {
@@ -138,10 +162,11 @@ TestCase("StopPropagationTest", {
 				this.stopPropagation(["override"]);
 			}
 		);
+		var spy = sinon.spy();
 		
-		var result = chain();
+		chain().then(spy);
 		
-		assertEquals(["override"], result);
+		sinon.assert.calledWith(spy, ["override"]);
 	}
 	
 });
@@ -300,8 +325,7 @@ TestCase("ChainScopeTest", {
 		chain();
 		
 		sinon.assert.calledOnce(spy);
-		assertObject(result);
-		assertFunction(result.then);
+		assertSame(spy.returnValues[0], result);
 	}),
 	
 	"test this.promise should stop chain execution until resolved":
@@ -448,11 +472,12 @@ TestCase("ChainNestingTest", {
 		var chain2 = hub.chain(function () {
 			return [2];
 		});
+		var spy = sinon.spy();
 		
 		var chain3 = hub.chain(chain1, chain2);
-		var merged = chain3();
+		chain3().then(spy);
 		
-		assertEquals([1, 2], merged);
+		sinon.assert.calledWith(spy, [1, 2]);
 	},
 	
 	"test should pass arguments through": function () {
@@ -605,10 +630,11 @@ TestCase("ChainNestingTest", {
 				this.stopPropagation();
 				return "test";
 			});
+			var spy = sinon.spy();
 			
-			var result = chain("a");
+			chain("a").then(spy);
 			
-			assertEquals("test", result);
+			sinon.assert.calledWith(spy, "test");
 		}
 				
 	});

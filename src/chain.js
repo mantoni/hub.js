@@ -29,8 +29,8 @@
 				}
 			},
 			/**
-			 * explicitly propagates the message to the next function in the
-			 * current call chain.
+			 * propagates the message to the next function in the current call
+			 * chain.
 			 */
 			propagate: function () {
 				if (arguments.length) {
@@ -38,7 +38,7 @@
 				}
 				var size = iteratorStack.length;
 				if (!size) {
-					return;
+					return thiz.result();
 				}
 				var iterator = iteratorStack[size - 1];
 				if (!iterator.hasNext) {
@@ -50,10 +50,10 @@
 						result = promise;
 						promise = undefined;
 						result.then(thiz.propagate);
-						return;
+						return result;
 					} else if (nextResult && nextResult.then) {
-						nextResult.then(thiz.propagate);
 						result = nextResult;
+						result.then(thiz.propagate);
 						return;
 					}
 					result = hub.merge(result, nextResult);
@@ -64,7 +64,10 @@
 				return aborted;
 			},
 			result: function () {
-				return result;
+				if (result && result.then) {
+					return result;
+				}
+				return hub.promise(0, thiz).resolve(result);
 			},
 			push: function (iterator) {
 				iteratorStack.push(iterator);
@@ -94,8 +97,7 @@
 		function callChain() {
 			var thiz = this.propagate ? this : scope(arguments);
 			thiz.push(iterator);
-			thiz.propagate();
-			return thiz.result();
+			return thiz.propagate();
 		}
 		callChain.add = function (fn) {
 			var fnType = typeof fn;
@@ -175,7 +177,7 @@
 			validateTopic(chainTopic);
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
-		var fns = chain();
+		var fns;
 		var children = firstChild ? [firstChild] : [];
 		function callChain(topic) {
 			if (!topic) {
@@ -191,7 +193,9 @@
 			var thiz = this.propagate ? this : scope(
 				Array.prototype.slice.call(arguments, 1)
 			);
-			fns.call(thiz);
+			if (fns) {
+				fns.call(thiz);
+			}
 			if (thiz.aborted()) {
 				return thiz.result();
 			}
@@ -218,6 +222,9 @@
 		};
 		callChain.add = function (topic, fn, topicMatcher) {
 			if (chainTopic === topic) {
+				if (!fns) {
+					fns = chain();
+				}
 				fns.add(fn);
 				return;
 			}
@@ -256,7 +263,7 @@
 		};
 		callChain.remove = function (topic, fn) {
 			if (chainTopic === topic) {
-				return fns.remove(fn);
+				return fns ? fns.remove(fn) : -1;
 			}
 			var i, l, child;
 			for (i = 0, l = children.length; i < l; i++) {

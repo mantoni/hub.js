@@ -104,20 +104,6 @@
 		return scope;
 	};
 	
-	hub.emitPromise = function (result, scope) {
-		if (!result || !result.then) {
-			var promise = hub.promise(0, scope);
-			promise.resolve(result);
-			result = promise;
-		}
-		result.emit = function (topic) {
-			result.then(function (value) {
-				hub.emit(topic, value);
-			});
-		};
-		return result;
-	};
-	
 	/**
 	 * invokes the call chain associated with a topic with optional arguments.
 	 * The topic combines a namespace and a message in the form:
@@ -145,7 +131,12 @@
 					error: e.message
 				});
 		}
-		return hub.emitPromise(result, thiz);
+		if (!result || !result.then) {
+			var promise = hub.promise(0, thiz);
+			promise.resolve(result);
+			result = promise;
+		}
+		return result;
 	};
 	
 	/**
