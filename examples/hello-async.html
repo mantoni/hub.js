@@ -37,7 +37,7 @@
 							'<input name="input" value="hub"/>' +
 							'<input type="submit" value="Go"/>' +
 						"</form>";
-					var promise = hub.promise();
+					var promise = this.promise();
 					document.forms[0].onsubmit = function () {
 						promise.resolve(this.input.value);
 						return false;
@@ -45,7 +45,7 @@
 				}
 			});
 			
-			hub.emit("input.name").emitResult("say.hello");
+			hub.emit("input.name").emit("say.hello");
 		-->
 		</script>
 	</body>
