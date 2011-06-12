@@ -75,9 +75,6 @@
 				rejected = true;
 				return thiz.resolve.apply(thiz, arguments);
 			},
-		/*	resolved: function () {
-				return Boolean(result);
-			},*/
 			wait: function () {
 				var i = 0, l = arguments.length;
 				blockers += l;

@@ -8,7 +8,7 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
-TestCase("Promise2Test", {
+TestCase("PromiseTest", {
 	
 	"test should be function": function () {
 		assertFunction(hub.promise);
@@ -22,7 +22,7 @@ TestCase("Promise2Test", {
 	
 });
 
-TestCase("Promise2ThenTest", {
+TestCase("PromiseThenTest", {
 	
 	"test should be function": function () {
 		var promise = hub.promise();
@@ -48,7 +48,7 @@ TestCase("Promise2ThenTest", {
 
 });
 
-TestCase("Promise2ResolveTest", {
+TestCase("PromiseResolveTest", {
 	
 	"test should be function": function () {
 		var promise = hub.promise();
@@ -72,16 +72,17 @@ TestCase("Promise2ResolveTest", {
 		sinon.assert.callOrder(spy1, spy2);
 	},
 	
-	"test should invoke callback immediately if already resolved": function () {
-		var promise = hub.promise();
-		promise.resolve("Test", 123);
-		var spy = sinon.spy();
+	"test should invoke callback immediately if already resolved":
+		function () {
+			var promise = hub.promise();
+			promise.resolve("Test", 123);
+			var spy = sinon.spy();
 		
-		promise.then(spy);
+			promise.then(spy);
 		
-		sinon.assert.calledOnce(spy);
-		sinon.assert.calledWith(spy, "Test", 123);
-	},
+			sinon.assert.calledOnce(spy);
+			sinon.assert.calledWith(spy, "Test", 123);
+		},
 	
 	"test should throw if already resolved": function () {
 		var promise = hub.promise();
@@ -113,7 +114,7 @@ TestCase("Promise2ResolveTest", {
 	
 });
 
-TestCase("Promise2RejectTest", {
+TestCase("PromiseRejectTest", {
 	
 	setUp: function () {
 		this.clock = sinon.useFakeTimers();
@@ -149,16 +150,17 @@ TestCase("Promise2RejectTest", {
 		});
 	},
 	
-	"test should invoke errback immediately if already rejected": function () {
-		var promise = hub.promise();
-		promise.reject("Test", 123);
-		var spy = sinon.spy();
+	"test should invoke errback immediately if already rejected":
+		function () {
+			var promise = hub.promise();
+			promise.reject("Test", 123);
+			var spy = sinon.spy();
 		
-		promise.then(fail, spy);
+			promise.then(fail, spy);
 		
-		sinon.assert.calledOnce(spy);
-		sinon.assert.calledWith(spy, "Test", 123);
-	},
+			sinon.assert.calledOnce(spy);
+			sinon.assert.calledWith(spy, "Test", 123);
+		},
 
 	"test should return the promise itself": function () {
 		var promise = hub.promise();
@@ -210,38 +212,8 @@ TestCase("Promise2RejectTest", {
 	}
 
 });
-/*
-TestCase("Promise2ResolvedTest", {
-	
-	"test should be function": function () {
-		var promise = hub.promise();
-		
-		assertFunction(promise.resolved);
-	},
-	
-	"test should return false if not resolved": function () {
-		var promise = hub.promise();
-		
-		assertFalse(promise.resolved());
-	},
-	
-	"test should return true if resolved": function () {
-		var promise = hub.promise();
-		promise.resolve();
-		
-		assert(promise.resolved());
-	},
-	
-	"test should return true if rejected": function () {
-		var promise = hub.promise();
-		promise.reject();
-		
-		assert(promise.resolved());
-	}
-	
-});
-*/
-TestCase("Promise2WaitTest", {
+
+TestCase("PromiseWaitTest", {
 	
 	"test should be function": function () {
 		var promise = hub.promise();
@@ -272,19 +244,20 @@ TestCase("Promise2WaitTest", {
 		sinon.assert.calledOnce(spy);
 	},
 	
-	"test should not invoke then callback if joined not resolved": function () {
-		var promise = hub.promise();
-		var spy = sinon.spy();
-		var blocking = hub.promise();
+	"test should not invoke then callback if joined not resolved":
+		function () {
+			var promise = hub.promise();
+			var spy = sinon.spy();
+			var blocking = hub.promise();
 		
-		promise.wait(blocking).resolve().then(spy);
+			promise.wait(blocking).resolve().then(spy);
 		
-		sinon.assert.notCalled(spy);
+			sinon.assert.notCalled(spy);
 
-		blocking.resolve();
+			blocking.resolve();
 		
-		sinon.assert.calledOnce(spy);
-	},
+			sinon.assert.calledOnce(spy);
+		},
 	
 	"test should accept multiple blockers": function () {
 		var promise = hub.promise();
@@ -317,7 +290,7 @@ TestCase("Promise2WaitTest", {
 	
 });
 
-TestCase("Promise2JoinTest", {
+TestCase("PromiseJoinTest", {
 	
 	"test should be function": function () {
 		var promise = hub.promise();
