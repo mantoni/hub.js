@@ -9,6 +9,78 @@
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
 /*
+ * Test cases for hub.resolve.
+ */
+TestCase("ResolveTest", {
+	
+	"test function exists": function () {
+		assertFunction(hub.resolve);
+	},
+
+	"test resolve undefined": function () {
+		assertUndefined(hub.resolve({}, "foo"));
+	},
+	
+	"test resolve index from array": function () {
+		assertEquals("foo", hub.resolve(["foo"], "0"));
+	},
+	
+	"test resolve property from object": function () {
+		assertEquals("foo", hub.resolve({ x: "foo" }, "x"));
+	},
+	
+	"test resolve property path from array": function () {
+		assertEquals("foo", hub.resolve([{ x: "foo" }], "0.x"));
+	},
+	
+	"test resolve property path from object": function () {
+		assertEquals("foo", hub.resolve({ x: { y: "foo" } }, "x.y"));
+	},
+	
+	"test resolve illegal path": function () {
+		assertUndefined(hub.resolve({}, "x.y"));
+	},
+	
+	"test resolve default value": function () {
+		assertEquals("nothing 1", hub.resolve({}, "x", "nothing 1"));
+		assertEquals("nothing 2", hub.resolve({}, "x.y", "nothing 2"));
+	}
+	
+});
+
+/*
+ * Test cases for hub.substitute.
+ */
+TestCase("SubstituteTest", {
+	
+	"test function exists": function () {
+		assertFunction(hub.substitute);
+	},
+	
+	"test substitute nothing": function () {
+		assertEquals("the quick brown fox",
+			hub.substitute("the quick brown fox"));
+	},
+	
+	"test substitute index from array": function () {
+		assertEquals("hello index", hub.substitute("hello {0}", ["index"]));
+	},
+	
+	"test substitute key from object": function () {
+		assertEquals("hello value",
+			hub.substitute("hello {key}", { key: "value" }));
+	},
+	
+	"test substitute fallback": function () {
+		assertEquals("hello fallback",
+			hub.substitute("hello {0}", null, "fallback"));
+		assertEquals("hello fallback",
+			hub.substitute("hello {0}", {}, "fallback"));
+	}
+	
+});
+
+/*
  * Test cases for hub.merge.
  */
 (function () {
