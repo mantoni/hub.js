@@ -55,7 +55,14 @@
 		return hub.mix(object, result);
 	}
 	
-	hub.create = create;
+	function factory(topic, fn) {
+		return function () {
+			return hub.create(topic, fn);
+		};
+	}
+	
 	hub.mix = mix;
+	hub.create = create;
+	hub.factory = factory;
 	
 }());

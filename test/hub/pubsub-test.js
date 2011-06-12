@@ -184,6 +184,10 @@
 			checkScopeFunctionPrefix("create");
 		},
 		
+		"test factory should invoke factory with topic prefix": function () {
+			checkScopeFunctionPrefix("factory");
+		},
+		
 		"test should throw if no topic is provided": function () {		
 			var scope = hub.topicScope("x");
 			

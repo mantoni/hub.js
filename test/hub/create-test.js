@@ -221,3 +221,34 @@ TestCase("MixTest", {
 	}
 	
 });
+
+
+/*
+ * Test cases for hub.factory.
+ */
+TestCase("FactoryTest", {
+	
+	"test should be function": function () {
+		assertFunction(hub.factory);
+	},
+	
+	"test should return function": function () {
+		var factory = hub.factory();
+		
+		assertFunction(factory);
+	},
+	
+	"test should invoke hub.create with given topic and fn": sinon.test(
+		function () {
+			this.stub(hub, "create");
+			var fn = function () {};
+			var factory = hub.factory("topic", fn);
+			
+			factory();
+			
+			sinon.assert.calledOnce(hub.create);
+			sinon.assert.calledWith(hub.create, "topic", fn);
+		}
+	)
+	
+});

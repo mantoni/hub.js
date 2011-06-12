@@ -96,7 +96,8 @@
 				un: scoped(topic, hub.un),
 				peer: scoped(topic, hub.peer),
 				emit: scoped(topic, hub.emit),
-				create: scoped(topic, hub.create)
+				create: scoped(topic, hub.create),
+				factory: scoped(topic, hub.factory)
 			};
 			scopeFunctionCache[topic] = cache;
 		}
@@ -105,6 +106,7 @@
 		scope.peer = cache.peer;
 		scope.emit = cache.emit;
 		scope.create = cache.create;
+		scope.factory = cache.factory;
 		return scope;
 	};
 	
