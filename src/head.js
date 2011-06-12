@@ -1,5 +1,5 @@
 /**
- * @license hub.js JavaScript library
+ * @license hub.js JavaScript library, v{version}
  * https://github.com/mantoni/hub.js
  * 
  * Copyright 2011, Maximilian Antoni

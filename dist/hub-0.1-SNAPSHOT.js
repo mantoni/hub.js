@@ -1,5 +1,5 @@
 /*
- hub.js JavaScript library
+ hub.js JavaScript library, v0.1-SNAPSHOT
  https://github.com/mantoni/hub.js
 
  Copyright 2011, Maximilian Antoni
