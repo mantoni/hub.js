@@ -9,6 +9,8 @@
  * promises.
  */
 (function () {
+	
+	var array_slice = Array.prototype.slice;
 
 	/**
 	 * returns a new promise.
@@ -58,22 +60,22 @@
 				if (!blockers && result) {
 					resolve();
 				}
-				return thiz;
+				return this;
 			},
 			resolve: function () {
 				if (result) {
 					throw new Error("Promise already " +
 						(rejected ? "rejected" : "resolved"));
 				}
-				result = Array.prototype.slice.call(arguments);
+				result = array_slice.call(arguments);
 				if (!blockers) {
 					resolve();
 				}
-				return thiz;
+				return this;
 			},
 			reject: function () {
 				rejected = true;
-				return thiz.resolve.apply(thiz, arguments);
+				return this.resolve.apply(this, arguments);
 			},
 			wait: function () {
 				var i = 0, l = arguments.length;
@@ -81,22 +83,24 @@
 				for (; i < l; i++) {
 					arguments[i].then(thenWait);
 				}
-				return thiz;
+				return this;
 			},
 			join: function (promise) {
 				if (!promise || typeof promise.then !== "function") {
 					throw new TypeError("Promise is " + promise);
 				}
 				var joined = hub.promise();
-				thiz.then(function (result1) {
-					promise.then(function (result2) {
-						joined.resolve(result1, result2);
+				this.then(function () {
+					var args1 = array_slice.call(arguments);
+					promise.then(function () {
+						var args2 = array_slice.call(arguments);
+						joined.resolve.apply(joined, args1.concat(args2));
 					});
 				});				
 				return joined;
 			},
 			emit: function (topic) {
-				thiz.then(function () {
+				this.then(function () {
 					hub.emit.apply(hub, [topic].concat(result));
 				});
 			}

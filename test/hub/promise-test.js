@@ -229,20 +229,21 @@ TestCase("PromiseWaitTest", {
 		}, "TypeError");
 	},
 	
-	"test should prevent then callback invocation until resolved": function () {
-		var promise = hub.promise();
-		var spy = sinon.spy();
-		promise.then(spy);
-		var blocking = hub.promise();
+	"test should prevent then callback invocation until resolved":
+		function () {
+			var promise = hub.promise();
+			var spy = sinon.spy();
+			promise.then(spy);
+			var blocking = hub.promise();
 		
-		promise.wait(blocking).resolve();
+			promise.wait(blocking).resolve();
 		
-		sinon.assert.notCalled(spy);
+			sinon.assert.notCalled(spy);
 		
-		blocking.resolve();
+			blocking.resolve();
 		
-		sinon.assert.calledOnce(spy);
-	},
+			sinon.assert.calledOnce(spy);
+		},
 	
 	"test should not invoke then callback if joined not resolved":
 		function () {
@@ -331,6 +332,20 @@ TestCase("PromiseJoinTest", {
 		promise1.resolve();
 		
 		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should concatenate results": function () {
+		var promise1 = hub.promise();
+		var promise2 = hub.promise();
+		var joined = promise1.join(promise2);
+		var spy = sinon.spy();
+		joined.then(spy);
+		
+		promise1.resolve("abc", 1, 2);
+		promise2.resolve("xyz", 3);
+		
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, "abc", 1, 2, "xyz", 3);
 	}
 	
 });
@@ -348,10 +363,10 @@ TestCase("PromiseEmitTest", {
 		this.stub(hub, "emit");
 		
 		promise.emit("x");
-		promise.resolve("Test");
+		promise.resolve("Test", 123);
 		
 		sinon.assert.calledOnce(hub.emit);
-		sinon.assert.calledWith(hub.emit, "x", "Test");
+		sinon.assert.calledWith(hub.emit, "x", "Test", 123);
 	})
 	
 });
