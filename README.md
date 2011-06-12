@@ -17,39 +17,21 @@ The build script downloads required tools into the lib folder.
         ./build.sh test
 
 
-Compiling with Closure compiler:
+Build commands:
 --------------------------------
 
-    ./build.sh compile
-
-
-JSLint checks:
---------------
-
-    ./build.sh lint
-
-
-Running it all:
----------------
-
-    ./build.sh all
-
-Runs all tests, JSLint checks, compile and run tests on compiled file again.
-
-
-Tip for TextMate users:
------------------------
-
-Create a new command in the bundle editor that saves the current file, takes no input, shows the output as a tooltip and has this content:
-
-    $TM_PROJECT_DIRECTORY/build.sh ct
-
-This will compile and test in one go.
+    ./build.sh start    # start JSTestDriver server
+    ./build.sh stop     # stop JSTestDriver server
+    ./build.sh test     # run JSTestDriver test cases
+    ./build.sh compile  # minify with Closure compiler
+    ./build.sh lint     # run node-jslint (if installed)
+    ./build.sh all      # run test, lint, compile and test on compiled output
 
 
 Links:
 ------
 
+* [hub.js](http://mantoni.github.com/hub.js/)
 * [Google Group](http://groups.google.com/group/hub-js)
 * [JsTestDriver](http://code.google.com/p/js-test-driver/)
 * [Closure Compiler](http://code.google.com/closure/compiler/)
