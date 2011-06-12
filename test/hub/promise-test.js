@@ -85,12 +85,12 @@ TestCase("PromiseTest", {
 		hub.on("test.promise", function () {
 			return "Test";
 		});
-		var value = "replaced with return value";
-		hub.on("test.other", function (arg) {
-			value = arg;
-		});
+		var spy = sinon.spy();
+		hub.on("test.other", spy);
+		
 		hub.emit("test.promise").emitResult("test.other");
-		assertEquals("Test", value);
+		
+		sinon.assert.calledWith(spy, "Test");
 	},
 
 	"test return value is used as parameter on emitResult (explicit resolve)": function () {
@@ -98,9 +98,7 @@ TestCase("PromiseTest", {
 		var spy = sinon.spy();
 		hub.on("test.other", spy);
 		
-		hub.promise().emit("test.promise").emitResult(
-			"test.other"
-		).resolve();
+		hub.promise().emit("test.promise").emitResult("test.other").resolve();
 		
 		sinon.assert.calledOnce(spy);
 		sinon.assert.calledWithExactly(spy, "Test");
