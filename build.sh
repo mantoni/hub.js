@@ -134,7 +134,7 @@ lint() {
 compile() {
 	check_cc
 	echo -n "Compiling hub-$HUB_VERSION.js ... "
-	cat $SOURCE_FILES > dist/hub.js
+	cat $SOURCE_FILES | sed "s/{version}/$HUB_VERSION/g" > dist/hub.js
 	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js dist/hub.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
 	if [ $? -ne 0 ]; then
 		exit 1
