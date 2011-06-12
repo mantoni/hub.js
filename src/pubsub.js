@@ -58,11 +58,14 @@
 	 * @param {function (object)} fn the callback function.
 	 */
 	hub.on = function (topic, fn) {
-		if (isObject(topic)) {
+		if (typeof topic === "function") {
+			hub.root.add("**", topic);
+		}
+		else if (isObject(topic)) {
 			onAll("", topic);
 			return;
 		}
-		if (isObject(fn)) {
+		else if (isObject(fn)) {
 			onAll(topic + ".", fn);
 			fn = getter(fn);
 		}
@@ -78,6 +81,9 @@
 	 *			true.
 	 */
 	hub.un = function (topic, fn) {
+		if (typeof topic === "function") {
+			return hub.root.remove("**", topic);
+		}
 		return hub.root.remove(topic, fn);
 	};
 	

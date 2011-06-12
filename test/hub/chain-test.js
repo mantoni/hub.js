@@ -23,7 +23,7 @@ TestCase("ChainCreateTest", {
 });
 
 TestCase("ChainCallTest", {
-		
+	
 	"test should invoke provided functions": function () {
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();

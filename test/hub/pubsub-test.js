@@ -261,7 +261,15 @@ TestCase("OnTest", {
 		assertException(function () {
 			hub.on("some/topic", function () {});
 		}, "Error");
-	}
+	},
+	
+	"test should subscribe to ** if no topic is given": sinon.test(function () {
+		this.stub(hub.root, "add");
+		var fn = function () {};
+		hub.on(fn);
+		
+		sinon.assert.calledWith(hub.root.add, "**", fn);
+	})
 	
 });
 	
@@ -571,7 +579,16 @@ TestCase("UnTest", {
 	
 	"test unsubscribe returns false on failure": function () {
 		assertFalse(hub.un("x.y", function () {}));
-	}
+	},
+	
+	"test should unsubscribe from ** if no topic is given": sinon.test(function () {
+		this.stub(hub.root, "remove");
+		var fn = function () {};
+		
+		hub.un(fn);
+		
+		sinon.assert.calledWith(hub.root.remove, "**", fn);
+	})
 		
 });
 
