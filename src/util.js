@@ -5,6 +5,14 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
+if (!Object.create) {
+	Object.create = function (object) {
+		function C() {}
+		C.prototype = object;
+		return new C();
+	};
+}
+
 /**
  * resolves a dot notation path from an object. If the path cannot be
  * resolved, the optional return value is returned.

@@ -11,71 +11,89 @@
  */
 (function () {
 	
+	var scopeProto = {};
+	(function () {
+		function scopeProtoFn(name) {
+			scopeProto[name] = function () {
+				var promise = this.promise();
+				promise[name].apply(promise, arguments);
+			};
+		}		
+		var names = ["then", "join", "wait", "resolve", "reject"];
+		var i = 0, l = names.length;
+		for (; i < l; i++) {
+			scopeProtoFn(names[i]);
+		}
+	}());
+	
 	function scope(args) {
 		var iteratorStack = [];
 		var aborted = false;
 		var promise;
 		var result;
-		var thiz;
-		thiz = {
-			/**
-			 * stops message propagation for the current call chain.
-			 */
-			stopPropagation: function () {
-				aborted = true;
-				iteratorStack.length = 0;
-				if (arguments.length) {
-					result = arguments[0];
-				}
-			},
-			/**
-			 * propagates the message to the next function in the current call
-			 * chain.
-			 */
-			propagate: function () {
-				if (arguments.length) {
-					result = arguments[0];
-				}
-				var size = iteratorStack.length;
-				if (!size) {
-					return thiz.result();
-				}
-				var iterator = iteratorStack[size - 1];
-				if (!iterator.hasNext) {
-					iterator.reset();
-					iteratorStack.pop();
-				} else {
-					var nextResult = iterator().apply(thiz, args);
-					if (promise) {
-						result = promise;
-						promise = undefined;
-						result.then(thiz.propagate);
-						return result;
-					} else if (nextResult && nextResult.then) {
-						result = nextResult;
-						result.then(thiz.propagate);
-						return;
-					}
-					result = hub.merge(result, nextResult);
-				}
-				return thiz.propagate();
-			},
-			aborted: function () {
-				return aborted;
-			},
-			result: function () {
-				if (result && result.then) {
-					return result;
-				}
-				return hub.promise(0, thiz).resolve(result);
-			},
-			push: function (iterator) {
-				iteratorStack.push(iterator);
-			},
-			promise: function () {
-				promise = hub.promise();
-				return promise;
+		var thiz = Object.create(scopeProto);
+		function boundPropagate() {
+			return thiz.propagate();
+		}
+		/**
+		 * stops message propagation for the current call chain.
+		 */
+		thiz.stopPropagation = function () {
+			aborted = true;
+			iteratorStack.length = 0;
+			if (arguments.length) {
+				result = arguments[0];
 			}
+		};
+		/**
+		 * propagates the message to the next function in the current call
+		 * chain.
+		 */
+		thiz.propagate = function () {
+			if (arguments.length) {
+				result = arguments[0];
+			}
+			var size = iteratorStack.length;
+			if (!size) {
+				return this.result();
+			}
+			var iterator = iteratorStack[size - 1];
+			if (!iterator.hasNext) {
+				iterator.reset();
+				iteratorStack.pop();
+			} else {
+				var nextResult = iterator().apply(this, args);
+				if (promise) {
+					result = promise;
+					promise = undefined;
+					result.then(boundPropagate);
+					return result;
+				} else if (nextResult && nextResult.then) {
+					result = nextResult;
+					result.then(boundPropagate);
+					return;
+				}
+				result = hub.merge(result, nextResult);
+			}
+			return this.propagate();
+		};
+		thiz.aborted = function () {
+			return aborted;
+		};
+		thiz.result = function () {
+			if (result && result.then) {
+				return result;
+			}
+			return hub.promise(0, this).resolve(result);
+		};
+		thiz.push = function (iterator) {
+			iteratorStack.push(iterator);
+		};
+		thiz.promise = function () {
+			if (!promise) {
+				promise = hub.promise();
+			}
+			return promise;
 		};
 		return thiz;
 	}

@@ -430,6 +430,129 @@ TestCase("ScopeTest", {
 	
 });
 
+TestCase("ScopeThenTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.then);
+	},
+	
+	"test should invoke promise and call then": sinon.test(function () {
+		var scope = hub.scope();
+		var promise = {
+			then: sinon.spy()
+		};
+		this.stub(scope, "promise").returns(promise);
+		
+		var callback = function () {};
+		var errback = function () {};
+		scope.then(callback, errback);
+		
+		sinon.assert.calledOnce(scope.promise);
+		sinon.assert.calledOnce(promise.then);
+		sinon.assert.calledWith(promise.then, callback, errback);
+	})
+
+});
+
+TestCase("ScopeJoinTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.join);
+	},
+	
+	"test should invoke promise and call join": sinon.test(function () {
+		var scope = hub.scope();
+		var promise = {
+			join: sinon.spy()
+		};
+		this.stub(scope, "promise").returns(promise);
+		
+		scope.join("promise");
+		
+		sinon.assert.calledOnce(scope.promise);
+		sinon.assert.calledOnce(promise.join);
+		sinon.assert.calledWith(promise.join, "promise");
+	})
+
+});
+
+TestCase("ScopeWaitTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.wait);
+	},
+	
+	"test should invoke promise and call wait": sinon.test(function () {
+		var scope = hub.scope();
+		var promise = {
+			wait: sinon.spy()
+		};
+		this.stub(scope, "promise").returns(promise);
+		
+		scope.wait("promise1", "promise2", "promise3");
+		
+		sinon.assert.calledOnce(scope.promise);
+		sinon.assert.calledOnce(promise.wait);
+		sinon.assert.calledWith(promise.wait, "promise1", "promise2",
+			"promise3");
+	})
+
+});
+
+TestCase("ScopeResolveTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.resolve);
+	},
+	
+	"test should invoke promise and call resolve": sinon.test(function () {
+		var scope = hub.scope();
+		var promise = {
+			resolve: sinon.spy()
+		};
+		this.stub(scope, "promise").returns(promise);
+		
+		scope.resolve("Test", 123);
+		
+		sinon.assert.calledOnce(scope.promise);
+		sinon.assert.calledOnce(promise.resolve);
+		sinon.assert.calledWith(promise.resolve, "Test", 123);
+	})
+
+});
+
+TestCase("ScopeRejectTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.reject);
+	},
+	
+	"test should invoke promise and call reject": sinon.test(function () {
+		var scope = hub.scope();
+		var promise = {
+			reject: sinon.spy()
+		};
+		this.stub(scope, "promise").returns(promise);
+		
+		scope.reject("Test", 123);
+		
+		sinon.assert.calledOnce(scope.promise);
+		sinon.assert.calledOnce(promise.reject);
+		sinon.assert.calledWith(promise.reject, "Test", 123);
+	})
+
+});
+
 TestCase("ChainNestingTest", {
 	
 	"test should invoke nested chain": function () {
