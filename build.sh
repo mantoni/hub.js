@@ -112,9 +112,8 @@ lint() {
 	LINT_OK=0
 	LINT_OPT="--node false"
 	TESTS_HUB=`ls test/hub/*.js`
-	TESTS_ASYNC=`ls test/async/*.js`
 	TESTS_PATTERNS=`ls test/patterns/*.js`
-	FILES="${SOURCE_FILES} $TESTS_HUB $TESTS_ASYNC $TESTS_PATTERNS"
+	FILES="${SOURCE_FILES} $TESTS_HUB $TESTS_PATTERNS"
 	for FILE in $FILES
 	do
 		LINT_RESULT=`jslint $LINT_OPT $FILE | sed -n -e '4,100p'`

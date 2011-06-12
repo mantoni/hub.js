@@ -235,60 +235,138 @@ TestCase("ChainConcurrencyTest", {
 
 });
 
-(function () {
+TestCase("ChainScopeTest", {
+
+	"test should implement stopPropagation": function () {
+		var scope = hub.scope();
+
+		assertFunction(scope.stopPropagation);
+	},
 	
-	function assertScopeFunction(property) {
-		var spy = sinon.spy();
-		var chain = hub.chain(spy);
+	"test should implement propagate": function () {
+		var scope = hub.scope();
+
+		assertFunction(scope.propagate);
+	},
 	
+	"test should implement aborted": function () {
+		var scope = hub.scope();
+
+		assertFunction(scope.aborted);
+	},
+			
+	"test should implement result": function () {
+		var scope = hub.scope();
+
+		assertFunction(scope.result);
+	},
+	
+	"test should implement promise": function () {
+		var scope = hub.scope();
+
+		assertFunction(scope.promise);
+	},
+	
+	"test aborted should return false by default": function () {
+		var aborted;
+		var chain = hub.chain(function () {
+			aborted = this.aborted();
+		});
+		
 		chain();
+		
+		assertFalse(aborted);
+	},
 	
-		assertFunction(spy.thisValues[0][property]);
+	"test aborted should return true after stopPropagation": function () {
+		var aborted;
+		var chain = hub.chain(function () {
+			this.stopPropagation();
+			aborted = this.aborted();
+		});
+		
+		chain();
+		
+		assert(aborted);
+	},
+	
+	"test promise should invoke hub.promise": sinon.test(function () {
+		var spy = this.spy(hub, "promise");
+		var result;
+		var chain = hub.chain(function () {
+			result = this.promise();
+		});
+		
+		chain();
+		
+		sinon.assert.calledOnce(spy);
+		assertObject(result);
+		assertFunction(result.then);
+	}),
+	
+	"test this.promise should stop chain execution until resolved":
+		function () {
+			var spy = sinon.spy();
+			var promise;
+			var chain = hub.chain(function () {
+				promise = this.promise();
+			}, spy);
+		
+			chain();
+		
+			sinon.assert.notCalled(spy);
+		
+			promise.resolve();
+		
+			sinon.assert.calledOnce(spy);
+		},
+	
+	"test return promise should stop chain execution until resolved":
+		function () {
+			var spy = sinon.spy();
+			var promise;
+			var chain = hub.chain(function () {
+				return (promise = hub.promise());
+			}, spy);
+		
+			chain();
+		
+			sinon.assert.notCalled(spy);
+		
+			promise.resolve();
+		
+			sinon.assert.calledOnce(spy);
+		},
+	
+	"test return this.promise should stop chain execution until resolved":
+		function () {
+			var spy = sinon.spy();
+			var promise;
+			var chain = hub.chain(function () {
+				return (promise = this.promise());
+			}, spy);
+
+			chain();
+
+			sinon.assert.notCalled(spy);
+
+			promise.resolve();
+
+			sinon.assert.calledOnce(spy);
+		},
+		
+	"test chain result should be promise": function () {
+		var chain = hub.chain(function () {
+			this.promise();
+		});
+		
+		var promise = chain();
+		
+		assertObject(promise);
+		assertFunction(promise.then);
 	}
 	
-	TestCase("ChainScopeTest", {
-	
-		"test should implement stopPropagation": function () {
-			assertScopeFunction("stopPropagation");
-		},
-		
-		"test should implement propagate": function () {
-			assertScopeFunction("propagate");
-		},
-		
-		"test should implement aborted": function () {
-			assertScopeFunction("aborted");
-		},
-		
-		"test aborted should return false by default": function () {
-			var aborted;
-			var chain = hub.chain(function () {
-				aborted = this.aborted();
-			});
-			
-			chain();
-			
-			assertFalse(aborted);
-		},
-		
-		"test aborted should return true after stopPropagation": function () {
-			var aborted;
-			var chain = hub.chain(function () {
-				this.stopPropagation();
-				aborted = this.aborted();
-			});
-			
-			chain();
-			
-			assert(aborted);
-		},
-		
-		"test should implement result": function () {
-			assertScopeFunction("result");
-		}
-	
-	});
-}());
+});
 
 TestCase("ScopeTest", {
 	

@@ -112,7 +112,7 @@
 	 * @param {String} topic the topic.
 	 * @param {...Object} args the arguments to pass.
 	 */
-	hub.invoke = function (topic) {
+	hub.emit = function (topic) {
 		hub.validateTopic(topic);
 		var args = array_slice.call(arguments);
 		var slicedArgs = args.slice(1);
@@ -121,8 +121,9 @@
 		}
 		var thiz = this.propagate ? this : hub.scope(slicedArgs);
 		thiz = hub.topicScope(args[0], thiz);
+		var result;
 		try {
-			return hub.root.apply(thiz, args);
+			result = hub.root.apply(thiz, args);
 		} catch (e) {
 			throw new hub.Error("error",
 				"Error in call chain for topic \"{topic}\": {error}", {
@@ -130,6 +131,12 @@
 					error: e.message
 				});
 		}
+		if (result && result.then) {
+			return result;
+		}
+		var promise = hub.promise(0, thiz);
+		promise.resolve(result);
+		return promise;
 	};
 	
 	/**
@@ -173,7 +180,6 @@
 	hub.reset = function () {
 		scopeFunctionCache = {};
 		hub.root = hub.topicChain();
-		hub.resetPromise();
 	};
 	
 }());

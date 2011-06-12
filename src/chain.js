@@ -14,8 +14,10 @@
 	function scope(args) {
 		var iteratorStack = [];
 		var aborted = false;
+		var promise;
 		var result;
-		return {
+		var thiz;
+		thiz = {
 			/**
 			 * stops message propagation for the current call chain.
 			 */
@@ -36,16 +38,27 @@
 				}
 				var size = iteratorStack.length;
 				if (!size) {
-					return false;
+					return;
 				}
 				var iterator = iteratorStack[size - 1];
 				if (!iterator.hasNext) {
+					iterator.reset();
 					iteratorStack.pop();
-					return this.propagate();
+				} else {
+					var nextResult = iterator().apply(thiz, args);
+					if (promise) {
+						result = promise;
+						promise = undefined;
+						result.then(thiz.propagate);
+						return;
+					} else if (nextResult && nextResult.then) {
+						nextResult.then(thiz.propagate);
+						result = nextResult;
+						return;
+					}
+					result = hub.merge(result, nextResult);
 				}
-				var nextResult = iterator().apply(this, args);
-				result = hub.merge(result, nextResult);
-				return true;
+				return thiz.propagate();
 			},
 			aborted: function () {
 				return aborted;
@@ -55,8 +68,13 @@
 			},
 			push: function (iterator) {
 				iteratorStack.push(iterator);
+			},
+			promise: function () {
+				promise = hub.promise();
+				return promise;
 			}
 		};
+		return thiz;
 	}
 	
 	/**
@@ -76,15 +94,7 @@
 		function callChain() {
 			var thiz = this.propagate ? this : scope(arguments);
 			thiz.push(iterator);
-			try {
-				while (true) {
-					if (!thiz.propagate()) {
-						break;
-					}
-				}
-			} finally {
-				iterator.reset();
-			}
+			thiz.propagate();
 			return thiz.result();
 		}
 		callChain.add = function (fn) {

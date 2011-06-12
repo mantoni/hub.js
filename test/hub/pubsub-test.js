@@ -24,7 +24,7 @@
 		assertFalse(topic, fn.called);
 	}
 	
-	TestCase("PublishTest", {
+	TestCase("EmitTest", {
 	
 		tearDown: function () {
 			hub.reset();
@@ -120,7 +120,16 @@
 			assertInvoked("a.**.c.d", fn);
 			assertNotInvoked("*.c.d", fn);
 			assertInvoked("**.c.d", fn);
-		}
+		},
+		
+		"test should create and return promise": sinon.test(function () {
+			var spy = this.spy(hub, "promise");
+			
+			var result = hub.emit("x");
+			
+			sinon.assert.calledOnce(spy);
+			assertSame(spy.returnValues[0], result);
+		})
 
 	});
 
@@ -201,7 +210,7 @@
 
 }());
 
-TestCase("PublishScopeTest", {
+TestCase("EmitScopeTest", {
 
 	tearDown: function () {
 		hub.reset();

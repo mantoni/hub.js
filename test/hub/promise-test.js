@@ -8,292 +8,354 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
-/*
- * Test cases for promise support.
- */
-TestCase("PromiseTest", {
+TestCase("Promise2Test", {
+	
+	"test should be function": function () {
+		assertFunction(hub.promise);
+	},
+	
+	"test should return object": function () {
+		var promise = hub.promise();
+		
+		assertObject(promise);
+	}
+	
+});
+
+TestCase("Promise2ThenTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.then);
+	},
+	
+	"test should require function argument": function () {
+		var promise = hub.promise();
+		
+		assertException(function () {
+			promise.then({});
+		}, "TypeError");
+	},
+	
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.then(function () {});
+		
+		assertSame(promise, result);
+	}
+
+});
+
+TestCase("Promise2ResolveTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.resolve);
+	},
+	
+	"test should invoke then callbacks": function () {
+		var promise = hub.promise();
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		promise.then(spy1);
+		promise.then(spy2);
+		
+		promise.resolve("Test", 123);
+		
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledWith(spy1, "Test", 123);
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.calledWith(spy2, "Test", 123);
+		sinon.assert.callOrder(spy1, spy2);
+	},
+	
+	"test should invoke callback immediately if already resolved": function () {
+		var promise = hub.promise();
+		promise.resolve("Test", 123);
+		var spy = sinon.spy();
+		
+		promise.then(spy);
+		
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, "Test", 123);
+	},
+	
+	"test should throw if already resolved": function () {
+		var promise = hub.promise();
+		promise.resolve();
+		
+		assertException(function () {
+			promise.resolve();
+		});
+	},
+	
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.resolve();
+		
+		assertSame(promise, result);
+	},
+	
+	"test should use scope from constructor": function () {
+		var scope = {};
+		var promise = hub.promise(0, scope);
+		var spy = sinon.spy();
+		promise.then(spy);
+		
+		promise.resolve();
+		
+		sinon.assert.calledOn(spy, scope);
+	}
+	
+});
+
+TestCase("Promise2RejectTest", {
+	
+	setUp: function () {
+		this.clock = sinon.useFakeTimers();
+	},
 	
 	tearDown: function () {
-		hub.reset();
+		this.clock.restore();
 	},
 	
-	"test resolve promise": function () {
-		var fn = sinon.spy();
-		hub.promise().then(fn).resolve();
-		sinon.assert.calledOnce(fn);
-	},
-	
-	"test promise queue 1": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
+	"test should be function": function () {
+		var promise = hub.promise();
 		
-		// then-then-resolve:
-		hub.promise().then(spy1).then(spy2).resolve();
-		
-		sinon.assert.calledOnce(spy1);
-		sinon.assert.calledOnce(spy2);
-		sinon.assert.callOrder(spy1, spy2);
+		assertFunction(promise.reject);
 	},
 	
-	"test promise queue 2": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-
-		// then-resolve-then:
-		hub.promise().then(spy1).resolve().then(spy2);
-		
-		sinon.assert.calledOnce(spy1);
-		sinon.assert.calledOnce(spy2);
-		sinon.assert.callOrder(spy1, spy2);
-	},
-	
-	"test emit with then": function () {
-		var chain = [];
-		hub.on("test.promise", function () {
-			chain.push("a");
-		});
-		hub.emit("test.promise").then(function () {
-			chain.push("b");
-		});
-		assertEquals("a,b", chain.join());
-	},
-	
-	"test then with promise emit": function () {
-		var chain = [];
-		hub.on("test.promise", function () {
-			chain.push("a");
-		});
-		hub.promise().emit("test.promise").then(function () {
-			chain.push("b");
-		}).resolve();
-		assertEquals("a,b", chain.join());
-	},
-	
-	"test return value is not used as parameter on emit": function () {
-		hub.on("test.promise", function () {
-			return "Test";
-		});
-		var value = "replaced with undefined";
-		hub.on("test.other", function (arg) {
-			value = arg;
-		});
-		hub.promise().emit("test.promise").emit("test.other").resolve();
-		assertUndefined(value);
-	},
-
-	"test return value is used as parameter on emitResult": function () {
-		hub.on("test.promise", function () {
-			return "Test";
-		});
+	"test should invoke errback": function () {
+		var promise = hub.promise();
 		var spy = sinon.spy();
-		hub.on("test.other", spy);
+		promise.then(fail, spy);
 		
-		hub.emit("test.promise").emitResult("test.other");
-		
-		sinon.assert.calledWith(spy, "Test");
-	},
-
-	"test return value is used as parameter on emitResult (explicit resolve)": function () {
-		hub.on("test.promise", sinon.stub().returns("Test"));
-		var spy = sinon.spy();
-		hub.on("test.other", spy);
-		
-		hub.promise().emit("test.promise").emitResult("test.other").resolve();
+		promise.reject("Test", 123);
 		
 		sinon.assert.calledOnce(spy);
-		sinon.assert.calledWithExactly(spy, "Test");
-	},
-
-	"test then with hub emit": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-		var spy3 = sinon.spy();
-		hub.on("test.promise", spy1);
-		var nested = function () {
-			hub.emit("test.promise").then(spy2);
-		};
-		
-		hub.promise().then(nested).then(spy3).resolve();
-		
-		sinon.assert.calledOnce(spy1);
-		sinon.assert.calledOnce(spy2);
-		sinon.assert.calledOnce(spy3);
+		sinon.assert.calledWith(spy, "Test", 123);
 	},
 	
-	/**
-	 * the return value of a subscriber callback is passed as the data
-	 * argument the promise.
-	 */
-	"test callback return string": function () {
-		hub.on("test.promise", sinon.stub().returns("Hello"));
+	"test should throw if already resolved": function () {
+		var promise = hub.promise();
+		promise.reject();
+
+		assertException(function () {
+			promise.reject();
+		});
+	},
+	
+	"test should invoke errback immediately if already rejected": function () {
+		var promise = hub.promise();
+		promise.reject("Test", 123);
 		var spy = sinon.spy();
 		
-		hub.emit("test.promise").then(spy);
-		
-		sinon.assert.calledWithExactly(spy, "Hello");
-	},
-
-	"test callback return string multicasting": function () {
-		hub.on("test.promise", sinon.stub().returns("Hello"));
-		var spy = sinon.spy();
-
-		hub.emit("test.*").then(spy);
-		
-		sinon.assert.calledWithExactly(spy, "Hello");
-	},
-	
-	"test callback return merge": function () {
-		hub.on("test.promise.a", sinon.stub().returns(["World"]));
-		hub.on("test.promise.b", sinon.stub().returns(["Hello"]));
-		var spy = sinon.spy();
-
-		hub.emit("test.promise.*").then(spy);
-		
-		sinon.assert.calledWithExactly(spy, ["Hello", "World"]);
-	},
-	
-	"test emit result": function () {
-		hub.on("test.promise.a", function () {
-			return "Check";
-		});
-		var spy = sinon.spy();
-		hub.on("test.promise.b", spy);
-		
-		hub.emit("test.promise.a").emitResult("test.promise.b");
-
-		sinon.assert.calledOnce(spy);
-		sinon.assert.calledWithExactly(spy, "Check");
-	},
-	
-	"test joined promises resolve #1 first": function () {
-		var p1, p2, done = false;
-		hub.on("test.promise.a", function () {
-			p1 = hub.promise();
-		});
-		hub.on("test.promise.b", function () {
-			p2 = hub.promise();
-		});
-		var p3 = hub.emit("test.promise.*").then(function () {
-			done = true;
-		});
-		assertFalse(p1 === p2);
-		assertFalse(p1 === p3);
-		assertFalse(p2 === p3);
-		assertFalse(p1.resolved());
-		assertFalse(p2.resolved());
-		assertFalse(done);
-		p1.resolve();
-		assert(p1.resolved());
-		assertFalse(p2.resolved());
-		assertFalse(done);
-		p2.resolve();
-		assert(p1.resolved());
-		assert(p2.resolved());
-		assert(done);
-	},
-
-	"test joined promises resolve #2 first": function () {
-		var p1, p2, done = false;
-		hub.on("test.promise.a", function () {
-			p1 = hub.promise();
-		});
-		hub.on("test.promise.b", function () {
-			p2 = hub.promise();
-		});
-		var p3 = hub.emit("test.promise.*").then(function () {
-			done = true;
-		});
-		assertFalse(p1 === p2);
-		assertFalse(p1 === p3);
-		assertFalse(p2 === p3);
-		assertFalse(p1.resolved());
-		assertFalse(p2.resolved());
-		assertFalse(done);
-		p2.resolve();
-		assertFalse(p1.resolved());
-		assert(p2.resolved());
-		assertFalse(done);
-		p1.resolve();
-		assert(p1.resolved());
-		assert(p2.resolved());
-		assert(done);
-	},
-	
-	"test should implement join": function () {
-		assertFunction(hub.promise().join);
-	},
-	
-	"test join two resolve arguments": function () {
-		var p1 = hub.promise();
-		var p2 = hub.promise();
-		var fn = sinon.spy();
-		
-		p1.join(p2).then(fn);
-		p2.resolve("b");
-		p1.resolve("a");
-		
-		assert(fn.calledOnce);
-		assert(fn.calledWithExactly("a", "b"));
-	},
-	
-	"test join three resolve arguments": function () {
-		var p1 = hub.promise();
-		var p2 = hub.promise();
-		var p3 = hub.promise();
-		var fn = sinon.spy();
-		p1.join(p2).join(p3).then(fn);
-		p1.resolve("a");
-		p3.resolve("c");
-		p2.resolve("b");
-		
-		assert(fn.calledOnce);
-		assert(fn.calledWith("a", "b", "c"));
-	},
-	
-	"test join promise proxy": function () {
-		hub.on("a.b", sinon.spy());
-		hub.on("a.c", sinon.spy());
-		var fn = sinon.spy();
-		
-		hub.emit("a.b").join(hub.emit("a.c")).then(fn);
-		
-		assert(fn.calledOnce);
-	},
-	
-	"test join resolved": function () {
-		var p1 = hub.promise();
-		var p2 = hub.promise();
-		var fn = sinon.spy();
-		
-		p1.resolve("test");
-		p1.join(p2).then(fn);
-		p2.resolve("case");
-		
-		assert(fn.calledOnce);
-		assert(fn.calledWithExactly("test", "case"));
-	},
-	
-	"test then return value stored as promise value": function () {
-		var spy = sinon.spy();
-		var stub = sinon.stub().returns("test");
-		
-		var p1 = hub.promise().resolve();
-		p1.then(stub).then(spy);		
+		promise.then(fail, spy);
 		
 		sinon.assert.calledOnce(spy);
-		sinon.assert.calledWithExactly(spy, "test");
+		sinon.assert.calledWith(spy, "Test", 123);
+	},
+
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.reject();
+		
+		assertSame(promise, result);
 	},
 	
-	"test promise rejected": function () {
-		hub.on("test.throw", function () {
-			hub.promise();
-			throw new Error();
-		});
+	"test should use scope from constructor": function () {
+		var scope = {};
+		var promise = hub.promise(0, scope);
 		var spy = sinon.spy();
+		promise.then(fail, spy);
 		
-		hub.emit("test.throw").then(function () {
-			fail("Unexpected success");
-		}, spy);
+		promise.reject();
+		
+		sinon.assert.calledOn(spy, scope);
+	},
+	
+	"test should be called on timeout": function () {
+		var promise = hub.promise(250);
+		var spy = sinon.spy();
+		promise.then(fail, spy);
+		
+		this.clock.tick(249);
+		
+		sinon.assert.notCalled(spy);
+		
+		this.clock.tick(1);
+		
+		sinon.assert.calledOnce(spy);
+		var error = spy.getCall(0).args[0];
+		assert(error instanceof hub.Error);
+		assertEquals("timeout", error.type);
+		assertEquals("Promise timed out after 250 milliseconds",
+			error.toString());
+	},
+
+	"test errback should not be called on timeout": function () {
+		var promise = hub.promise(250);
+		var spy = sinon.spy();
+		promise.then(function () {}, spy);
+
+		promise.resolve();
+		this.clock.tick(250);
+		
+		sinon.assert.notCalled(spy);
+	}
+
+});
+/*
+TestCase("Promise2ResolvedTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.resolved);
+	},
+	
+	"test should return false if not resolved": function () {
+		var promise = hub.promise();
+		
+		assertFalse(promise.resolved());
+	},
+	
+	"test should return true if resolved": function () {
+		var promise = hub.promise();
+		promise.resolve();
+		
+		assert(promise.resolved());
+	},
+	
+	"test should return true if rejected": function () {
+		var promise = hub.promise();
+		promise.reject();
+		
+		assert(promise.resolved());
+	}
+	
+});
+*/
+TestCase("Promise2WaitTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.wait);
+	},
+	
+	"test should throw if no promise given": function () {
+		var promise = hub.promise();
+		
+		assertException(function () {
+			promise.wait({});
+		}, "TypeError");
+	},
+	
+	"test should prevent then callback invocation until resolved": function () {
+		var promise = hub.promise();
+		var spy = sinon.spy();
+		promise.then(spy);
+		var blocking = hub.promise();
+		
+		promise.wait(blocking).resolve();
+		
+		sinon.assert.notCalled(spy);
+		
+		blocking.resolve();
+		
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should not invoke then callback if joined not resolved": function () {
+		var promise = hub.promise();
+		var spy = sinon.spy();
+		var blocking = hub.promise();
+		
+		promise.wait(blocking).resolve().then(spy);
+		
+		sinon.assert.notCalled(spy);
+
+		blocking.resolve();
+		
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should accept multiple blockers": function () {
+		var promise = hub.promise();
+		var spy = sinon.spy();
+		promise.then(spy);
+		var blocking1 = hub.promise();
+		var blocking2 = hub.promise();
+		
+		promise.wait(blocking1, blocking2);
+		promise.resolve();
+		
+		sinon.assert.notCalled(spy);
+		
+		blocking1.resolve();
+		
+		sinon.assert.notCalled(spy);
+
+		blocking2.resolve();
+		
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.wait(hub.promise());
+		
+		assertSame(promise, result);
+	}
+	
+});
+
+TestCase("Promise2JoinTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.join);
+	},
+	
+	"test should throw if no promise given": function () {
+		var promise = hub.promise();
+		
+		assertException(function () {
+			promise.join({});
+		}, "TypeError");
+	},
+	
+	"test should return new promise": function () {
+		var promise = hub.promise();
+		
+		var joined = promise.join(hub.promise());
+		
+		assertObject(joined);
+		assertFunction(joined.then);
+	},
+	
+	"test should invoke then if both are resolved": function () {
+		var promise1 = hub.promise();
+		var promise2 = hub.promise();
+		var joined = promise1.join(promise2);
+		var spy = sinon.spy();
+		joined.then(spy);
+		
+		sinon.assert.notCalled(spy);
+		
+		promise2.resolve();
+		
+		sinon.assert.notCalled(spy);
+		
+		promise1.resolve();
 		
 		sinon.assert.calledOnce(spy);
 	}
