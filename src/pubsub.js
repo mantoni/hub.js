@@ -60,12 +60,10 @@
 	hub.on = function (topic, fn) {
 		if (typeof topic === "function") {
 			hub.root.add("**", topic);
-		}
-		else if (isObject(topic)) {
+		} else if (isObject(topic)) {
 			onAll("", topic);
 			return;
-		}
-		else if (isObject(fn)) {
+		} else if (isObject(fn)) {
 			onAll(topic + ".", fn);
 			fn = getter(fn);
 		}
