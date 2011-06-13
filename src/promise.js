@@ -28,7 +28,7 @@
 		var timer;
 		var thiz;
 		
-		function resolve() {
+		function notify() {
 			if (timer) {
 				clearTimeout(timer);
 			}
@@ -41,47 +41,93 @@
 			errbacks.length = 0;
 		}
 		
+		function resolveReject(args) {
+			result = array_slice.call(args);
+			if (!blockers) {
+				notify();
+			}
+		}
+		
 		function thenWait() {
 			blockers--;
 			if (!blockers && result) {
-				resolve();
+				notify();
 			}
+		}
+		
+		function joinReject(joined) {
+			return function () {
+				joined.reject.apply(joined, arguments);
+			};
+		}
+		
+		function joinResolve(joined, promise) {
+			return function () {
+				var args1 = array_slice.call(arguments);
+				promise.then(function () {
+					var args2 = array_slice.call(arguments);
+					joined.resolve.apply(joined, args1.concat(args2));
+				});
+			};
+		}
+		
+		function checkResolved() {
+			if (result) {
+				throw new Error("Promise already " +
+					(rejected ? "rejected" : "resolved"));
+			}
+		}
+		
+		function emitThen(topic) {
+			return function () {
+				hub.emit.apply(hub, [topic].concat(result));
+			};
+		}
+		
+		function emitThenArgs(args) {
+			return function () {
+				hub.emit.apply(hub, args);
+			};
 		}
 		
 		thiz = {
 			then: function (callback, errback) {
-				if (typeof callback !== "function") {
+				if (!callback && !errback) {
+					throw new TypeError("Require callback or errback");
+				}
+				if (callback && typeof callback !== "function") {
 					throw new TypeError("Callback is " + callback);
 				}
-				callbacks.push(callback);
+				if (errback && typeof errback !== "function") {
+					throw new TypeError("Errback is " + errback);
+				}
+				if (callback) {
+					callbacks.push(callback);
+				}
 				if (errback) {
 					errbacks.push(errback);
 				}
 				if (!blockers && result) {
-					resolve();
+					notify();
 				}
 				return this;
 			},
 			resolve: function () {
-				if (result) {
-					throw new Error("Promise already " +
-						(rejected ? "rejected" : "resolved"));
-				}
-				result = array_slice.call(arguments);
-				if (!blockers) {
-					resolve();
-				}
+				checkResolved();
+				resolveReject(arguments);
 				return this;
 			},
 			reject: function () {
+				checkResolved();
 				rejected = true;
-				return this.resolve.apply(this, arguments);
+				resolveReject(arguments);
+				return this;
 			},
 			wait: function () {
 				var i = 0, l = arguments.length;
 				blockers += l;
 				for (; i < l; i++) {
-					arguments[i].then(thenWait);
+					arguments[i].then(thenWait, thenWait);
 				}
 				return this;
 			},
@@ -90,19 +136,14 @@
 					throw new TypeError("Promise is " + promise);
 				}
 				var joined = hub.promise();
-				this.then(function () {
-					var args1 = array_slice.call(arguments);
-					promise.then(function () {
-						var args2 = array_slice.call(arguments);
-						joined.resolve.apply(joined, args1.concat(args2));
-					});
-				});				
+				this.then(joinResolve(joined, promise), joinReject(joined));
+				promise.then(null, joinReject(joined));
 				return joined;
 			},
 			emit: function (topic) {
-				this.then(function () {
-					hub.emit.apply(hub, [topic].concat(result));
-				});
+				hub.validateTopic(topic);
+				return this.then(arguments.length === 1 ? emitThen(topic) :
+					emitThenArgs(arguments));
 			}
 		};
 		if (timeout) {

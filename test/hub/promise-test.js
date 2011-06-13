@@ -30,11 +30,35 @@ TestCase("PromiseThenTest", {
 		assertFunction(promise.then);
 	},
 	
-	"test should require function argument": function () {
+	"test should require callback": function () {
+		var promise = hub.promise();
+		
+		assertException(function () {
+			promise.then();
+		}, "TypeError");
+	},
+	
+	"test should throw if callback is not function": function () {
 		var promise = hub.promise();
 		
 		assertException(function () {
 			promise.then({});
+		}, "TypeError");
+	},
+	
+	"test should allow null callback if errback is given": function () {
+		var promise = hub.promise();
+		
+		assertNoException(function () {
+			promise.then(null, function () {});
+		});
+	},
+	
+	"test should throw if errback is not function": function () {
+		var promise = hub.promise();
+		
+		assertException(function () {
+			promise.then(null, {});
 		}, "TypeError");
 	},
 	
@@ -88,9 +112,36 @@ TestCase("PromiseResolveTest", {
 		var promise = hub.promise();
 		promise.resolve();
 		
-		assertException(function () {
+		try {
 			promise.resolve();
-		});
+			fail("Exception expected");
+		} catch (e1) {
+			assertEquals("Promise already resolved", e1.message);
+		}
+		try {
+			promise.reject();
+			fail("Exception expected");
+		} catch (e2) {
+			assertEquals("Promise already resolved", e2.message);
+		}
+	},
+	
+	"test should throw if already rejected": function () {
+		var promise = hub.promise();
+		promise.reject();
+		
+		try {
+			promise.resolve();
+			fail("Exception expected");
+		} catch (e1) {
+			assertEquals("Promise already rejected", e1.message);
+		}
+		try {
+			promise.reject();
+			fail("Exception expected");
+		} catch (e2) {
+			assertEquals("Promise already rejected", e2.message);
+		}
 	},
 	
 	"test should return the promise itself": function () {
@@ -245,6 +296,22 @@ TestCase("PromiseWaitTest", {
 			sinon.assert.calledOnce(spy);
 		},
 	
+	"test should prevent then callback invocation until rejected":
+		function () {
+			var promise = hub.promise();
+			var spy = sinon.spy();
+			promise.then(spy);
+			var blocking = hub.promise();
+
+			promise.wait(blocking).resolve();
+
+			sinon.assert.notCalled(spy);
+
+			blocking.reject();
+
+			sinon.assert.calledOnce(spy);
+		},
+
 	"test should not invoke then callback if joined not resolved":
 		function () {
 			var promise = hub.promise();
@@ -346,8 +413,34 @@ TestCase("PromiseJoinTest", {
 		
 		sinon.assert.calledOnce(spy);
 		sinon.assert.calledWith(spy, "abc", 1, 2, "xyz", 3);
-	}
+	},
 	
+	"test should reject if first promise is rejected": function () {
+		var promise1 = hub.promise();
+		var promise2 = hub.promise();
+		var joined = promise1.join(promise2);
+		var spy = sinon.spy();
+		joined.then(fail, spy);
+		
+		promise1.reject("abc", 123);
+		
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, "abc", 123);
+	},
+	
+	"test should reject if second promise is rejected": function () {
+		var promise1 = hub.promise();
+		var promise2 = hub.promise();
+		var joined = promise1.join(promise2);
+		var spy = sinon.spy();
+		joined.then(fail, spy);
+		
+		promise2.reject("abc", 123);
+		
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, "abc", 123);
+	}
+
 });
 
 TestCase("PromiseEmitTest", {
@@ -367,6 +460,33 @@ TestCase("PromiseEmitTest", {
 		
 		sinon.assert.calledOnce(hub.emit);
 		sinon.assert.calledWith(hub.emit, "x", "Test", 123);
-	})
+	}),
+	
+	"test should throw if topic is invalid": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "emit");
+		
+		assertException(function () {
+			promise.emit("da-da-da");
+		});
+	}),
+	
+	"test should allow to override arguments": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "emit");
+		
+		promise.emit("x", "override");
+		promise.resolve("Test", 123);
+		
+		sinon.assert.calledWith(hub.emit, "x", "override");
+	}),
+	
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.emit("topic");
+		
+		assertSame(promise, result);
+	}
 	
 });
