@@ -13,6 +13,10 @@ if (!Object.create) {
 	};
 }
 
+hub.apply = function (name, args) {
+	this[name].apply(this, args);
+};
+
 /**
  * resolves a dot notation path from an object. If the path cannot be
  * resolved, the optional return value is returned.

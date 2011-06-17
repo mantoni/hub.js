@@ -13,7 +13,7 @@
 	function apply(object, key, fn) {
 		var c = object[key];
 		if (!c) {
-			object[key] = fn;
+			object[key] = hub.chain(fn);
 		} else if (c.add) {
 			c.add(fn);
 		} else {

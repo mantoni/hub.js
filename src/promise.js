@@ -78,15 +78,15 @@
 			}
 		}
 		
-		function emitThen(topic) {
+		function invokeThen(fn, topic) {
 			return function () {
-				hub.emit.apply(hub, [topic].concat(result));
+				fn.apply(hub, [topic].concat(result));
 			};
 		}
 		
-		function emitThenArgs(args) {
+		function invokeThenArgs(fn, args) {
 			return function () {
-				hub.emit.apply(hub, args);
+				fn.apply(hub, args);
 			};
 		}
 		
@@ -142,8 +142,14 @@
 			},
 			emit: function (topic) {
 				hub.validateTopic(topic);
-				return this.then(arguments.length === 1 ? emitThen(topic) :
-					emitThenArgs(arguments));
+				return this.then(arguments.length === 1 ?
+					invokeThen(hub.emit, topic) :
+					invokeThenArgs(hub.emit, arguments)
+				);
+			},
+			create: function (topic) {
+				hub.validateTopic(topic);
+				return this.then(invokeThen(hub.create, topic));
 			}
 		};
 		if (timeout) {

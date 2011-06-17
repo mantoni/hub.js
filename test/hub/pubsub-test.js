@@ -138,17 +138,20 @@
 (function () {
 	
 	var checkScopeFunctionPrefix = sinon.test(function (property) {
-		this.stub(hub, "root");
 		this.stub(hub, property);
+		var scope = hub.topicScope("topic");
 		
-		var scope = hub.topicScope(property);
 		scope[property]("test", function () {});
-	
+		
 		sinon.assert.calledOnce(hub[property]);
-		sinon.assert.calledWith(hub[property], property + ".test");
+		sinon.assert.calledWith(hub[property], "test");
 	});
 	
 	TestCase("TopicScopeTest", {
+		
+		tearDown: function () {
+			hub.reset();
+		},
 		
 		"test should be function": function () {
 			assertFunction(hub.topicScope);
@@ -157,12 +160,31 @@
 		"test should implement methods on scope": sinon.test(function () {		
 			var scope = hub.topicScope("x");
 			
+			assertFunction(scope.topic);
 			assertFunction(scope.on);
 			assertFunction(scope.un);
 			assertFunction(scope.peer);
 			assertFunction(scope.emit);
 			assertFunction(scope.create);
 		}),
+		
+		"test should expose topic": function () {
+			var scope = hub.topicScope("x");
+			
+			assertEquals("x", scope.topic());
+		},
+		
+		"test should prefix topic according to context": sinon.test(
+			function () {
+				this.stub(hub, "on");
+				var scope = hub.topicScope("some.topic");
+			
+				scope.on("test", function () {});
+			
+				sinon.assert.calledOnce(hub.on);
+				sinon.assert.calledWith(hub.on, "some.test");
+			}
+		),
 	
 		"test on should invoke on with topic prefix": function () {
 			checkScopeFunctionPrefix("on");
@@ -220,23 +242,24 @@ TestCase("EmitScopeTest", {
 	},
 
 	"test should use given scope": sinon.test(function () {
-		this.stub(hub, "root");
+		this.stub(hub.root, "emit");
 		var scope = hub.scope();
 		scope.test = "test";
 		
 		hub.emit.call(scope, "x");
 		
-		assertEquals("test", hub.root.thisValues[0].test);
+		assertEquals("test", hub.root.emit.thisValues[0].test);
 	}),
 
 	"test should create new scope and use with root": sinon.test(function () {
-		this.stub(hub, "root");
+		this.stub(hub.root, "emit");
 		this.stub(hub, "scope").returns("test");
 		
 		hub.emit("x");
 		
 		sinon.assert.calledOnce(hub.scope);
-		assertEquals("test", hub.root.thisValues[0]);
+		sinon.assert.calledOnce(hub.root.emit);
+		assertEquals("test", hub.root.emit.thisValues[0]);
 	})
 	
 });
@@ -268,11 +291,11 @@ TestCase("OnTest", {
 	},
 	
 	"test should subscribe to ** if no topic is given": sinon.test(function () {
-		this.stub(hub.root, "add");
+		this.stub(hub.root, "on");
 		var fn = function () {};
 		hub.on(fn);
 		
-		sinon.assert.calledWith(hub.root.add, "**", fn);
+		sinon.assert.calledWith(hub.root.on, "**", fn);
 	})
 	
 });
@@ -284,13 +307,13 @@ TestCase("OnFunctionTest", {
 	},
 	
 	"test should invoke hub.root.add": sinon.test(function () {
-		var stub = this.stub(hub.root, "add");
+		this.stub(hub.root, "on");
 		var callback = function () {};
 		
 		hub.on("topic", callback);
 		
-		sinon.assert.calledOnce(stub);
-		sinon.assert.calledWithExactly(stub, "topic", callback);
+		sinon.assert.calledOnce(hub.root.on);
+		sinon.assert.calledWithExactly(hub.root.on, "topic", callback);
 	}),
 	
 	"test should not throw for valid topics": function () {
@@ -365,7 +388,7 @@ TestCase("OnObjectTest", {
 	},
 	
 	"test should invoke hub.root.add with each pair": sinon.test(function () {
-		var stub = this.stub(hub.root, "add");
+		var stub = this.stub(hub.root, "on");
 		var callback1 = function () {};
 		var callback2 = function () {};
 		
@@ -381,7 +404,7 @@ TestCase("OnObjectTest", {
 	
 	"test should invoke hub.root.add with topic and each pair": sinon.test(
 		function () {
-			var stub = this.stub(hub.root, "add");
+			var stub = this.stub(hub.root, "on");
 			var callback1 = function () {};
 			var callback2 = function () {};
 	
@@ -586,12 +609,12 @@ TestCase("UnTest", {
 	},
 	
 	"test should unsubscribe from ** if no topic is given": sinon.test(function () {
-		this.stub(hub.root, "remove");
+		this.stub(hub.root, "un");
 		var fn = function () {};
 		
 		hub.un(fn);
 		
-		sinon.assert.calledWith(hub.root.remove, "**", fn);
+		sinon.assert.calledWith(hub.root.un, "**", fn);
 	})
 		
 });

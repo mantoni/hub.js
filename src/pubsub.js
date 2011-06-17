@@ -15,7 +15,7 @@
 	 *
 	 * @type {Function}
 	 */
-	hub.root = hub.topicChain();
+	hub.root = hub.node();
 	
 	var scopeFunctionCache = {};
 	var array_slice = Array.prototype.slice;
@@ -28,7 +28,7 @@
 		var k;
 		for (k in object) {
 			if (object.hasOwnProperty(k)) {
-				hub.root.add(topicPrefix + k, object[k]);
+				hub.root.on(topicPrefix + k, object[k]);
 			}
 		}
 	}
@@ -40,7 +40,9 @@
 	}
 	
 	function scoped(topic, fn) {
-		topic += ".";
+		if (topic) {
+			topic += ".";
+		}
 		return function () {
 			var args = array_slice.call(arguments);
 			if (!args[0]) {
@@ -59,7 +61,7 @@
 	 */
 	hub.on = function (topic, fn) {
 		if (typeof topic === "function") {
-			hub.root.add("**", topic);
+			hub.root.on("**", topic);
 		} else if (isObject(topic)) {
 			onAll("", topic);
 			return;
@@ -67,7 +69,7 @@
 			onAll(topic + ".", fn);
 			fn = getter(fn);
 		}
-		hub.root.add(topic, fn);
+		hub.root.on(topic, fn);
 	};
 	
 	/**
@@ -80,27 +82,31 @@
 	 */
 	hub.un = function (topic, fn) {
 		if (typeof topic === "function") {
-			return hub.root.remove("**", topic);
+			return hub.root.un("**", topic);
 		}
-		return hub.root.remove(topic, fn);
+		return hub.root.un(topic, fn);
 	};
 	
 	hub.topicScope = function (topic, scope) {
 		if (!scope) {
 			scope = hub.scope();
 		}
-		var cache = scopeFunctionCache[topic];
+		var p = topic.lastIndexOf(".");
+		var namespace = p === -1 ? "" : topic.substring(0, p);
+		var cache = scopeFunctionCache[namespace];
 		if (!cache) {
 			cache = {
-				on: scoped(topic, hub.on),
-				un: scoped(topic, hub.un),
-				peer: scoped(topic, hub.peer),
-				emit: scoped(topic, hub.emit),
-				create: scoped(topic, hub.create),
-				factory: scoped(topic, hub.factory)
+				topic: getter(topic),
+				on: scoped(namespace, hub.on),
+				un: scoped(namespace, hub.un),
+				peer: scoped(namespace, hub.peer),
+				emit: scoped(namespace, hub.emit),
+				create: scoped(namespace, hub.create),
+				factory: scoped(namespace, hub.factory)
 			};
-			scopeFunctionCache[topic] = cache;
+			scopeFunctionCache[namespace] = cache;
 		}
+		scope.topic = cache.topic;
 		scope.on = cache.on;
 		scope.un = cache.un;
 		scope.peer = cache.peer;
@@ -129,7 +135,7 @@
 		thiz = hub.topicScope(args[0], thiz);
 		var result;
 		try {
-			result = hub.root.apply(thiz, args);
+			result = hub.root.emit.apply(thiz, args);
 		} catch (e) {
 			throw new hub.Error("error",
 				"Error in call chain for topic \"{topic}\": {error}", {
@@ -185,7 +191,7 @@
 	 */
 	hub.reset = function () {
 		scopeFunctionCache = {};
-		hub.root = hub.topicChain();
+		hub.root = hub.node();
 	};
 	
 }());

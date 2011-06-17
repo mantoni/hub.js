@@ -451,6 +451,15 @@ TestCase("PromiseEmitTest", {
 		assertFunction(promise.emit);
 	},
 	
+	"test should throw if topic is invalid": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "emit");
+		
+		assertException(function () {
+			promise.emit("da-da-da");
+		});
+	}),
+	
 	"test should emit result": sinon.test(function () {
 		var promise = hub.promise();
 		this.stub(hub, "emit");
@@ -461,16 +470,7 @@ TestCase("PromiseEmitTest", {
 		sinon.assert.calledOnce(hub.emit);
 		sinon.assert.calledWith(hub.emit, "x", "Test", 123);
 	}),
-	
-	"test should throw if topic is invalid": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "emit");
 		
-		assertException(function () {
-			promise.emit("da-da-da");
-		});
-	}),
-	
 	"test should allow to override arguments": sinon.test(function () {
 		var promise = hub.promise();
 		this.stub(hub, "emit");
@@ -485,6 +485,45 @@ TestCase("PromiseEmitTest", {
 		var promise = hub.promise();
 		
 		var result = promise.emit("topic");
+		
+		assertSame(promise, result);
+	}
+	
+});
+
+TestCase("PromiseCreateTest", {
+	
+	"test should be function": function () {
+		var promise = hub.promise();
+		
+		assertFunction(promise.create);
+	},
+	
+	"test should throw if topic is invalid": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "create");
+		
+		assertException(function () {
+			promise.create("da-da-da");
+		});
+	}),
+	
+	"test should create result with topic": sinon.test(function () {
+		var promise = hub.promise();
+		this.stub(hub, "create");
+		var object = {};
+		
+		promise.create("x");
+		promise.resolve(object);
+		
+		sinon.assert.calledOnce(hub.create);
+		sinon.assert.calledWith(hub.create, "x", object);
+	}),
+	
+	"test should return the promise itself": function () {
+		var promise = hub.promise();
+		
+		var result = promise.create("topic");
 		
 		assertSame(promise, result);
 	}

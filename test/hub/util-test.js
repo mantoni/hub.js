@@ -8,12 +8,31 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
+TestCase("ApplyTest", {
+	
+	"test should be function": function () {
+		assertFunction(hub.apply);
+	},
+	
+	"test should invoke function on this with args": sinon.test(function () {
+		var obj = {
+			fn: sinon.spy()
+		};
+		
+		hub.apply.call(obj, "fn", ["test", 123]);
+		
+		sinon.assert.calledOnce(obj.fn);
+		sinon.assert.calledOn(obj.fn, obj);
+		sinon.assert.calledWith(obj.fn, "test", 123);
+	})
+	
+});
 /*
  * Test cases for hub.resolve.
  */
 TestCase("ResolveTest", {
 	
-	"test function exists": function () {
+	"test should be function": function () {
 		assertFunction(hub.resolve);
 	},
 

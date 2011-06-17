@@ -159,17 +159,17 @@ TestCase("CreateOnTest", {
 		}, "TypeError");
 	},
 	
-	"test should invoke hub.on prefixed with namespace": sinon.test(
+	"test should invoke hub.on prefixed with some": sinon.test(
 		function () {
 			this.stub(hub, "on");
 			var fn = function () {};
 		
-			hub.create("namespace", function () {
+			hub.create("some.namespace", function () {
 				this.on("message", fn);
 			});
 		
 			sinon.assert.calledOnce(hub.on);
-			sinon.assert.calledWithExactly(hub.on, "namespace.message", fn);
+			sinon.assert.calledWithExactly(hub.on, "some.message", fn);
 		}
 	)
 	
@@ -186,14 +186,15 @@ TestCase("MixTest", {
 	
 	"test should assign function": function () {
 		var object = {};
-		var fn = sinon.spy();
+		var spy = sinon.spy();
 		
-		hub.mix(object, { test: fn });
+		hub.mix(object, { test: spy });
+		object.test();
 		
-		assertSame(fn, object.test);
+		sinon.assert.calledOnce(spy);
 	},
 	
-	"test should not assign property": function () {
+	"test should assign only function properties": function () {
 		var object = {};
 		
 		hub.mix(object, { test: 123 });
@@ -202,13 +203,19 @@ TestCase("MixTest", {
 	},
 	
 	"test should create chain on override": function () {
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
 		var object = {
-			test: sinon.spy()
+			test: spy1
 		};
 		
-		hub.mix(object, { test: sinon.spy() });
+		hub.mix(object, { test: spy2 });
 
-		assertFunction(object.test.add);
+		object.test();
+		
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.callOrder(spy2, spy1);
 	},
 	
 	"test should return first argument": function () {
@@ -227,6 +234,10 @@ TestCase("MixTest", {
  * Test cases for hub.factory.
  */
 TestCase("FactoryTest", {
+	
+	tearDown: function () {
+		hub.reset();
+	},
 	
 	"test should be function": function () {
 		assertFunction(hub.factory);

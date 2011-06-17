@@ -12,7 +12,7 @@
  * Test cases for the observer pattern.
  */
 TestCase("ObserverPatternTest", {
-	/*
+	
 	tearDown: function () {
 		hub.reset();
 	},
@@ -22,29 +22,26 @@ TestCase("ObserverPatternTest", {
 		hub.peer("Document", function () {
 			var text = "";
 			return {
-				change: function (newText) {
-					text = newText;
-					hub.emit("Observer.notify", text);
+				append: function (newText) {
+					text += newText;
+					this.emit("changed", text);
 				}
 			};
 		});
 
 		var spy = sinon.spy();
-		hub.peer("Observer", function () {
-			this.on("notify", spy);
-			return {
-				// ...
-			};
-		});
+		hub.on("observer.create", hub.factory(function () {
+			hub.on("Document.changed", spy);
+		}));
 		
-		hub.get("Observer");
-		hub.get("Observer");
-		
-		var text = "Hello Observer!";
-		hub.emit("Document.change", text);
+		// Create two observers:
+		hub.emit("observer.create");
+		hub.emit("observer.create");
+				
+		hub.emit("Document.append", "Hello Observer!");
 		
 		sinon.assert.calledTwice(spy);
-		sinon.assert.alwaysCalledWith(spy, text);
-	}*/
+		sinon.assert.alwaysCalledWith(spy, "Hello Observer!");
+	}
 
 });

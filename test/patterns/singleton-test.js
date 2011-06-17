@@ -11,7 +11,7 @@
 /*
  * Test cases for the singleton pattern.
  */
-/*TestCase("SingletonPatternTest", {
+TestCase("SingletonPatternTest", {
 	
 	tearDown: function () {
 		hub.reset();
@@ -19,23 +19,28 @@
 
 	"test singleton object": function () {
 		var spy = sinon.spy();
-		hub.peer("singleton", {
+		hub.on("singleton", {
 			method: spy
 		});
-		hub.emit("singleton.method");
+		
+		hub.emit("singleton.method", 123, "test");
+		
 		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, 123, "test");
 	},
 
 	"test singleton module": function () {
 		var spy = sinon.spy();
 		hub.peer("singleton", function () {
-			// private variables go here.
 			return {
 				method: spy
 			};
 		});
-		hub.emit("singleton.method");
+		
+		hub.emit("singleton.method", 123, "test");
+		
 		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWith(spy, 123, "test");
 	}
 
-});*/
+});
