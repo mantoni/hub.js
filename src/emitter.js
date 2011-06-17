@@ -62,7 +62,7 @@
 				} else {
 					api[key] = hub.emitter.apply(hub, value);
 				}
-				api.add(api[key]);
+				api.on(api[key]);
 			}
 		}
 		return api;

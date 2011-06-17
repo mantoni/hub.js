@@ -122,7 +122,7 @@
 					if (!chain) {
 						chain = hub.chain();
 					}
-					chain.add(fn);
+					chain.on(fn);
 					return;
 				}
 				var newChild, i, l, child;
@@ -160,7 +160,7 @@
 			},
 			un: function (topic, fn) {
 				if (chainTopic === topic) {
-					return chain ? chain.remove(fn) : -1;
+					return chain ? chain.un(fn) : -1;
 				}
 				var i, l, child;
 				for (i = 0, l = children.length; i < l; i++) {
