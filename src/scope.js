@@ -18,15 +18,13 @@
 		};
 	});
 	
-	function scope(args) {
+	function scope(object) {
 		var iteratorStack = [];
 		var promise;
 		var result;
+		var args;
 		var thiz = Object.create(scopeProto);
 		thiz.aborted = false;
-		function boundPropagate() {
-			return thiz.propagate();
-		}
 		/**
 		 * stops message propagation for the current call chain.
 		 */
@@ -58,16 +56,20 @@
 				if (promise) {
 					result = promise;
 					promise = undefined;
-					result.then(boundPropagate);
+					result.then(function () {
+						thiz.propagate.apply(thiz, args);
+					});
 					return result;
 				} else if (nextResult && nextResult.then) {
 					result = nextResult;
-					result.then(boundPropagate);
+					result.then(function () {
+						thiz.propagate.apply(thiz, args);
+					});
 					return;
 				}
 				result = hub.merge(result, nextResult);
 			}
-			return this.propagate();
+			return this.propagate.apply(this, args);
 		};
 		thiz.result = function () {
 			if (result && result.then) {
@@ -83,6 +85,9 @@
 				promise = hub.promise(timeout || 0, scope || this);
 			}
 			return promise;
+		};
+		thiz.mix = function () {
+			return object.mix.apply(object, arguments);
 		};
 		return thiz;
 	}
@@ -101,6 +106,18 @@
 			return fn.apply(hub, args);
 		};
 	}
+	
+	var TopicScopeDoes = hub.does.define("emit", "on", "un", "create",
+		"factory", "peer", "mix"
+	);
+	TopicScopeDoes.prototype.resolve = function () {
+		var does = this._.promise().does;
+		return does.resolve.apply(does, arguments);
+	};
+	TopicScopeDoes.prototype.reject = function () {
+		var does = this._.promise().does;
+		return does.reject.apply(does, arguments);
+	};
 	
 	hub.topicScope = function (topic, scope) {
 		if (!scope) {
@@ -127,6 +144,7 @@
 		scope.emit = cache.emit;
 		scope.create = cache.create;
 		scope.factory = cache.factory;
+		scope.does = new TopicScopeDoes(scope);
 		return scope;
 	};
 	

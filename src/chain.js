@@ -26,9 +26,9 @@
 		var iterator = hub.iterator(arguments.length ?
 			Array.prototype.slice.call(arguments) : []);
 		function callChain() {
-			var thiz = this.propagate ? this : hub.scope(arguments);
+			var thiz = this.propagate ? this : hub.scope();
 			thiz.push(iterator);
-			return thiz.propagate();
+			return thiz.propagate.apply(thiz, arguments);
 		}
 		callChain.on = function (fn) {
 			var fnType = typeof fn;

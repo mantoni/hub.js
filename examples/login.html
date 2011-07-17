@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!--
+	Copyright 2011, Maximilian Antoni
+	Released under the MIT license:
+	https://github.com/mantoni/hub.js/raw/master/LICENSE
+-->
+<html>
+	<head>
+		<title>Login Form - hub.js example</title>
+		<script type="text/javascript"
+			src="../dist/hub-0.1-SNAPSHOT.js"></script>
+	</head>
+	<body>
+		<h2>Login Form - hub.js example</h2>
+		<p>
+		</p>
+		
+		<hr/>
+		
+		<h4 id="message"></h4>
+		<form>
+			<label for="username">User:</label>
+			<input type="text" name="username"/><br/>
+			<input type="submit" name="send" value="Login"/>
+		</form>
+		
+		<script type="text/javascript">
+		<!--
+			document.body.onload = hub.does.emit("form.init");
+			
+			/*
+			 * Form UI component:
+			 */
+			hub.peer("form", function () {
+				var form = document.forms[0];
+				var message = document.getElementById("message");
+				
+				form.onsubmit = function () {
+					hub.emit("form.data.changed",
+						form.elements.username.value
+					);
+					return false;
+				};
+				
+				return {
+					init: function () {
+						form.elements.username.focus();
+					},
+					disable: function (disable) {
+						form.elements.username.disabled = disable;
+						form.elements.send.disabled = disable;
+					},
+					message: function (html) {
+						message.innerHTML = html;
+					}
+				};
+			});
+			
+			/*
+			 * Server communication component:
+			 */
+			hub.peer("server", function () {
+				return {
+					login: function (user, pass) {
+												
+						// Imagine an AJAX call here.
+						
+						var message = user + ", there is no backend.";
+						var ajaxCallback = this.does.resolve(message);
+						setTimeout(ajaxCallback, 1000);
+					}
+				};
+			});
+			
+			/*
+			 * Control flow:
+			 */
+			hub.on("form.data.changed", function (user) {
+				hub.emit("form.disable", true);
+				hub.emit("server.login", user).emit("form.message");
+			});
+			hub.on("form.message", hub.does.emit("form.disable", false));
+			
+		-->
+		</script>
+	</body>
+</html>

@@ -143,28 +143,28 @@
 				}
 				topic = rootTopic;
 			}
-			var thiz = this.propagate ? this : hub.scope(slicedArgs);
-			thiz = hub.topicScope(topic, thiz);
+			var scope = this.propagate ? this : hub.scope();
+			scope = hub.topicScope(topic, scope);
 			if (chain) {
-				chain.call(thiz);
+				chain.apply(scope, slicedArgs);
 			}
-			if (thiz.aborted) {
-				return thiz.result();
+			if (scope.aborted) {
+				return scope.result();
 			}
-			var queue = thiz.topicChainQueue;
+			var queue = scope.topicChainQueue;
 			if (queue) {
 				Array.prototype.push.apply(queue, children);
 			} else {
-				queue = thiz.topicChainQueue = children.slice();
+				queue = scope.topicChainQueue = children.slice();
 			}
 			while (queue.length) {
 				var child = queue.shift();
-				child.emit.call(thiz, topic);
-				if (thiz.aborted) {
+				child.emit.apply(scope, [topic].concat(slicedArgs));
+				if (scope.aborted) {
 					break;
 				}
 			}
-			return thiz.result();
+			return scope.result();
 		};
 		thiz.matches = function (topic) {
 			return chainTopicMatcher.test(topic);

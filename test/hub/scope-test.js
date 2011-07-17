@@ -438,6 +438,28 @@ TestCase("ScopeStopPropagationTest", {
 	
 });
 
+TestCase("ScopeMixTest", {
+	
+	"test should be function": function () {
+		var scope = hub.scope();
+		
+		assertFunction(scope.mix);
+	},
+	
+	"test should invoke mix on given object": function () {
+		var object = {
+			mix: function () {}
+		};
+		var mock = sinon.mock(object);
+		mock.expects("mix").once().withArgs("topic");
+		
+		var scope = hub.scope(object);
+		scope.mix("topic");
+		
+		mock.verify();
+	}
+
+});
 
 (function () {
 	

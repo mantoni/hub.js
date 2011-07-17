@@ -45,6 +45,106 @@ TestCase("PromiseDoesTest", {
 	
 });
 
+TestCase("TopicScopeDoesTest", {
+	
+	"test should be object": function () {
+		var scope = hub.topicScope("topic");
+		
+		assertObject(scope.does);
+	}
+	
+});
+
+TestCase("TopicScopeDoesResolveTest", {
+	
+	setUp: function () {
+		this.scope = hub.topicScope("topic");
+	},
+	
+	"test should be function": function () {
+		assertFunction(this.scope.does.resolve);
+	},
+	
+	"test should return function": function () {
+		assertFunction(this.scope.does.resolve());
+	},
+	
+	"test should create promise": sinon.test(function () {
+		this.spy(this.scope, "promise");
+		
+		this.scope.does.resolve();
+		
+		sinon.assert.calledOnce(this.scope.promise);
+	}),
+	
+	"test should resolve promise when invoked": function () {
+		var spy = sinon.spy();
+		this.scope.then(spy);
+		
+		var fn = this.scope.does.resolve();
+		
+		sinon.assert.notCalled(spy);
+		fn();
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should concat and pass arguments": function () {
+		var spy = sinon.spy();
+		this.scope.then(spy);
+		
+		var fn = this.scope.does.resolve("abc");		
+		fn(123);
+		
+		sinon.assert.calledWith(spy, "abc", 123);
+	}
+	
+});
+	
+TestCase("TopicScopeDoesRejectTest", {
+	
+	setUp: function () {
+		this.scope = hub.topicScope("topic");
+	},
+	
+	"test should be function": function () {
+		assertFunction(this.scope.does.reject);
+	},
+	
+	"test should return function": function () {
+		assertFunction(this.scope.does.reject());
+	},
+	
+	"test should create promise": sinon.test(function () {
+		this.spy(this.scope, "promise");
+		
+		this.scope.does.reject();
+		
+		sinon.assert.calledOnce(this.scope.promise);
+	}),
+	
+	"test should resolve promise when invoked": function () {
+		var spy = sinon.spy();
+		this.scope.then(null, spy);
+		
+		var fn = this.scope.does.reject();
+		
+		sinon.assert.notCalled(spy);
+		fn();
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should concat and pass arguments": function () {
+		var spy = sinon.spy();
+		this.scope.then(null, spy);
+		
+		var fn = this.scope.does.reject("abc");		
+		fn(123);
+		
+		sinon.assert.calledWith(spy, "abc", 123);
+	}
+	
+});
+
 (function () {
 
 	function testsFor(object, method) {
@@ -97,6 +197,15 @@ TestCase("PromiseDoesTest", {
 	TestCase("HubDoesPeerTest", testsFor(hub, "peer"));
 	TestCase("HubDoesMixTest", testsFor(hub, "mix"));
 	
+	TestCase("ScopeDoesEmitTest", testsFor(hub.topicScope("x"), "emit"));
+	TestCase("ScopeDoesOnTest", testsFor(hub.topicScope("x"), "on"));
+	TestCase("ScopeDoesUnTest", testsFor(hub.topicScope("x"), "un"));
+	TestCase("ScopeDoesCreateTest", testsFor(hub.topicScope("x"), "create"));
+	TestCase("ScopeDoesFactoryTest", testsFor(hub.topicScope("x"),
+		"factory"));
+	TestCase("ScopeDoesPeerTest", testsFor(hub.topicScope("x"), "peer"));
+	TestCase("ScopeDoesMixTest", testsFor(hub.topicScope("x"), "mix"));
+
 	TestCase("PromiseDoesEmitTest", testsFor(hub.promise(), "emit"));
 	TestCase("PromiseDoesOnTest", testsFor(hub.promise(), "on"));
 	TestCase("PromiseDoesUnTest", testsFor(hub.promise(), "un"));
