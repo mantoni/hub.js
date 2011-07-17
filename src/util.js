@@ -5,6 +5,9 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
+/*
+ * Object.create polyfill.
+ */
 if (!Object.create) {
 	Object.create = function (object) {
 		function C() {}
@@ -13,8 +16,23 @@ if (!Object.create) {
 	};
 }
 
+/*
+ * Array.prototype.forEach polyfill.
+ */
+if (!Array.prototype.forEach) {
+	Array.prototype.forEach = function (fn, scope) {
+		if (!fn || !fn.call) {
+			throw new TypeError();
+		}
+		var i = 0, l = this.length;
+		for (; i < l; i++) {
+			fn.call(scope, this[i], i, this);
+		}
+	};
+}
+
 hub.apply = function (name, args) {
-	this[name].apply(this, args);
+	return this[name].apply(this, args);
 };
 
 /**
