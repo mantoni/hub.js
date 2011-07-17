@@ -96,7 +96,7 @@
 		var cache = scopeFunctionCache[namespace];
 		if (!cache) {
 			cache = {
-				topic: getter(topic),
+				topic: topic,
 				on: scoped(namespace, hub.on),
 				un: scoped(namespace, hub.un),
 				peer: scoped(namespace, hub.peer),

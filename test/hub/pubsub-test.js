@@ -160,7 +160,7 @@
 		"test should implement methods on scope": sinon.test(function () {		
 			var scope = hub.topicScope("x");
 			
-			assertFunction(scope.topic);
+			assertString(scope.topic);
 			assertFunction(scope.on);
 			assertFunction(scope.un);
 			assertFunction(scope.peer);
@@ -171,7 +171,7 @@
 		"test should expose topic": function () {
 			var scope = hub.topicScope("x");
 			
-			assertEquals("x", scope.topic());
+			assertEquals("x", scope.topic);
 		},
 		
 		"test should prefix topic according to context": sinon.test(
