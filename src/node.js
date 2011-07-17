@@ -67,10 +67,16 @@
 	var rootTopic = "**";
 	
 	function node(chainTopic, firstChild) {
+		var initializer;
 		if (!chainTopic) {
 			chainTopic = rootTopic;
 		} else {
-			validateTopic(chainTopic);
+			if (typeof chainTopic === "string") {
+				validateTopic(chainTopic);
+			} else {
+				initializer = chainTopic;
+				chainTopic = rootTopic;
+			}
 		}
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var chain;
@@ -183,6 +189,12 @@
 		thiz.factory = hub.factory;
 		thiz.peer = hub.peer;
 		thiz.does = new hub.Does(thiz);
+		if (initializer) {
+			var key;
+			for (key in initializer) {
+				thiz.on(key, initializer[key]);
+			}
+		}
 		return thiz;
 	}
 

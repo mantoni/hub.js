@@ -19,6 +19,17 @@ TestCase("NodeTest", {
 		assertFunction(node.emit);
 		assertFunction(node.on);
 		assertFunction(node.un);
+	},
+	
+	"test should map config object to on": function () {
+		var spy = sinon.spy();
+		var node = hub.node({
+			test: spy
+		});
+		
+		node.emit("test");
+		
+		sinon.assert.calledOnce(spy);
 	}
 	
 });
