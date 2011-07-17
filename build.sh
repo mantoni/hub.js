@@ -133,9 +133,16 @@ lint() {
 
 compile() {
 	check_cc
-	echo -n "Compiling hub-$HUB_VERSION.js ... "
-	cat $SOURCE_FILES | sed "s/{version}/$HUB_VERSION/g" > dist/hub.js
-	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js dist/hub.js --js_output_file dist/hub-$HUB_VERSION.js --use_only_custom_externs
+	echo -n "Creating hub.debug.js ... "
+	cat "${SOURCE_FILES[@]:0:11}" | sed "s/{version}/$HUB_VERSION/g" > hub.debug.js
+	FILES="${SOURCE_FILES[@]:12:${#SOURCE_FILES}}"
+	cat $FILES | grep -v "\/\*" | grep -v " \*" >> hub.debug.js
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+	echo "OK"
+	echo -n "Compiling hub.min.js ... "
+	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js hub.debug.js --js_output_file hub.min.js --use_only_custom_externs
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -181,7 +188,6 @@ plugin:
     jar: \"lib/$COVERAGE_FILENAME\"
     module: \"com.google.jstestdriver.coverage.CoverageModule\"
 " >> $COVERAGE_CONFIG
-	cp dist/hub-$HUB_VERSION.js dist/hub.js
 	JSTD_CONFIG="$COVERAGE_CONFIG"
 	test
 	rm "$COVERAGE_CONFIG"
@@ -249,9 +255,8 @@ case "$1" in
 			lint
 		fi
 		compile
-		cp dist/hub-$HUB_VERSION.js dist/hub.js
 		JSTD_CONFIG="jsTestDriverDist.conf"
-		test # run tests on dist/hub.js again
+		test # run tests on hub.min.js again
 	;;
 	"start" )
 		start

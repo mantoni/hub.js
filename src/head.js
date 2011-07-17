@@ -6,7 +6,4 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
-/**
- * Defines the hub namespace.
- */
 hub = {};

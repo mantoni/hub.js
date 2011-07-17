@@ -146,12 +146,6 @@
 			promise.then(null, joinReject(joined));
 			return joined;
 		};
-		/*thiz.propagate = function () {
-			if (!scope) {
-				throw new Error("No scope available");
-			}
-			return this.then(scope.propagate);
-		};*/
 		thiz.does = new PromiseDoes(thiz);
 		if (timeout) {
 			timer = setTimeout(function () {
