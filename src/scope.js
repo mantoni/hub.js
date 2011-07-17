@@ -17,10 +17,10 @@
 	
 	function scope(args) {
 		var iteratorStack = [];
-		var aborted = false;
 		var promise;
 		var result;
 		var thiz = Object.create(scopeProto);
+		thiz.aborted = false;
 		function boundPropagate() {
 			return thiz.propagate();
 		}
@@ -28,7 +28,7 @@
 		 * stops message propagation for the current call chain.
 		 */
 		thiz.stopPropagation = function () {
-			aborted = true;
+			thiz.aborted = true;
 			iteratorStack.length = 0;
 			if (arguments.length) {
 				result = arguments[0];
@@ -65,9 +65,6 @@
 				result = hub.merge(result, nextResult);
 			}
 			return this.propagate();
-		};
-		thiz.aborted = function () {
-			return aborted;
 		};
 		thiz.result = function () {
 			if (result && result.then) {

@@ -99,7 +99,7 @@
 			if (chain) {
 				chain.call(thiz);
 			}
-			if (thiz.aborted()) {
+			if (thiz.aborted) {
 				return thiz.result();
 			}
 			var queue = thiz.topicChainQueue;
@@ -111,7 +111,7 @@
 			while (queue.length) {
 				var child = queue.shift();
 				child.emit.call(thiz, topic);
-				if (thiz.aborted()) {
+				if (thiz.aborted) {
 					break;
 				}
 			}

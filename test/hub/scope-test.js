@@ -29,10 +29,10 @@ TestCase("ScopeTest", {
 		assertFunction(scope.propagate);
 	},
 
-	"test should implement aborted": function () {
+	"test should expose aborted": function () {
 		var scope = hub.scope();
 
-		assertFunction(scope.aborted);
+		assertBoolean(scope.aborted);
 	},
 
 	"test should implement result": function () {
@@ -47,27 +47,18 @@ TestCase("ScopeTest", {
 		assertFunction(scope.promise);
 	},
 
-	"test aborted should return false by default": function () {
-		var aborted;
-		var chain = hub.chain(function () {
-			aborted = this.aborted();
-		});
+	"test aborted should be false by default": function () {
+		var scope = hub.scope();
 
-		chain();
-
-		assertFalse(aborted);
+		assertFalse(scope.aborted);
 	},
 
 	"test aborted should return true after stopPropagation": function () {
-		var aborted;
-		var chain = hub.chain(function () {
-			this.stopPropagation();
-			aborted = this.aborted();
-		});
-
-		chain();
-
-		assert(aborted);
+		var scope = hub.scope();
+		
+		scope.stopPropagation();
+		
+		assert(scope.aborted);
 	},
 
 	"test return promise should stop chain execution until resolved":
