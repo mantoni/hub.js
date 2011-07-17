@@ -236,36 +236,6 @@
 
 }());
 
-TestCase("EmitScopeTest", {
-
-	tearDown: function () {
-		hub.reset();
-	},
-
-	"test should use given scope": sinon.test(function () {
-		this.stub(hub.root, "emit");
-		var scope = hub.scope();
-		scope.test = "test";
-		
-		hub.emit.call(scope, "x");
-		
-		assertEquals("test", hub.root.emit.thisValues[0].test);
-	}),
-
-	"test should create new scope and use with root": sinon.test(function () {
-		this.stub(hub.root, "emit");
-		this.stub(hub, "scope").returns("test");
-		
-		hub.emit("x");
-		
-		sinon.assert.calledOnce(hub.scope);
-		sinon.assert.calledOnce(hub.root.emit);
-		assertEquals("test", hub.root.emit.thisValues[0]);
-	})
-	
-});
-
-
 /*
  * Test cases for hub.on.
  */
@@ -285,22 +255,12 @@ TestCase("OnTest", {
 		}, "TypeError");
 	},
 	
-	"test should throw if topic contains illegal characters": function () {
+	"test should validate topic": function () {
 		assertException(function () {
 			hub.on("some/topic", function () {});
 		}, "Error");
-	},
-	
-	"test should subscribe to ** if no topic is given": sinon.test(
-		function () {
-			this.stub(hub.root, "on");
-			var fn = function () {};
-			hub.on(fn);
+	}
 		
-			sinon.assert.calledWith(hub.root.on, "**", fn);
-		}
-	)
-	
 });
 	
 TestCase("OnFunctionTest", {
@@ -376,346 +336,25 @@ TestCase("OnFunctionTest", {
 		
 });
 
-TestCase("OnObjectTest", {
-	
-	tearDown: function () {
-		hub.reset();
-	},
-	
-	"test should accept a map": function () {
-		hub.on({});
-	},
-	
-	"test should accept topic and a map": function () {
-		hub.on("topic", {});
-	},
-	
-	"test should invoke hub.root.add with each pair": sinon.test(function () {
-		var stub = this.stub(hub.root, "on");
-		var callback1 = function () {};
-		var callback2 = function () {};
-		
-		hub.on({
-			topic1: callback1,
-			topic2: callback2
-		});
-		
-		sinon.assert.calledTwice(stub);
-		sinon.assert.calledWithExactly(stub, "topic1", callback1);
-		sinon.assert.calledWithExactly(stub, "topic2", callback2);
-	}),
-	
-	"test should invoke hub.root.add with topic and each pair": sinon.test(
-		function () {
-			var stub = this.stub(hub.root, "on");
-			var callback1 = function () {};
-			var callback2 = function () {};
-	
-			hub.on("prefix", {
-				topic1: callback1,
-				topic2: callback2
-			});
-	
-			sinon.assert.calledThrice(stub);
-			sinon.assert.calledWithExactly(stub, "prefix.topic1", callback1);
-			sinon.assert.calledWithExactly(stub, "prefix.topic2", callback2);
-		}
-	),
-	
-	"test should store object and return it for hub.emit": function () {
-		var object = {
-			foo: function () {}
-		};
-		hub.on("a", object);
-		var spy = sinon.spy();
-		
-		hub.emit("a").then(spy);
-		
-		var result = spy.getCall(0).args[0];
-		assertObject(result);
-		assertFunction(result.foo);
-	}
-	
-});
-
-/*
- * Test cases for hub.un.
- */
-TestCase("UnTest", {
-	
-	tearDown: function () {
-		hub.reset();
-	},
-	
-	"test simple unsubscribe": function () {
-		var fn = sinon.spy();
-		hub.on("x.y", fn);
-		hub.emit("x.y");
-		sinon.assert.calledOnce(fn);
-		fn.called = false;
-		hub.un("x.y", fn);
-		hub.emit("x.y");
-		assertFalse(fn.called);
-	},
-	
-	"test unsubscribe first in chain of two": function () {
-		var a = [];
-		var f1 = function () {
-			a.push("f1");
-		};
-		var f2 = function () {
-			a.push("f2");
-		};
-		hub.on("x.y", f1);
-		hub.on("x.y", f2);
-		hub.emit("x.y");
-		assertEquals("f2,f1", a.join());
-		a.length = 0;
-		hub.un("x.y", f1);
-		hub.emit("x.y");
-		assertEquals("f2", a.join());
-	},
-	
-	"test unsubscribe second in chain of two": function () {
-		var a = [];
-		var f1 = function () {
-			a.push("f1");
-		};
-		var f2 = function () {
-			a.push("f2");
-		};
-		hub.on("x.y", f1);
-		hub.on("x.y", f2);
-		hub.emit("x.y");
-		assertEquals("f2,f1", a.join());
-		a.length = 0;
-		hub.un("x.y", f2);
-		hub.emit("x.y");
-		assertEquals("f1", a.join());
-	},
-	
-	"test unsubscribe first in chain of three": function () {
-		var a = [];
-		var f1 = function () {
-			a.push("f1");
-		};
-		var f2 = function () {
-			a.push("f2");
-		};
-		var f3 = function () {
-			a.push("f3");
-		};
-		hub.on("x.y", f1);
-		hub.on("x.y", f2);
-		hub.on("x.y", f3);
-		hub.emit("x.y");
-		assertEquals("f3,f2,f1", a.join());
-		a.length = 0;
-		hub.un("x.y", f1);
-		hub.emit("x.y");
-		assertEquals("f3,f2", a.join());
-	},
-	
-	"test unsubscribe second in chain of three": function () {
-		var a = [];
-		var f1 = function () {
-			a.push("f1");
-		};
-		var f2 = function () {
-			a.push("f2");
-		};
-		var f3 = function () {
-			a.push("f3");
-		};
-		hub.on("x.y", f1);
-		hub.on("x.y", f2);
-		hub.on("x.y", f3);
-		hub.emit("x.y");
-		assertEquals("f3,f2,f1", a.join());
-		a.length = 0;
-		hub.un("x.y", f2);
-		hub.emit("x.y");
-		assertEquals("f3,f1", a.join());
-	},
-	
-	"test unsubscribe third in chain of three": function () {
-		var a = [];
-		var f1 = function () {
-			a.push("f1");
-		};
-		var f2 = function () {
-			a.push("f2");
-		};
-		var f3 = function () {
-			a.push("f3");
-		};
-		hub.on("x.y", f1);
-		hub.on("x.y", f2);
-		hub.on("x.y", f3);
-		hub.emit("x.y");
-		assertEquals("f3,f2,f1", a.join());
-		a.length = 0;
-		hub.un("x.y", f3);
-		hub.emit("x.y");
-		assertEquals("f2,f1", a.join());
-	},
-	
-	"test emit subscribe emit unsubscribe emit": function () {
-		var fn = sinon.spy();
-		hub.emit("x.y");
-		hub.on("x.y", fn);
-		hub.emit("x.y");
-		sinon.assert.calledOnce(fn);
-		fn.called = false;
-		hub.un("x.y", fn);
-		hub.emit("x.y");
-		assertFalse(fn.called);
-	},
-	
-	"test subscribe emit wildcard and unsubscribe": function () {
-		var fn = sinon.spy();
-		hub.on("x.y", fn);
-		hub.emit("x.*");
-		sinon.assert.calledOnce(fn);
-		fn.called = false;
-		hub.un("x.y", fn);
-		hub.emit("x.*");
-		assertFalse(fn.called);
-	},
-	
-	"test unsubscribe throws if callback is not a function": function () {
-		assertException(function () {
-			hub.un("x.y");
-		});
-		assertException(function () {
-			hub.un("x.y", null);
-		});
-		assertException(function () {
-			hub.un("x.y", true);
-		});
-		assertException(function () {
-			hub.un("x.y", {});
-		});
-		assertException(function () {
-			hub.un("x.y", []);
-		});
-	},
-	
-	"test unsubscribe returns true on success": function () {
-		var fn = function () {};
-		hub.on("x.y", fn);
-		assert(hub.un("x.y", fn));
-	},
-	
-	"test unsubscribe returns false on failure": function () {
-		assertFalse(hub.un("x.y", function () {}));
-	},
-	
-	"test should unsubscribe from ** if no topic is given": sinon.test(
-		function () {
-			this.stub(hub.root, "un");
-			var fn = function () {};
-		
-			hub.un(fn);
-		
-			sinon.assert.calledWith(hub.root.un, "**", fn);
-		}
-	)
-		
-});
-
 /*
  * Test cases for hub.peer.
  */
 TestCase("PeerTest", {
 	
-	tearDown: function () {
-		hub.reset();
-	},
-	
 	"test should be function": function () {
 		assertFunction(hub.peer);
 	},
 	
-	"test should invoke create with function": sinon.test(function () {
-		this.stub(hub, "create");
-	
-		var factory = function () {};	
-		hub.peer(factory);
-		
-		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWith(hub.create, factory);
-	}),
-	
-	"test should invoke create with function and args": sinon.test(
+	"test should invoke hub.root.peer and delegate arguments": sinon.test(
 		function () {
-			this.stub(hub, "create");
+			this.stub(hub.root, "peer");
 			
-			var factory = function () {};
-			var args = [123];
-			hub.peer(factory, args);
-		
-			sinon.assert.calledOnce(hub.create);
-			sinon.assert.calledWith(hub.create, factory, args);
+			var object = {};
+			hub.peer("topic", object);
+			
+			sinon.assert.calledOnce(hub.root.peer);
+			sinon.assert.calledWithExactly(hub.root.peer, "topic", object);
 		}
-	),
+	)
 
-	"test should invoke create with topic and function": sinon.test(
-		function () {
-			this.stub(hub, "create");
-			var factory = function () {};
-				
-			hub.peer("topic", factory);
-		
-			sinon.assert.calledOnce(hub.create);
-			sinon.assert.calledWith(hub.create, "topic", factory);
-		}
-	),
-
-	"test should invoke create with topic, function and args": sinon.test(
-		function () {
-			this.stub(hub, "create");
-			var factory = function () {};
-			var args = [123];
-
-			hub.peer("topic", factory, args);
-
-			sinon.assert.calledOnce(hub.create);
-			sinon.assert.calledWithExactly(hub.create, "topic", factory, 
-				args);
-		}
-	),
-
-	"test should pass create result to hub.on": sinon.test(function () {
-		this.stub(hub, "create").returns("test");
-		this.stub(hub, "on");
-
-		hub.peer(function () {});
-
-		sinon.assert.calledOnce(hub.on);
-		sinon.assert.calledWithExactly(hub.on, "test");
-	}),
-	
-	"test should pass topic and create result to hub.on": sinon.test(
-		function () {
-			this.stub(hub, "create").returns("test");
-			this.stub(hub, "on");
-		
-			hub.peer("topic", function () {});
-		
-			sinon.assert.calledOnce(hub.on);
-			sinon.assert.calledWithExactly(hub.on, "topic", "test");
-		}
-	),
-	
-	"test should pass topic and object to hub.on": sinon.test(function () {
-		this.stub(hub, "on");
-		var object = {};
-		
-		hub.peer("topic", object);
-		
-		sinon.assert.calledOnce(hub.on);
-		sinon.assert.calledWithExactly(hub.on, "topic", object);
-	})
-	
 });

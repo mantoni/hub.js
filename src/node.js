@@ -63,7 +63,47 @@
 		).replace(/#/g, "\\*");
 		return new RegExp("^" + exp + "$");
 	}
+	
+	function isObject(object) {
+		return Object.prototype.toString.call(object) === "[object Object]";
+	}
+	
+	function getter(object) {
+		return function () {
+			return object;
+		};
+	}
 
+	function onAll(thiz, topicPrefix, object) {
+		var key;
+		for (key in object) {
+			if (object.hasOwnProperty(key)) {
+				thiz.on(topicPrefix + key, object[key]);
+			}
+		}
+	}
+	
+	var nodeProto = {
+		create: hub.create,
+		factory: hub.factory,
+		peer: function (topic, factory, args) {
+			var object;
+			if (typeof topic === "function") {
+				object = hub.create(topic, factory);
+				if (object) {
+					this.on(object);
+				}
+			} else if (typeof factory === "function") {
+				object = hub.create(topic, factory, args);
+				if (object) {
+					this.on(topic, object);
+				}
+			} else {
+				this.on(topic, factory);
+			}
+		}
+	};
+	
 	var rootTopic = "**";
 	
 	function node(chainTopic, firstChild) {
@@ -81,10 +121,16 @@
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var chain;
 		var children = firstChild ? [firstChild] : [];
-		var thiz = Object.create({});
+		var thiz = Object.create(nodeProto);
 		thiz.emit = function (topic) {
-			if (!topic) {
+			if (arguments.length) {
+				hub.validateTopic(topic);
+			} else {
 				topic = chainTopic;
+			}
+			var slicedArgs = Array.prototype.slice.call(arguments, 1);
+			if (topic.indexOf("{") !== -1) {
+				topic = hub.substitute(topic, slicedArgs);
 			}
 			if (topic !== rootTopic && !chainTopicMatcher.test(topic)) {
 				if (topic.indexOf("*") === -1 ||
@@ -93,9 +139,8 @@
 				}
 				topic = rootTopic;
 			}
-			var thiz = this.propagate ? this : hub.scope(
-				Array.prototype.slice.call(arguments, 1)
-			);
+			var thiz = this.propagate ? this : hub.scope(slicedArgs);
+			thiz = hub.topicScope(topic, thiz);
 			if (chain) {
 				chain.call(thiz);
 			}
@@ -122,6 +167,16 @@
 		};
 		thiz.topic = chainTopic;
 		thiz.on = function (topic, fn, topicMatcher) {
+			if (typeof topic === "function") {
+				thiz.on(chainTopic, topic);
+				return;
+			} else if (isObject(topic)) {
+				onAll(thiz, "", topic);
+				return;
+			} else if (isObject(fn)) {
+				onAll(thiz, topic + ".", fn);
+				fn = getter(fn);
+			}
 			if (chainTopic === topic) {
 				if (!chain) {
 					chain = hub.chain();
@@ -163,6 +218,9 @@
 			}
 		};
 		thiz.un = function (topic, fn) {
+			if (typeof topic === "function") {
+				return thiz.un("**", topic);
+			}
 			if (chainTopic === topic) {
 				return chain ? chain.un(fn) : -1;
 			}
@@ -182,20 +240,17 @@
 			}
 			return false;
 		};
-		thiz.mix = function () {
-			hub.apply("emit", arguments).then(hub.does.mix(thiz));
+		thiz.mix = function (topic) {
+			if (typeof topic === "string") {
+				hub.apply("emit", arguments).then(thiz.does.on());
+			} else {
+				thiz.on(topic);
+			}
+			return thiz;
 		};
-		thiz.create = hub.create;
-		thiz.factory = hub.factory;
-		thiz.peer = hub.peer;
 		thiz.does = new hub.Does(thiz);
 		if (initializer) {
-			var key;
-			for (key in initializer) {
-				if (initializer.hasOwnProperty(key)) {
-					thiz.on(key, initializer[key]);
-				}
-			}
+			onAll(thiz, "", initializer);
 		}
 		return thiz;
 	}

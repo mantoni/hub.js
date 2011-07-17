@@ -20,25 +20,6 @@
 	var scopeFunctionCache = {};
 	var array_slice = Array.prototype.slice;
 	
-	function isObject(object) {
-		return Object.prototype.toString.call(object) === "[object Object]";
-	}
-	
-	function onAll(topicPrefix, object) {
-		var k;
-		for (k in object) {
-			if (object.hasOwnProperty(k)) {
-				hub.root.on(topicPrefix + k, object[k]);
-			}
-		}
-	}
-	
-	function getter(object) {
-		return function () {
-			return object;
-		};
-	}
-	
 	function scoped(topic, fn) {
 		if (topic) {
 			topic += ".";
@@ -60,15 +41,6 @@
 	 * @param {function (object)} fn the callback function.
 	 */
 	hub.on = function (topic, fn) {
-		if (typeof topic === "function") {
-			hub.root.on("**", topic);
-		} else if (isObject(topic)) {
-			onAll("", topic);
-			return;
-		} else if (isObject(fn)) {
-			onAll(topic + ".", fn);
-			fn = getter(fn);
-		}
 		hub.root.on(topic, fn);
 	};
 	
@@ -81,9 +53,6 @@
 	 *			true.
 	 */
 	hub.un = function (topic, fn) {
-		if (typeof topic === "function") {
-			return hub.root.un("**", topic);
-		}
 		return hub.root.un(topic, fn);
 	};
 	
@@ -121,30 +90,7 @@
 	 * @param {...Object} args the arguments to pass.
 	 */
 	hub.emit = function (topic) {
-		hub.validateTopic(topic);
-		var args = array_slice.call(arguments);
-		var slicedArgs = args.slice(1);
-		if (topic.indexOf("{") !== -1) {
-			args[0] = hub.substitute(topic, slicedArgs);
-		}
-		var thiz = this.propagate ? this : hub.scope(slicedArgs);
-		thiz = hub.topicScope(args[0], thiz);
-		var result;
-		try {
-			result = hub.root.emit.apply(thiz, args);
-		} catch (e) {
-			throw new hub.Error("error",
-				"Error in call chain for topic \"{topic}\": {error}", {
-					topic: args[0],
-					error: e.message
-				});
-		}
-		if (!result || !result.then) {
-			var promise = hub.promise(0, thiz);
-			promise.resolve(result);
-			result = promise;
-		}
-		return result;
+		return hub.root.emit.apply(hub.root, arguments);
 	};
 	
 	/**
@@ -152,21 +98,8 @@
 	 * @param {Function} factory the factory
 	 * @param {Array} args the optional arguments
 	 */
-	hub.peer = function (topic, factory, args) {
-		var object;
-		if (typeof topic === "function") {
-			object = hub.create(topic, factory);
-			if (object) {
-				hub.on(object);
-			}
-		} else if (typeof factory === "function") {
-			object = hub.create(topic, factory, args);
-			if (object) {
-				hub.on(topic, object);
-			}
-		} else {
-			hub.on(topic, factory);
-		}
+	hub.peer = function () {
+		return hub.root.peer.apply(hub.root, arguments);
 	};
 	
 	/**

@@ -128,18 +128,6 @@ TestCase("PublishSubscribeTest", {
 		sinon.assert.called(spy);
 	},
 	
-	"test emit with placeholder in message": function () {
-		var spy = sinon.spy();
-		hub.on("x.y", spy);
-		hub.emit("x.{0}", "y");
-		
-		sinon.assert.calledOnce(spy);
-		
-		hub.emit("x.{0.m}", {m: "y"});
-		
-		sinon.assert.calledTwice(spy);
-	},
-	
 	"test subscribe emit subscribe same message": function () {
 		var spy1 = sinon.spy();
 		hub.on("x.y", spy1);
@@ -153,21 +141,6 @@ TestCase("PublishSubscribeTest", {
 		
 		sinon.assert.calledTwice(spy1);
 		sinon.assert.calledOnce(spy2);
-	},
-	
-	"test subscribe emit subscribe same message w/ placeholder": function () {
-		var spy1 = sinon.spy();
-		hub.on("x.y", spy1);
-		hub.emit("x.{0}", "y");
-		
-		sinon.assert.called(spy1);
-		
-		var spy2 = sinon.spy();
-		hub.on("x.y", spy2);
-		hub.emit("x.{0}", "y");
-		
-		sinon.assert.calledTwice(spy1);
-		sinon.assert.called(spy2);
 	},
 	
 	"test multicast emit and subscribe": function () {
