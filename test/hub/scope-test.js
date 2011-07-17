@@ -361,19 +361,19 @@ TestCase("ScopePropagateTest", {
 		assertEquals("y,a,b,x,a,b", calls.join());
 	},
 	
-	"test override result": function () {
-		var chain = hub.chain(function () {
-			return ["a"];
+	"test override arguments": function () {
+		var chain = hub.chain(function (x) {
+			return x;
 		}, function () {
 			this.propagate(["b"]);
-		}, function () {
-			return ["c"];
+		}, function (x) {
+			return x;
 		});
+		
 		var spy = sinon.spy();
+		chain(["a"]).then(spy);
 		
-		chain().then(spy);
-		
-		sinon.assert.calledWith(spy, ["b", "c"]);
+		sinon.assert.calledWith(spy, ["a", "b"]);
 	},
 	
 	"test should return promise": sinon.test(function () {

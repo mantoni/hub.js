@@ -16,7 +16,7 @@
 	});
 	
 	function scope(args) {
-		var iteratorStack = [];
+		var iteratorStack;
 		var aborted = false;
 		var promise;
 		var result;
@@ -29,7 +29,9 @@
 		 */
 		thiz.stopPropagation = function () {
 			aborted = true;
-			iteratorStack.length = 0;
+			if (iteratorStack) {
+				iteratorStack.length = 0;
+			}
 			if (arguments.length) {
 				result = arguments[0];
 			}
@@ -40,9 +42,10 @@
 		 */
 		thiz.propagate = function () {
 			if (arguments.length) {
-				result = arguments[0];
+				//result = arguments[0];
+				args = Array.prototype.slice.call(arguments);
 			}
-			var size = iteratorStack.length;
+			var size = iteratorStack ? iteratorStack.length : 0;
 			if (!size) {
 				return this.result();
 			}
@@ -76,6 +79,9 @@
 			return hub.promise(0, this).resolve(result);
 		};
 		thiz.push = function (iterator) {
+			if (!iteratorStack) {
+				iteratorStack = [];
+			}
 			iteratorStack.push(iterator);
 		};
 		thiz.promise = function (timeout, scope) {
