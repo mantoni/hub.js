@@ -38,7 +38,6 @@ TestCase("NodeTest", {
 (function () {
 	
 	function verifyInsertOrder(inserts, expected) {
-		var node = hub.node();
 		var calls = [];
 		function caller(name) {
 			return function () {
@@ -48,66 +47,70 @@ TestCase("NodeTest", {
 		
 		var i, l;
 		for (i = 0, l = inserts.length; i < l; i++) {
-			node.on(inserts[i], caller(inserts[i]));
+			this.node.on(inserts[i], caller(inserts[i]));
 		}
-		node.emit("**");
+		this.node.emit("**");
 		
 		assertEquals(expected.join(), calls.join());
 	}
 	
 	TestCase("NodeOnTest", {
+		
+		setUp: function () {
+			this.node = hub.node();
+		},
 
 		"test insert 1": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["foo.*", "*.bar"],
 				["*.bar", "foo.*"]
 			);
 		},
 	
 		"test insert 2": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["foo.bar", "foo.*", "*.bar"],
 				["*.bar", "foo.*", "foo.bar"]
 			);
 		},
 	
 		"test insert 3": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["foo.*", "foo.bar", "*.bar"],
 				["*.bar", "foo.*", "foo.bar"]
 			);
 		},
 	
 		"test insert 4": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["*.bar", "foo.bar", "foo.*"],
 				["*.bar", "foo.*", "foo.bar"]
 			);
 		},
 	
 		"test insert 5": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["foo.bar", "*.bar", "foo.*"],
 				["*.bar", "foo.*", "foo.bar"]
 			);
 		},
 	
 		"test insert 7": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["*.b", "*.y", "a.b", "x.y"],
 				["*.y", "*.b", "x.y", "a.b"]
 			);
 		},
 	
 		"test insert two equal": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["a.b", "x.y"],
 				["x.y", "a.b"]
 			);
 		},
 	
 		"test insert two wildcard": function () {
-			verifyInsertOrder(
+			verifyInsertOrder.call(this,
 				["a.*", "x.*"],
 				["x.*", "a.*"]
 			);
@@ -115,24 +118,40 @@ TestCase("NodeTest", {
 		
 		"test should accept object": function () {
 			var spy = sinon.spy();
-			var node = hub.node();
 			
-			node.on({
+			this.node.on({
 				test: spy
 			});
-			node.emit("test");
+			this.node.emit("test");
 			
 			sinon.assert.calledOnce(spy);
 		},
 		
 		"test should subscribe to ** if no topic is given": function () {
 			var spy = sinon.spy();
-			var node = hub.node();
 			
-			node.on(spy);
-			node.emit("anything");
+			this.node.on(spy);
+			this.node.emit("anything");
 
 			sinon.assert.calledOnce(spy);
+		},
+		
+		"test should replace placeholders with wildcards": function () {
+			var spy = sinon.spy();
+			
+			this.node.on("foo.{0}", spy);
+			this.node.emit("foo.bar");
+			
+			sinon.assert.calledOnce(spy);
+		},
+		
+		"test should inject placeholders into arguments": function () {
+			var spy = sinon.spy();
+			
+			this.node.on("foo.{0}", spy);
+			this.node.emit("foo.bar");
+			
+			sinon.assert.calledWith(spy, "bar");
 		}
 		
 	});

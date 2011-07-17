@@ -13,8 +13,8 @@
 	var PromiseDoes = hub.does.define("emit", "on", "un", "create", "factory",
 		"peer", "mix", "resolve", "reject"
 	);
-	
 	var array_slice = Array.prototype.slice;
+	var function_string = "function";
 	
 	var promiseProto = {};
 	["on", "un", "emit", "create", "factory", "peer", "mix"].forEach(
@@ -101,10 +101,10 @@
 			if (!callback && !errback) {
 				throw new TypeError("Require callback or errback");
 			}
-			if (callback && typeof callback !== "function") {
+			if (callback && typeof callback !== function_string) {
 				throw new TypeError("Callback is " + callback);
 			}
-			if (errback && typeof errback !== "function") {
+			if (errback && typeof errback !== function_string) {
 				throw new TypeError("Errback is " + errback);
 			}
 			if (callback) {
@@ -138,7 +138,7 @@
 			return this;
 		};
 		thiz.join = function (promise) {
-			if (!promise || typeof promise.then !== "function") {
+			if (!promise || typeof promise.then !== function_string) {
 				throw new TypeError("Promise is " + promise);
 			}
 			var joined = hub.promise(0, scope);

@@ -10,6 +10,9 @@
 	var NodeDoes = hub.does.define("emit", "on", "un", "create", "factory",
 		"peer", "mix"
 	);
+	var array_slice = Array.prototype.slice;
+	var function_string = "function";
+	var topicPlaceholderRE = /\{([a-zA-Z0-9\.]+)\}/g;
 	
 	// ensures the given argument is a valid topic. Throws an error otherwise.
 	function validateTopic(topic) {
@@ -87,17 +90,31 @@
 		}
 	}
 	
+	function topicExtractorProxy(fn, topic) {
+		var re = new RegExp("^" + topic.replace(topicPlaceholderRE,
+			"([a-zA-Z0-9\\.]+)"
+		) + "$");
+		return function () {
+			var args = array_slice.call(arguments);
+			var m = this.topic.match(re), i = 1, l = m.length;
+			for (; i < l; i++) {
+				args[i - 1] = m[i];
+			}
+			return fn.apply(this, args);
+		};
+	}
+	
 	var nodeProto = {
 		create: hub.create,
 		factory: hub.factory,
 		peer: function (topic, factory, args) {
 			var object;
-			if (typeof topic === "function") {
+			if (typeof topic === function_string) {
 				object = hub.create(topic, factory);
 				if (object) {
 					this.on(object);
 				}
-			} else if (typeof factory === "function") {
+			} else if (typeof factory === function_string) {
 				object = hub.create(topic, factory, args);
 				if (object) {
 					this.on(topic, object);
@@ -126,13 +143,15 @@
 		var chain;
 		var children = firstChild ? [firstChild] : [];
 		var thiz = Object.create(nodeProto);
-		thiz.emit = function (topic) {
+		thiz.emit = function () {
+			var topic;
 			if (arguments.length) {
+				topic = arguments[0];
 				hub.validateTopic(topic);
 			} else {
 				topic = chainTopic;
 			}
-			var slicedArgs = Array.prototype.slice.call(arguments, 1);
+			var slicedArgs = array_slice.call(arguments, 1);
 			if (topic.indexOf("{") !== -1) {
 				topic = hub.substitute(topic, slicedArgs);
 			}
@@ -144,7 +163,9 @@
 				topic = rootTopic;
 			}
 			var scope = this.propagate ? this : hub.scope();
-			scope = hub.topicScope(topic, scope);
+			if (!scope.topic) {
+				scope = hub.topicScope(topic, scope);
+			}
 			if (chain) {
 				chain.apply(scope, slicedArgs);
 			}
@@ -171,15 +192,21 @@
 		};
 		thiz.topic = chainTopic;
 		thiz.on = function (topic, fn, topicMatcher) {
-			if (typeof topic === "function") {
+			if (typeof topic === function_string) {
 				thiz.on(chainTopic, topic);
 				return;
-			} else if (isObject(topic)) {
+			}
+			if (isObject(topic)) {
 				onAll(thiz, "", topic);
 				return;
-			} else if (isObject(fn)) {
+			}
+			if (topic.indexOf("{") !== -1) {
+				fn = topicExtractorProxy(fn, topic);
+				topic = topic.replace(topicPlaceholderRE, "*");
+			}
+			if (isObject(fn)) {
 				onAll(thiz, topic + ".", fn);
-				fn = getter(fn);
+				fn = getter(fn); // store, so that emit returns the object.
 			}
 			if (chainTopic === topic) {
 				if (!chain) {
@@ -222,7 +249,7 @@
 			}
 		};
 		thiz.un = function (topic, fn) {
-			if (typeof topic === "function") {
+			if (typeof topic === function_string) {
 				return thiz.un("**", topic);
 			}
 			if (chainTopic === topic) {
@@ -239,7 +266,7 @@
 			}
 			validateTopic(topic);
 			var fnType = typeof fn;
-			if (fnType !== "function") {
+			if (fnType !== function_string) {
 				throw new TypeError("Callback is " + fnType);
 			}
 			return false;

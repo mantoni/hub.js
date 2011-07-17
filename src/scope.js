@@ -110,14 +110,12 @@
 	var TopicScopeDoes = hub.does.define("emit", "on", "un", "create",
 		"factory", "peer", "mix"
 	);
-	TopicScopeDoes.prototype.resolve = function () {
-		var does = this._.promise().does;
-		return does.resolve.apply(does, arguments);
-	};
-	TopicScopeDoes.prototype.reject = function () {
-		var does = this._.promise().does;
-		return does.reject.apply(does, arguments);
-	};
+	["resolve", "reject"].forEach(function (name) {
+		TopicScopeDoes.prototype[name] = function () {
+			var does = this._.promise().does;
+			return does[name].apply(does, arguments);
+		};
+	});
 	
 	hub.topicScope = function (topic, scope) {
 		if (!scope) {
