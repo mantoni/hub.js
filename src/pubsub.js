@@ -10,12 +10,14 @@
  */
 (function () {
 	
+	var root = hub.node();
+	
 	/**
 	 * The root node.
 	 *
 	 * @type {Object}
 	 */
-	hub.root = hub.node();
+	hub.root = root;
 	
 	/**
 	 * subscribes a callback function to the given topic.
@@ -24,7 +26,7 @@
 	 * @param {function (object)} fn the callback function.
 	 */
 	hub.on = function (topic, fn) {
-		hub.root.on(topic, fn);
+		root.on(topic, fn);
 	};
 	
 	/**
@@ -36,15 +38,15 @@
 	 *			true.
 	 */
 	hub.un = function (topic, fn) {
-		return hub.root.un(topic, fn);
+		return root.un(topic, fn);
 	};
 	
 	/**
 	 * @param {String} topic the topic.
 	 * @param {...Object} args the arguments to pass.
 	 */
-	hub.emit = function (topic) {
-		return hub.root.emit.apply(hub.root, arguments);
+	hub.emit = function () {
+		return root.emit.apply(root, arguments);
 	};
 	
 	/**
@@ -53,7 +55,7 @@
 	 * @param {Array} args the optional arguments
 	 */
 	hub.peer = function () {
-		return hub.root.peer.apply(hub.root, arguments);
+		return root.peer.apply(root, arguments);
 	};
 	
 	/**
@@ -61,7 +63,7 @@
 	 * testing.
 	 */
 	hub.reset = function () {
-		hub.root = hub.node();
+		hub.root = root = hub.node();
 	};
 	
 }());
