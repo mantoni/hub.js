@@ -11,9 +11,9 @@
 (function () {
 	
 	/**
-	 * The root topic chain.
+	 * The root node.
 	 *
-	 * @type {Function}
+	 * @type {Object}
 	 */
 	hub.root = hub.node();
 	
@@ -117,10 +117,6 @@
 	};
 	
 	/**
-	 * invokes the call chain associated with a topic with optional arguments.
-	 * The topic combines a namespace and a message in the form:
-	 * "{namespace}/{message}".
-	 * 
 	 * @param {String} topic the topic.
 	 * @param {...Object} args the arguments to pass.
 	 */
@@ -152,21 +148,9 @@
 	};
 	
 	/**
-	 * <p>
-	 * defines a peer in the hub that emits and receives messages.
-	 * </p>
-	 * <p>
-	 * Configuration parameters:
-	 * </p>
-	 * <ul>
-	 * <li>is (String|Array): single peer name or list of peer names this peer
-	 * inherits from</li>
-	 * <li>scope (String): the peer scope, either hub.SINGLETON or
-	 * hub.PROTOTYPE. Defaults to hub.SINGLETON.</li>
-	 * </ul>
-	 * 
-	 * @param {String} namespace the namespace for the peer
-	 * @param {Function} factory the factory for the map of listeners
+	 * @param {String} topic the topic
+	 * @param {Function} factory the factory
+	 * @param {Array} args the optional arguments
 	 */
 	hub.peer = function (topic, factory, args) {
 		var object;
