@@ -18,7 +18,6 @@ TestCase("ObserverPatternTest", {
 	},
 
 	"test abserver": function () {
-				
 		hub.peer("document", function () {
 			var text = "";
 			return {
@@ -28,7 +27,6 @@ TestCase("ObserverPatternTest", {
 				}
 			};
 		});
-		
 		var spy1 = sinon.spy();
 		var spy2 = sinon.spy();
 		hub.on("document.changed", spy1);
