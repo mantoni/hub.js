@@ -7,10 +7,13 @@
  */
 (function () {
 	
-	/*
-	 * adds a function to the given object under the specified key.
-	 */
-	function apply(object, key, fn) {
+	function assertFunction(fn) {
+		if (typeof fn !== "function") {
+			throw new TypeError();
+		}
+	}
+	
+	function chain(object, key, fn) {
 		var c = object[key];
 		if (!c) {
 			object[key] = hub.chain(fn);
@@ -21,15 +24,12 @@
 		}
 	}
 	
-	/*
-	 * applies a mix-in to an object.
-	 */
 	function mix(object, mixin) {
 		var key;
 		for (key in mixin) {
 			if (mixin.hasOwnProperty(key) &&
 					typeof mixin[key] === "function") {
-				apply(object, key, mixin[key]);
+				chain(object, key, mixin[key]);
 			}
 		}
 		return object;
@@ -41,21 +41,22 @@
 			fn = topic;
 			topic = null;
 		}
-		if (typeof fn !== "function") {
-			throw new TypeError();
-		}
+		assertFunction(fn);
 		var object = {};
 		var scope = topic ? hub.topicScope(topic) : hub.scope();
 		scope.mix = function () {
-			hub.emit.apply(hub, arguments).then(function (mixin) {
-				hub.mix(object, mixin);
-			});
+			hub.apply("emit", arguments).then(hub.does.mix(object));
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);
 		return hub.mix(object, result);
 	}
 	
 	function factory(topic, fn) {
+		if (typeof topic !== "string") {
+			assertFunction(topic);
+		} else {
+			assertFunction(fn);
+		}
 		return function () {
 			return hub.create(topic, fn);
 		};

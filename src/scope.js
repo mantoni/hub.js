@@ -8,19 +8,12 @@
 (function () {
 	
 	var scopeProto = {};
-	(function () {
-		function scopeProtoFn(name) {
-			scopeProto[name] = function () {
-				var promise = this.promise();
-				promise[name].apply(promise, arguments);
-			};
-		}		
-		var names = ["then", "join", "wait", "resolve", "reject"];
-		var i = 0, l = names.length;
-		for (; i < l; i++) {
-			scopeProtoFn(names[i]);
-		}
-	}());
+	["then", "join", "wait", "resolve", "reject"].forEach(function (name) {
+		scopeProto[name] = function () {
+			var promise = this.promise();
+			promise[name].apply(promise, arguments);
+		};
+	});
 	
 	function scope(args) {
 		var iteratorStack = [];
@@ -85,9 +78,9 @@
 		thiz.push = function (iterator) {
 			iteratorStack.push(iterator);
 		};
-		thiz.promise = function () {
+		thiz.promise = function (timeout, scope) {
 			if (!promise) {
-				promise = hub.promise();
+				promise = hub.promise(timeout || 0, scope || this);
 			}
 			return promise;
 		};

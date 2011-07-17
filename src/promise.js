@@ -11,7 +11,37 @@
 (function () {
 	
 	var array_slice = Array.prototype.slice;
-
+	
+	var promiseProto = {};
+	["on", "un", "emit", "create", "factory", "peer", "mix"].forEach(
+		function (name) {
+			promiseProto[name] = function () {
+				var args = array_slice.call(arguments);
+				return this.then(function () {
+					hub[name].apply(hub, args.concat(
+						Array.prototype.slice.call(arguments)
+					));
+				});
+			};
+		}
+	);
+	
+	function joinReject(joined) {
+		return function () {
+			joined.reject.apply(joined, arguments);
+		};
+	}
+	
+	function joinResolve(joined, promise) {
+		return function () {
+			var args1 = array_slice.call(arguments);
+			promise.then(function () {
+				var args2 = array_slice.call(arguments);
+				joined.resolve.apply(joined, args1.concat(args2));
+			});
+		};
+	}
+	
 	/**
 	 * returns a new promise.
 	 *
@@ -54,23 +84,7 @@
 				notify();
 			}
 		}
-		
-		function joinReject(joined) {
-			return function () {
-				joined.reject.apply(joined, arguments);
-			};
-		}
-		
-		function joinResolve(joined, promise) {
-			return function () {
-				var args1 = array_slice.call(arguments);
-				promise.then(function () {
-					var args2 = array_slice.call(arguments);
-					joined.resolve.apply(joined, args1.concat(args2));
-				});
-			};
-		}
-		
+				
 		function checkResolved() {
 			if (result) {
 				throw new Error("Promise already " +
@@ -78,80 +92,63 @@
 			}
 		}
 		
-		function invokeThen(fn, topic) {
-			return function () {
-				fn.apply(hub, [topic].concat(result));
-			};
-		}
-		
-		function invokeThenArgs(fn, args) {
-			return function () {
-				fn.apply(hub, args);
-			};
-		}
-		
-		thiz = {
-			then: function (callback, errback) {
-				if (!callback && !errback) {
-					throw new TypeError("Require callback or errback");
-				}
-				if (callback && typeof callback !== "function") {
-					throw new TypeError("Callback is " + callback);
-				}
-				if (errback && typeof errback !== "function") {
-					throw new TypeError("Errback is " + errback);
-				}
-				if (callback) {
-					callbacks.push(callback);
-				}
-				if (errback) {
-					errbacks.push(errback);
-				}
-				if (!blockers && result) {
-					notify();
-				}
-				return this;
-			},
-			resolve: function () {
-				checkResolved();
-				resolveReject(arguments);
-				return this;
-			},
-			reject: function () {
-				checkResolved();
-				rejected = true;
-				resolveReject(arguments);
-				return this;
-			},
-			wait: function () {
-				var i = 0, l = arguments.length;
-				blockers += l;
-				for (; i < l; i++) {
-					arguments[i].then(thenWait, thenWait);
-				}
-				return this;
-			},
-			join: function (promise) {
-				if (!promise || typeof promise.then !== "function") {
-					throw new TypeError("Promise is " + promise);
-				}
-				var joined = hub.promise();
-				this.then(joinResolve(joined, promise), joinReject(joined));
-				promise.then(null, joinReject(joined));
-				return joined;
-			},
-			emit: function (topic) {
-				hub.validateTopic(topic);
-				return this.then(arguments.length === 1 ?
-					invokeThen(hub.emit, topic) :
-					invokeThenArgs(hub.emit, arguments)
-				);
-			},
-			create: function (topic) {
-				hub.validateTopic(topic);
-				return this.then(invokeThen(hub.create, topic));
+		thiz = Object.create(promiseProto);
+		thiz.then = function (callback, errback) {
+			if (!callback && !errback) {
+				throw new TypeError("Require callback or errback");
 			}
+			if (callback && typeof callback !== "function") {
+				throw new TypeError("Callback is " + callback);
+			}
+			if (errback && typeof errback !== "function") {
+				throw new TypeError("Errback is " + errback);
+			}
+			if (callback) {
+				callbacks.push(callback);
+			}
+			if (errback) {
+				errbacks.push(errback);
+			}
+			if (!blockers && result) {
+				notify();
+			}
+			return this;
 		};
+		thiz.resolve = function () {
+			checkResolved();
+			resolveReject(arguments);
+			return this;
+		};
+		thiz.reject = function () {
+			checkResolved();
+			rejected = true;
+			resolveReject(arguments);
+			return this;
+		};
+		thiz.wait = function () {
+			var i = 0, l = arguments.length;
+			blockers += l;
+			for (; i < l; i++) {
+				arguments[i].then(thenWait, thenWait);
+			}
+			return this;
+		};
+		thiz.join = function (promise) {
+			if (!promise || typeof promise.then !== "function") {
+				throw new TypeError("Promise is " + promise);
+			}
+			var joined = hub.promise(0, scope);
+			this.then(joinResolve(joined, promise), joinReject(joined));
+			promise.then(null, joinReject(joined));
+			return joined;
+		};
+		/*thiz.propagate = function () {
+			if (!scope) {
+				throw new Error("No scope available");
+			}
+			return this.then(scope.propagate);
+		};*/
+		thiz.does = new hub.Does(thiz);
 		if (timeout) {
 			timer = setTimeout(function () {
 				thiz.reject(new hub.Error("timeout",

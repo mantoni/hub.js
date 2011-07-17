@@ -290,13 +290,15 @@ TestCase("OnTest", {
 		}, "Error");
 	},
 	
-	"test should subscribe to ** if no topic is given": sinon.test(function () {
-		this.stub(hub.root, "on");
-		var fn = function () {};
-		hub.on(fn);
+	"test should subscribe to ** if no topic is given": sinon.test(
+		function () {
+			this.stub(hub.root, "on");
+			var fn = function () {};
+			hub.on(fn);
 		
-		sinon.assert.calledWith(hub.root.on, "**", fn);
-	})
+			sinon.assert.calledWith(hub.root.on, "**", fn);
+		}
+	)
 	
 });
 	
@@ -608,14 +610,16 @@ TestCase("UnTest", {
 		assertFalse(hub.un("x.y", function () {}));
 	},
 	
-	"test should unsubscribe from ** if no topic is given": sinon.test(function () {
-		this.stub(hub.root, "un");
-		var fn = function () {};
+	"test should unsubscribe from ** if no topic is given": sinon.test(
+		function () {
+			this.stub(hub.root, "un");
+			var fn = function () {};
 		
-		hub.un(fn);
+			hub.un(fn);
 		
-		sinon.assert.calledWith(hub.root.un, "**", fn);
-	})
+			sinon.assert.calledWith(hub.root.un, "**", fn);
+		}
+	)
 		
 });
 
@@ -634,8 +638,8 @@ TestCase("PeerTest", {
 	
 	"test should invoke create with function": sinon.test(function () {
 		this.stub(hub, "create");
-		var factory = function () {};
-		
+	
+		var factory = function () {};	
 		hub.peer(factory);
 		
 		sinon.assert.calledOnce(hub.create);
@@ -645,9 +649,9 @@ TestCase("PeerTest", {
 	"test should invoke create with function and args": sinon.test(
 		function () {
 			this.stub(hub, "create");
+			
 			var factory = function () {};
 			var args = [123];
-		
 			hub.peer(factory, args);
 		
 			sinon.assert.calledOnce(hub.create);
@@ -676,7 +680,8 @@ TestCase("PeerTest", {
 			hub.peer("topic", factory, args);
 
 			sinon.assert.calledOnce(hub.create);
-			sinon.assert.calledWithExactly(hub.create, "topic", factory, args);
+			sinon.assert.calledWithExactly(hub.create, "topic", factory, 
+				args);
 		}
 	),
 

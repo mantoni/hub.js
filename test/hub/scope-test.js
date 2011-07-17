@@ -70,36 +70,6 @@ TestCase("ScopeTest", {
 		assert(aborted);
 	},
 
-	"test promise should invoke hub.promise": sinon.test(function () {
-		var spy = this.spy(hub, "promise");
-		var result;
-		var chain = hub.chain(function () {
-			result = this.promise();
-		});
-
-		chain();
-
-		sinon.assert.calledOnce(spy);
-		assertSame(spy.returnValues[0], result);
-	}),
-
-	"test this.promise should stop chain execution until resolved":
-		function () {
-			var spy = sinon.spy();
-			var promise;
-			var chain = hub.chain(function () {
-				promise = this.promise();
-			}, spy);
-
-			chain();
-
-			sinon.assert.notCalled(spy);
-
-			promise.resolve();
-
-			sinon.assert.calledOnce(spy);
-		},
-
 	"test return promise should stop chain execution until resolved":
 		function () {
 			var spy = sinon.spy();
@@ -116,24 +86,7 @@ TestCase("ScopeTest", {
 
 			sinon.assert.calledOnce(spy);
 		},
-
-	"test return this.promise should stop chain execution until resolved":
-		function () {
-			var spy = sinon.spy();
-			var promise;
-			var chain = hub.chain(function () {
-				return (promise = this.promise());
-			}, spy);
-
-			chain();
-
-			sinon.assert.notCalled(spy);
-
-			promise.resolve();
-
-			sinon.assert.calledOnce(spy);
-		},
-
+	
 	"test chain result should be promise": function () {
 		var chain = hub.chain(function () {
 			this.promise();
@@ -145,6 +98,54 @@ TestCase("ScopeTest", {
 		assertFunction(promise.then);
 	}
 
+});
+
+TestCase("ScopePromiseTest", {
+	
+	"test should invoke hub.promise": sinon.test(function () {
+		var spy = this.spy(hub, "promise");
+		var result = hub.scope().promise();
+
+		sinon.assert.calledOnce(spy);
+		assertSame(spy.returnValues[0], result);
+	}),
+
+	"test should stop chain execution until resolved": function () {
+		var spy = sinon.spy();
+		var promise;
+		var chain = hub.chain(function () {
+			promise = this.promise();
+		}, spy);
+
+		chain();
+
+		sinon.assert.notCalled(spy);
+
+		promise.resolve();
+
+		sinon.assert.calledOnce(spy);
+	},
+	
+	"test should pass arguments to hub.promise": sinon.test(function () {
+		this.stub(hub, "promise");
+		var object = {};
+		
+		hub.scope().promise(0, object);
+		
+		sinon.assert.calledWithExactly(hub.promise, 0, object);
+	}),
+	
+	"test should pass this as scope to hub.promise": sinon.test(
+		function () {
+			this.stub(hub, "promise");
+			var scope = hub.scope();
+			
+			scope.promise();
+			
+			sinon.assert.calledWithExactly(hub.promise, 0, scope);
+		}
+	)
+	
 });
 
 TestCase("ChainScopeTest", {
@@ -269,7 +270,18 @@ TestCase("ScopeResolveTest", {
 		sinon.assert.calledOnce(scope.promise);
 		sinon.assert.calledOnce(promise.resolve);
 		sinon.assert.calledWith(promise.resolve, "Test", 123);
-	})
+	}),
+	
+	"test should resolve previously created promise": function () {
+		var scope = hub.scope();
+		var spy = sinon.spy();
+		
+		scope.promise().then(spy);
+		
+		scope.resolve();
+		
+		sinon.assert.calledOnce(spy);
+	}
 
 });
 
@@ -297,7 +309,7 @@ TestCase("ScopeRejectTest", {
 
 });
 
-TestCase("PropagateTest", {
+TestCase("ScopePropagateTest", {
 	
 	"test should be function": function () {
 		var spy = sinon.spy();
@@ -374,11 +386,25 @@ TestCase("PropagateTest", {
 		chain();
 		
 		assertSame(spy.returnValues[0], result);
-	})
+	}),
+	
+	"test should not cause second call if promise was created": function () {
+		var spy = sinon.spy();
+		var promise;
+		var chain = hub.chain(function () {
+			promise = this.promise();
+			this.propagate();
+		}, spy);
+
+		chain();
+		promise.resolve();
+
+		sinon.assert.calledOnce(spy);
+	}
 
 });
 
-TestCase("StopPropagationTest", {
+TestCase("ScopeStopPropagationTest", {
 	
 	"test should stop after invokation": function () {
 		var spy = sinon.spy();
@@ -419,3 +445,4 @@ TestCase("StopPropagationTest", {
 	}
 	
 });
+

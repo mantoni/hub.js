@@ -11,21 +11,29 @@
 	
 	function does(method) {
 		return function () {
+			var delegate = this._;
 			var args1 = array_slice.call(arguments);
 			return function () {
 				var args2 = array_slice.call(arguments);
-				return hub[method].apply(hub, args1.concat(args2));
+				return delegate[method].apply(delegate, args1.concat(args2));
 			};
 		};
 	}
 	
-	hub.does = {
+	function Does(delegate) {
+		this._ = delegate;
+	}
+	Does.prototype = {
 		emit: does("emit"),
 		on: does("on"),
 		un: does("un"),
 		create: does("create"),
 		factory: does("factory"),
-		peer: does("peer")
+		peer: does("peer"),
+		mix: does("mix")
 	};
+	
+	hub.Does = Does;
+	hub.does = new Does(hub);
 	
 }());

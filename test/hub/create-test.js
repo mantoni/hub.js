@@ -128,26 +128,28 @@ TestCase("CreateOnTest", {
 	
 	"test should use scope provided by hub.topicScope": sinon.test(
 		function () {
-			this.stub(hub, "topicScope").returns("test");
+			var object = {};
+			this.stub(hub, "topicScope").returns(object);
 			var spy = sinon.spy();
 			
 			hub.create("foo", spy);
 			
 			sinon.assert.calledOnce(hub.topicScope);
 			sinon.assert.calledWith(hub.topicScope, "foo");
-			sinon.assert.calledOn(spy, "test");
+			sinon.assert.calledOn(spy, object);
 		}
 	),
 	
 	"test should use scope provided by hub.scope": sinon.test(
 		function () {
-			this.stub(hub, "scope").returns("test");
+			var object = {};
+			this.stub(hub, "scope").returns(object);
 			var spy = sinon.spy();
 			
 			hub.create(spy);
 			
 			sinon.assert.calledOnce(hub.scope);
-			sinon.assert.calledOn(spy, "test");
+			sinon.assert.calledOn(spy, object);
 		}
 	),
 	
@@ -244,7 +246,7 @@ TestCase("FactoryTest", {
 	},
 	
 	"test should return function": function () {
-		var factory = hub.factory();
+		var factory = hub.factory(function () {});
 		
 		assertFunction(factory);
 	},
@@ -260,6 +262,12 @@ TestCase("FactoryTest", {
 			sinon.assert.calledOnce(hub.create);
 			sinon.assert.calledWith(hub.create, "topic", fn);
 		}
-	)
+	),
+	
+	"test should require function argument": function () {
+		assertException(function () {
+			hub.factory("only.topic");
+		}, "TypeError");
+	}
 	
 });

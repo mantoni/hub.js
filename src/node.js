@@ -75,110 +75,115 @@
 		var chainTopicMatcher = pathMatcher(chainTopic);
 		var chain;
 		var children = firstChild ? [firstChild] : [];
-		return {
-			emit: function (topic) {
-				if (!topic) {
-					topic = chainTopic;
-				}
-				if (topic !== rootTopic && !chainTopicMatcher.test(topic)) {
-					if (topic.indexOf("*") === -1 ||
-							!pathMatcher(topic).test(chainTopic)) {
-						return;
-					}
-					topic = rootTopic;
-				}
-				var thiz = this.propagate ? this : hub.scope(
-					Array.prototype.slice.call(arguments, 1)
-				);
-				if (chain) {
-					chain.call(thiz);
-				}
-				if (thiz.aborted()) {
-					return thiz.result();
-				}
-				var queue = thiz.topicChainQueue;
-				if (queue) {
-					Array.prototype.push.apply(queue, children);
-				} else {
-					queue = thiz.topicChainQueue = children.slice();
-				}
-				while (queue.length) {
-					var child = queue.shift();
-					child.emit.call(thiz, topic);
-					if (thiz.aborted()) {
-						break;
-					}
-				}
-				return thiz.result();
-			},
-			matches: function (topic) {
-				return chainTopicMatcher.test(topic);
-			},
-			getTopic: function () {
-				return chainTopic;
-			},
-			on: function (topic, fn, topicMatcher) {
-				if (chainTopic === topic) {
-					if (!chain) {
-						chain = hub.chain();
-					}
-					chain.on(fn);
+		var thiz = Object.create({});
+		thiz.emit = function (topic) {
+			if (!topic) {
+				topic = chainTopic;
+			}
+			if (topic !== rootTopic && !chainTopicMatcher.test(topic)) {
+				if (topic.indexOf("*") === -1 ||
+						!pathMatcher(topic).test(chainTopic)) {
 					return;
 				}
-				var newChild, i, l, child;
+				topic = rootTopic;
+			}
+			var thiz = this.propagate ? this : hub.scope(
+				Array.prototype.slice.call(arguments, 1)
+			);
+			if (chain) {
+				chain.call(thiz);
+			}
+			if (thiz.aborted()) {
+				return thiz.result();
+			}
+			var queue = thiz.topicChainQueue;
+			if (queue) {
+				Array.prototype.push.apply(queue, children);
+			} else {
+				queue = thiz.topicChainQueue = children.slice();
+			}
+			while (queue.length) {
+				var child = queue.shift();
+				child.emit.call(thiz, topic);
+				if (thiz.aborted()) {
+					break;
+				}
+			}
+			return thiz.result();
+		};
+		thiz.matches = function (topic) {
+			return chainTopicMatcher.test(topic);
+		};
+		thiz.topic = chainTopic;
+		thiz.on = function (topic, fn, topicMatcher) {
+			if (chainTopic === topic) {
+				if (!chain) {
+					chain = hub.chain();
+				}
+				chain.on(fn);
+				return;
+			}
+			var newChild, i, l, child;
+			for (i = 0, l = children.length; i < l; i++) {
+				child = children[i];
+				if (child.matches(topic)) {
+					child.on(topic, fn, topicMatcher);
+					return;
+				}
+				if (!topicMatcher) {
+					topicMatcher = pathMatcher(topic);
+				}
+				if (topicMatcher.test(child.topic)) {
+					newChild = node(topic, child);
+					newChild.on(topic, fn, topicMatcher);
+					children[i] = newChild;
+					return;
+				}
+			}
+			newChild = node(topic);
+			newChild.on(topic, fn);
+			if (topic.indexOf("*") === -1) {
+				children.unshift(newChild);
+			} else {
 				for (i = 0, l = children.length; i < l; i++) {
-					child = children[i];
-					if (child.matches(topic)) {
-						child.on(topic, fn, topicMatcher);
+					var childTopic = children[i].topic;
+					var result = topicComparator(childTopic, topic);
+					if (result !== -1) {
+						children.splice(i, 0, newChild);
 						return;
 					}
-					if (!topicMatcher) {
-						topicMatcher = pathMatcher(topic);
-					}
-					if (topicMatcher.test(child.getTopic())) {
-						newChild = node(topic, child);
-						newChild.on(topic, fn, topicMatcher);
-						children[i] = newChild;
-						return;
-					}
 				}
-				newChild = node(topic);
-				newChild.on(topic, fn);
-				if (topic.indexOf("*") === -1) {
-					children.unshift(newChild);
-				} else {
-					for (i = 0, l = children.length; i < l; i++) {
-						var childTopic = children[i].getTopic();
-						var result = topicComparator(childTopic, topic);
-						if (result !== -1) {
-							children.splice(i, 0, newChild);
-							return;
-						}
-					}
-					children.push(newChild);
-				}
-			},
-			un: function (topic, fn) {
-				if (chainTopic === topic) {
-					return chain ? chain.un(fn) : -1;
-				}
-				var i, l, child;
-				for (i = 0, l = children.length; i < l; i++) {
-					child = children[i];
-					if (child.matches(topic)) {
-						if (child.un(topic, fn)) {
-							return true;
-						}
-					}
-				}
-				validateTopic(topic);
-				var fnType = typeof fn;
-				if (fnType !== "function") {
-					throw new TypeError("Callback is " + fnType);
-				}
-				return false;
+				children.push(newChild);
 			}
 		};
+		thiz.un = function (topic, fn) {
+			if (chainTopic === topic) {
+				return chain ? chain.un(fn) : -1;
+			}
+			var i, l, child;
+			for (i = 0, l = children.length; i < l; i++) {
+				child = children[i];
+				if (child.matches(topic)) {
+					if (child.un(topic, fn)) {
+						return true;
+					}
+				}
+			}
+			validateTopic(topic);
+			var fnType = typeof fn;
+			if (fnType !== "function") {
+				throw new TypeError("Callback is " + fnType);
+			}
+			return false;
+		};
+		thiz.mix = function () {
+			hub.apply("emit", arguments).then(hub.does.mix(thiz));
+		};
+		thiz.create = hub.create;
+		thiz.factory = hub.factory;
+		thiz.peer = hub.peer;
+		thiz.does = new hub.Does(thiz);
+		return thiz;
 	}
 
 	hub.node = node;

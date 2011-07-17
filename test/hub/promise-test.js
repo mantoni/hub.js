@@ -439,93 +439,95 @@ TestCase("PromiseJoinTest", {
 		
 		sinon.assert.calledOnce(spy);
 		sinon.assert.calledWith(spy, "abc", 123);
+	},
+	
+	"test should pass current scope": function () {
+		var scope = {};
+		var joined = hub.promise(0, scope).join(hub.promise(0, {}));
+		var spy = sinon.spy();
+		joined.then(spy);
+		
+		joined.resolve();
+		
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledOn(spy, scope);
 	}
 
 });
-
-TestCase("PromiseEmitTest", {
+/*
+TestCase("PromisePropagateTest", {
 	
 	"test should be function": function () {
 		var promise = hub.promise();
 		
-		assertFunction(promise.emit);
+		assertFunction(promise.propagate);
 	},
 	
-	"test should throw if topic is invalid": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "emit");
-		
+	"test should throw if no scope available": function () {
 		assertException(function () {
-			promise.emit("da-da-da");
+			hub.promise().propagate();
 		});
-	}),
+	},
 	
-	"test should emit result": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "emit");
+	"test should propagate after promise resolution": function () {
+		var spy = sinon.spy();
+		var promise;
+		var chain = hub.chain(function () {
+			promise = this.promise();
+			promise.propagate().then(spy);
+		}, function () {
+			return "test";
+		});
 		
-		promise.emit("x");
-		promise.resolve("Test", 123);
+		chain();
 		
-		sinon.assert.calledOnce(hub.emit);
-		sinon.assert.calledWith(hub.emit, "x", "Test", 123);
-	}),
+		sinon.assert.notCalled(spy);
 		
-	"test should allow to override arguments": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "emit");
+		promise.resolve();
 		
-		promise.emit("x", "override");
-		promise.resolve("Test", 123);
-		
-		sinon.assert.calledWith(hub.emit, "x", "override");
-	}),
-	
-	"test should return the promise itself": function () {
-		var promise = hub.promise();
-		
-		var result = promise.emit("topic");
-		
-		assertSame(promise, result);
+		sinon.assert.calledOnce(spy);
+		sinon.assert.calledWithExactly(spy, "test");
 	}
 	
-});
+});*/
 
-TestCase("PromiseCreateTest", {
-	
-	"test should be function": function () {
-		var promise = hub.promise();
-		
-		assertFunction(promise.create);
-	},
-	
-	"test should throw if topic is invalid": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "create");
-		
-		assertException(function () {
-			promise.create("da-da-da");
-		});
-	}),
-	
-	"test should create result with topic": sinon.test(function () {
-		var promise = hub.promise();
-		this.stub(hub, "create");
-		var object = {};
-		
-		promise.create("x");
-		promise.resolve(object);
-		
-		sinon.assert.calledOnce(hub.create);
-		sinon.assert.calledWith(hub.create, "x", object);
-	}),
-	
-	"test should return the promise itself": function () {
-		var promise = hub.promise();
-		
-		var result = promise.create("topic");
-		
-		assertSame(promise, result);
+(function () {
+
+	function testsFor(method) {
+		return {
+			"test should be function": function () {
+				assertFunction(hub[method]);
+			},
+			
+			"test should concat arguments": sinon.test(function () {
+				var promise = hub.promise();
+				this.stub(hub, method);
+
+				promise[method]("x.y", 123);
+				promise.resolve("test");
+
+				sinon.assert.calledOnce(hub[method]);
+				sinon.assert.calledWithExactly(hub[method],
+					"x.y", 123, "test");
+			}),
+			
+			"test should return the promise itself": function () {
+				var promise = hub.promise();
+
+				var result = promise[method]("topic");
+
+				assertSame(promise, result);
+			}
+			
+		};
 	}
 	
-});
+	TestCase("PromiseOnTest", testsFor("on"));
+	TestCase("PromiseUnTest", testsFor("un"));
+	TestCase("PromiseEmitTest", testsFor("emit"));
+	TestCase("PromiseCreateTest", testsFor("create"));
+	TestCase("PromiseFactoryTest", testsFor("factory"));
+	TestCase("PromisePeerTest", testsFor("peer"));
+	TestCase("PromiseMixTest", testsFor("mix"));
+	
+}());
