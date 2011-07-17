@@ -12,6 +12,10 @@
 	function does(method) {
 		return function () {
 			var delegate = this._;
+			var type = typeof delegate[method];
+			if (type !== "function") {
+				throw new TypeError(method + " is " + type);
+			}
 			var args1 = array_slice.call(arguments);
 			return function () {
 				var args2 = array_slice.call(arguments);

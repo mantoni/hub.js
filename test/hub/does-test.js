@@ -23,6 +23,15 @@ TestCase("HubDoesClassTest", {
 		assertFunction(hub.Does.prototype.factory);
 		assertFunction(hub.Does.prototype.peer);
 		assertFunction(hub.Does.prototype.mix);
+	},
+	
+	"test should throw if not function": function () {
+		var does = new hub.Does({
+			emit: {}
+		});
+		assertException(function () {
+			does.emit();
+		}, "TypeError");
 	}
 	
 });
@@ -107,8 +116,9 @@ TestCase("PromiseDoesTest", {
 
 	TestCase("NodeDoesEmitTest", testsFor(hub.node(), "emit"));
 	TestCase("NodeDoesOnTest", testsFor(hub.node(), "on"));
-	TestCase("NodeDoesUnTest", testsFor(hub.node(), "un"));
+	TestCase("NodeDoesUnTest", testsFor(hub.node(), "un"));	
 	TestCase("NodeDoesCreateTest", testsFor(hub.node(), "create"));
+	TestCase("NodeDoesFactoryTest", testsFor(hub.node(), "factory"));
 	TestCase("NodeDoesPeerTest", testsFor(hub.node(), "peer"));
 	
 }());
