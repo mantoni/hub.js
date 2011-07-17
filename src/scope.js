@@ -8,6 +8,9 @@
 (function () {
 	
 	var scopeProto = {};
+	var scopeFunctionCache = {};
+	var array_slice = Array.prototype.slice;
+	
 	["then", "join", "wait", "resolve", "reject"].forEach(function (name) {
 		scopeProto[name] = function () {
 			var promise = this.promise();
@@ -40,7 +43,7 @@
 		 */
 		thiz.propagate = function () {
 			if (arguments.length) {
-				args = Array.prototype.slice.call(arguments);
+				args = array_slice.call(arguments);
 			}
 			var size = iteratorStack.length;
 			if (!size) {
@@ -83,7 +86,54 @@
 		};
 		return thiz;
 	}
-	
 	hub.scope = scope;
+	
+	function scoped(topic, fn) {
+		if (topic) {
+			topic += ".";
+		}
+		return function () {
+			var args = array_slice.call(arguments);
+			if (!args[0]) {
+				throw new TypeError("Topic is " + args[0]);
+			}
+			args[0] = topic + args[0];
+			return fn.apply(hub, args);
+		};
+	}
+	
+	hub.topicScope = function (topic, scope) {
+		if (!scope) {
+			scope = hub.scope();
+		}
+		var p = topic.lastIndexOf(".");
+		var namespace = p === -1 ? "" : topic.substring(0, p);
+		var cache = scopeFunctionCache[namespace];
+		if (!cache) {
+			cache = {
+				on: scoped(namespace, hub.on),
+				un: scoped(namespace, hub.un),
+				peer: scoped(namespace, hub.peer),
+				emit: scoped(namespace, hub.emit),
+				create: scoped(namespace, hub.create),
+				factory: scoped(namespace, hub.factory)
+			};
+			scopeFunctionCache[namespace] = cache;
+		}
+		scope.topic = topic;
+		scope.on = cache.on;
+		scope.un = cache.un;
+		scope.peer = cache.peer;
+		scope.emit = cache.emit;
+		scope.create = cache.create;
+		scope.factory = cache.factory;
+		return scope;
+	};
+	
+	var reset = hub.reset;
+	hub.reset = function () {
+		scopeFunctionCache = {};
+		reset();
+	};
 	
 }());

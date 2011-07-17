@@ -17,23 +17,6 @@
 	 */
 	hub.root = hub.node();
 	
-	var scopeFunctionCache = {};
-	var array_slice = Array.prototype.slice;
-	
-	function scoped(topic, fn) {
-		if (topic) {
-			topic += ".";
-		}
-		return function () {
-			var args = array_slice.call(arguments);
-			if (!args[0]) {
-				throw new TypeError("Topic is " + args[0]);
-			}
-			args[0] = topic + args[0];
-			return fn.apply(this, args);
-		};
-	}
-	
 	/**
 	 * subscribes a callback function to the given topic.
 	 * 
@@ -54,35 +37,6 @@
 	 */
 	hub.un = function (topic, fn) {
 		return hub.root.un(topic, fn);
-	};
-	
-	hub.topicScope = function (topic, scope) {
-		if (!scope) {
-			scope = hub.scope();
-		}
-		var p = topic.lastIndexOf(".");
-		var namespace = p === -1 ? "" : topic.substring(0, p);
-		var cache = scopeFunctionCache[namespace];
-		if (!cache) {
-			cache = {
-				topic: topic,
-				on: scoped(namespace, hub.on),
-				un: scoped(namespace, hub.un),
-				peer: scoped(namespace, hub.peer),
-				emit: scoped(namespace, hub.emit),
-				create: scoped(namespace, hub.create),
-				factory: scoped(namespace, hub.factory)
-			};
-			scopeFunctionCache[namespace] = cache;
-		}
-		scope.topic = cache.topic;
-		scope.on = cache.on;
-		scope.un = cache.un;
-		scope.peer = cache.peer;
-		scope.emit = cache.emit;
-		scope.create = cache.create;
-		scope.factory = cache.factory;
-		return scope;
 	};
 	
 	/**
@@ -107,7 +61,6 @@
 	 * testing.
 	 */
 	hub.reset = function () {
-		scopeFunctionCache = {};
 		hub.root = hub.node();
 	};
 	
