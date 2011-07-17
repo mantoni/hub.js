@@ -24,20 +24,20 @@
 		};
 	}
 	
-	function Does(delegate) {
-		this._ = delegate;
+	function define() {
+		var proto = {};
+		array_slice.call(arguments).forEach(function (name) {
+			proto[name] = does(name);
+		});
+		function F(delegate) {
+			this._ = delegate;
+		}
+		F.prototype = proto;
+		return F;
 	}
-	Does.prototype = {
-		emit: does("emit"),
-		on: does("on"),
-		un: does("un"),
-		create: does("create"),
-		factory: does("factory"),
-		peer: does("peer"),
-		mix: does("mix")
-	};
-	
-	hub.Does = Does;
-	hub.does = new Does(hub);
+	var HubDoes = define("emit", "on", "un", "create", "factory", "peer",
+		"mix");
+	hub.does = new HubDoes(hub);
+	hub.does.define = define;
 	
 }());

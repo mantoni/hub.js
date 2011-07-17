@@ -7,6 +7,10 @@
  */
 (function () {
 	
+	var NodeDoes = hub.does.define("emit", "on", "un", "create", "factory",
+		"peer", "mix"
+	);
+	
 	// ensures the given argument is a valid topic. Throws an error otherwise.
 	function validateTopic(topic) {
 		var type = typeof topic;
@@ -248,7 +252,7 @@
 			}
 			return thiz;
 		};
-		thiz.does = new hub.Does(thiz);
+		thiz.does = new NodeDoes(thiz);
 		if (initializer) {
 			onAll(thiz, "", initializer);
 		}

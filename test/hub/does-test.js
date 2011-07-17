@@ -9,24 +9,15 @@
  * Released under the MIT license:
  * https://github.com/mantoni/hub.js/raw/master/LICENSE
  */
-TestCase("HubDoesClassTest", {
+TestCase("HubDoesDefineClassTest", {
 	
 	"test should be function": function () {
-		assertFunction(hub.Does);
-	},
-	
-	"test should implement methods": function () {
-		assertFunction(hub.Does.prototype.emit);
-		assertFunction(hub.Does.prototype.on);
-		assertFunction(hub.Does.prototype.un);
-		assertFunction(hub.Does.prototype.create);
-		assertFunction(hub.Does.prototype.factory);
-		assertFunction(hub.Does.prototype.peer);
-		assertFunction(hub.Does.prototype.mix);
+		assertFunction(hub.does.define);
 	},
 	
 	"test should throw if not function": function () {
-		var does = new hub.Does({
+		var Does = hub.does.define("emit");
+		var does = new Does({
 			emit: {}
 		});
 		assertException(function () {
@@ -113,6 +104,8 @@ TestCase("PromiseDoesTest", {
 	TestCase("PromiseDoesFactoryTest", testsFor(hub.promise(), "factory"));
 	TestCase("PromiseDoesPeerTest", testsFor(hub.promise(), "peer"));
 	TestCase("PromiseDoesMixTest", testsFor(hub.promise(), "mix"));
+	TestCase("PromiseDoesResolveTest", testsFor(hub.promise(), "resolve"));
+	TestCase("PromiseDoesRejectTest", testsFor(hub.promise(), "reject"));
 
 	TestCase("NodeDoesEmitTest", testsFor(hub.node(), "emit"));
 	TestCase("NodeDoesOnTest", testsFor(hub.node(), "on"));

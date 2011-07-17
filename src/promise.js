@@ -10,6 +10,10 @@
  */
 (function () {
 	
+	var PromiseDoes = hub.does.define("emit", "on", "un", "create", "factory",
+		"peer", "mix", "resolve", "reject"
+	);
+	
 	var array_slice = Array.prototype.slice;
 	
 	var promiseProto = {};
@@ -148,7 +152,7 @@
 			}
 			return this.then(scope.propagate);
 		};*/
-		thiz.does = new hub.Does(thiz);
+		thiz.does = new PromiseDoes(thiz);
 		if (timeout) {
 			timer = setTimeout(function () {
 				thiz.reject(new hub.Error("timeout",
