@@ -192,7 +192,9 @@
 		if (initializer) {
 			var key;
 			for (key in initializer) {
-				thiz.on(key, initializer[key]);
+				if (initializer.hasOwnProperty(key)) {
+					thiz.on(key, initializer[key]);
+				}
 			}
 		}
 		return thiz;

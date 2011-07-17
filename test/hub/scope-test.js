@@ -1,7 +1,8 @@
 /*jslint undef: true, white: true*/
 /*globals hub sinon TestCase fail assert assertFalse assertNull assertNotNull
 	assertUndefined assertNotUndefined assertSame assertNotSame assertEquals
-	assertFunction assertObject assertArray assertException assertNoException
+	assertBoolean assertString assertFunction assertObject assertArray
+	assertException assertNoException
 */
 /**
  * Copyright 2011, Maximilian Antoni
