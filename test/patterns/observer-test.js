@@ -18,8 +18,8 @@ TestCase("ObserverPatternTest", {
 	},
 
 	"test abserver": function () {
-		
-		hub.peer("Document", function () {
+				
+		hub.peer("document", function () {
 			var text = "";
 			return {
 				append: function (newText) {
@@ -28,20 +28,18 @@ TestCase("ObserverPatternTest", {
 				}
 			};
 		});
+		
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		hub.on("document.changed", spy1);
+		hub.on("document.changed", spy2);
 
-		var spy = sinon.spy();
-		hub.on("observer.create", hub.factory(function () {
-			hub.on("Document.changed", spy);
-		}));
+		hub.emit("document.append", "Hello Observers!");
 		
-		// Create two observers:
-		hub.emit("observer.create");
-		hub.emit("observer.create");
-				
-		hub.emit("Document.append", "Hello Observer!");
-		
-		sinon.assert.calledTwice(spy);
-		sinon.assert.alwaysCalledWith(spy, "Hello Observer!");
+		sinon.assert.calledOnce(spy1);
+		sinon.assert.alwaysCalledWith(spy1, "Hello Observers!");
+		sinon.assert.calledOnce(spy2);
+		sinon.assert.alwaysCalledWith(spy2, "Hello Observers!");
 	}
 
 });
