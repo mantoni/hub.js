@@ -554,9 +554,18 @@ TestCase("ScopeMixTest", {
 			assertException(function () {
 				scope.emit(null, function () {});
 			}, "TypeError");
-		},
-		
-		
+		}
+			
 	});
 
 }());
+
+TestCase("TopicScopeOnTest", {
+
+	"test should throw if no callback is provided": function () {		
+		assertException(function () {
+			hub.topicScope().on("message");
+		}, "TypeError");
+	}
+
+});

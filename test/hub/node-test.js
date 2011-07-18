@@ -45,10 +45,11 @@ TestCase("NodeTest", {
 			};
 		}
 		
-		var i, l;
-		for (i = 0, l = inserts.length; i < l; i++) {
+		var i = 0, l = inserts.length;
+		for (; i < l; i++) {
 			this.node.on(inserts[i], caller(inserts[i]));
 		}
+		
 		this.node.emit("**");
 		
 		assertEquals(expected.join(), calls.join());
@@ -532,7 +533,7 @@ TestCase("NodeEmitSubstituteTest", {
 		
 		sinon.assert.calledOnce(hub.substitute);
 		sinon.assert.calledWith(hub.substitute, "x.{0}", ["y"]);
-	}),
+	})
 
 });
 

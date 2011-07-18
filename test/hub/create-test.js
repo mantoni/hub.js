@@ -154,14 +154,6 @@ TestCase("CreateOnTest", {
 		}
 	),
 	
-	"test should throw if no callback is provided": function () {		
-		assertException(function () {
-			hub.create("topic", function () {
-				this.on("message");
-			});
-		}, "TypeError");
-	},
-	
 	"test should invoke hub.on prefixed with some": sinon.test(
 		function () {
 			this.stub(hub, "on");

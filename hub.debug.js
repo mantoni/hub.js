@@ -299,7 +299,7 @@ hub.chain = function () {
 		}
 	}
 	
-	function topicComparator(left, right) {
+	function comparator(left, right) {
 		var leftStar = left.indexOf("*");
 		var rightStar = right.indexOf("*");
 		if (leftStar === -1) {
@@ -438,9 +438,9 @@ hub.chain = function () {
 			} else {
 				queue = scope.topicChainQueue = children.slice();
 			}
+			var args = [topic].concat(slicedArgs);
 			while (queue.length) {
-				var child = queue.shift();
-				child.emit.apply(scope, [topic].concat(slicedArgs));
+				queue.shift().emit.apply(scope, args);
 				if (scope.aborted) {
 					break;
 				}
@@ -464,7 +464,7 @@ hub.chain = function () {
 				fn = topicExtractorProxy(fn, topic);
 				topic = topic.replace(topicPlaceholderRE, "*");
 			}
-			if (isObject(fn)) {
+			if (fn && isObject(fn)) {
 				onAll(thiz, topic + ".", fn);
 				fn = getter(fn); // store, so that emit returns the object.
 			}
@@ -486,9 +486,8 @@ hub.chain = function () {
 					topicMatcher = pathMatcher(topic);
 				}
 				if (topicMatcher.test(child.topic)) {
-					newChild = node(topic, child);
+					children[i] = newChild = node(topic, child);
 					newChild.on(topic, fn, topicMatcher);
-					children[i] = newChild;
 					return;
 				}
 			}
@@ -498,9 +497,7 @@ hub.chain = function () {
 				children.unshift(newChild);
 			} else {
 				for (i = 0, l = children.length; i < l; i++) {
-					var childTopic = children[i].topic;
-					var result = topicComparator(childTopic, topic);
-					if (result !== -1) {
+					if (comparator(children[i].topic, topic) !== -1) {
 						children.splice(i, 0, newChild);
 						return;
 					}
@@ -547,7 +544,7 @@ hub.chain = function () {
 	}
 
 	hub.node = node;
-	hub.topicComparator = topicComparator;
+	hub.topicComparator = comparator;
 	hub.validateTopic = validateTopic;
 
 }());
@@ -728,6 +725,7 @@ hub.chain = function () {
 	var scopeProto = {};
 	var scopeFunctionCache = {};
 	var array_slice = Array.prototype.slice;
+	var array_empty = [];
 	
 	["then", "join", "wait", "resolve", "reject"].forEach(function (name) {
 		scopeProto[name] = function () {
@@ -740,7 +738,7 @@ hub.chain = function () {
 		var iteratorStack = [];
 		var promise;
 		var result;
-		var args;
+		var args = array_empty;
 		var thiz = Object.create(scopeProto);
 		thiz.aborted = false;
 		thiz.stopPropagation = function () {
@@ -805,9 +803,6 @@ hub.chain = function () {
 	hub.scope = scope;
 	
 	function scoped(topic, fn) {
-		if (topic) {
-			topic += ".";
-		}
 		return function () {
 			var args = array_slice.call(arguments);
 			if (!args[0]) {
@@ -833,7 +828,7 @@ hub.chain = function () {
 			scope = hub.scope();
 		}
 		var p = topic.lastIndexOf(".");
-		var namespace = p === -1 ? "" : topic.substring(0, p);
+		var namespace = p === -1 ? "" : (topic.substring(0, p) + ".");
 		var cache = scopeFunctionCache[namespace];
 		if (!cache) {
 			cache = {

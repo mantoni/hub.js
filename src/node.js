@@ -39,7 +39,7 @@
 	 * @param {String} right the second topic.
 	 * @return {Number} 0, 1 or -1.
 	 */
-	function topicComparator(left, right) {
+	function comparator(left, right) {
 		var leftStar = left.indexOf("*");
 		var rightStar = right.indexOf("*");
 		if (leftStar === -1) {
@@ -178,9 +178,9 @@
 			} else {
 				queue = scope.topicChainQueue = children.slice();
 			}
+			var args = [topic].concat(slicedArgs);
 			while (queue.length) {
-				var child = queue.shift();
-				child.emit.apply(scope, [topic].concat(slicedArgs));
+				queue.shift().emit.apply(scope, args);
 				if (scope.aborted) {
 					break;
 				}
@@ -204,7 +204,7 @@
 				fn = topicExtractorProxy(fn, topic);
 				topic = topic.replace(topicPlaceholderRE, "*");
 			}
-			if (isObject(fn)) {
+			if (fn && isObject(fn)) {
 				onAll(thiz, topic + ".", fn);
 				fn = getter(fn); // store, so that emit returns the object.
 			}
@@ -226,9 +226,8 @@
 					topicMatcher = pathMatcher(topic);
 				}
 				if (topicMatcher.test(child.topic)) {
-					newChild = node(topic, child);
+					children[i] = newChild = node(topic, child);
 					newChild.on(topic, fn, topicMatcher);
-					children[i] = newChild;
 					return;
 				}
 			}
@@ -238,9 +237,7 @@
 				children.unshift(newChild);
 			} else {
 				for (i = 0, l = children.length; i < l; i++) {
-					var childTopic = children[i].topic;
-					var result = topicComparator(childTopic, topic);
-					if (result !== -1) {
+					if (comparator(children[i].topic, topic) !== -1) {
 						children.splice(i, 0, newChild);
 						return;
 					}
@@ -287,7 +284,7 @@
 	}
 
 	hub.node = node;
-	hub.topicComparator = topicComparator;
+	hub.topicComparator = comparator;
 	hub.validateTopic = validateTopic;
 
 }());

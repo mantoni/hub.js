@@ -10,6 +10,7 @@
 	var scopeProto = {};
 	var scopeFunctionCache = {};
 	var array_slice = Array.prototype.slice;
+	var array_empty = [];
 	
 	["then", "join", "wait", "resolve", "reject"].forEach(function (name) {
 		scopeProto[name] = function () {
@@ -22,7 +23,7 @@
 		var iteratorStack = [];
 		var promise;
 		var result;
-		var args;
+		var args = array_empty;
 		var thiz = Object.create(scopeProto);
 		thiz.aborted = false;
 		/**
@@ -94,9 +95,6 @@
 	hub.scope = scope;
 	
 	function scoped(topic, fn) {
-		if (topic) {
-			topic += ".";
-		}
 		return function () {
 			var args = array_slice.call(arguments);
 			if (!args[0]) {
@@ -122,7 +120,7 @@
 			scope = hub.scope();
 		}
 		var p = topic.lastIndexOf(".");
-		var namespace = p === -1 ? "" : topic.substring(0, p);
+		var namespace = p === -1 ? "" : (topic.substring(0, p) + ".");
 		var cache = scopeFunctionCache[namespace];
 		if (!cache) {
 			cache = {
