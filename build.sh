@@ -133,16 +133,19 @@ lint() {
 
 compile() {
 	check_cc
-	echo -n "Creating hub.debug.js ... "
-	cat "${SOURCE_FILES[@]:0:11}" | sed "s/{version}/$HUB_VERSION/g" > hub.debug.js
+	if [ ! -e pkg ]; then
+		mkdir pkg
+	fi
+	echo -n "Creating pkg/hub-$HUB_VERSION.js ... "
+	cat "${SOURCE_FILES[@]:0:11}" | sed "s/{version}/$HUB_VERSION/g" > "pkg/hub-$HUB_VERSION.js"
 	FILES="${SOURCE_FILES[@]:12:${#SOURCE_FILES}}"
-	cat $FILES | grep -v "\/\*" | grep -v " \*" >> hub.debug.js
+	cat $FILES | grep -v "\/\*" | grep -v " \*" >> "pkg/hub-$HUB_VERSION.js"
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
 	echo "OK"
-	echo -n "Compiling hub.min.js ... "
-	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js hub.debug.js --js_output_file hub.min.js --use_only_custom_externs
+	echo -n "Compiling pkg/hub-$HUB_VERSION.min.js ... "
+	java -jar lib/$CC_FILENAME --compilation_level SIMPLE_OPTIMIZATIONS --js "pkg/hub-$HUB_VERSION.js" --js_output_file "pkg/hub-$HUB_VERSION.min.js" --use_only_custom_externs
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -255,8 +258,6 @@ case "$1" in
 			lint
 		fi
 		compile
-		JSTD_CONFIG="jsTestDriverDist.conf"
-		test # run tests on hub.min.js again
 	;;
 	"start" )
 		start
