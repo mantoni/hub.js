@@ -1,6 +1,11 @@
 hub.js
 ======
 
+Separation of concerns with pub/sub multicasting, mixins and promises.
+
+More information: http://mantoni.github.com/hub.js/
+
+
 Running the JsTestDriver test cases:
 ------------------------------------
 
@@ -28,11 +33,10 @@ Build commands:
     ./build.sh all      # run test, lint, compile and test on compiled output
 
 
-Links:
-------
+References:
+--------------------------------
 
-* [hub.js](http://mantoni.github.com/hub.js/)
-* [Google Group](http://groups.google.com/group/hub-js)
+* [Sinon.JS](http://sinonjs.org/)
 * [JsTestDriver](http://code.google.com/p/js-test-driver/)
 * [Closure Compiler](http://code.google.com/closure/compiler/)
 * [Node-JSLint](https://github.com/reid/node-jslint)
