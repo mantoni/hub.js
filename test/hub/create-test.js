@@ -154,17 +154,18 @@ TestCase("CreateOnTest", {
 		}
 	),
 	
-	"test should invoke hub.on prefixed with some": sinon.test(
+	"test should invoke hub.on prefixed with current topic": sinon.test(
 		function () {
-			this.stub(hub, "on");
+			this.stub(hub.root, "on");
 			var fn = function () {};
 		
 			hub.create("some.namespace", function () {
 				this.on("message", fn);
 			});
 		
-			sinon.assert.calledOnce(hub.on);
-			sinon.assert.calledWithExactly(hub.on, "some.message", fn);
+			sinon.assert.calledOnce(hub.root.on);
+			sinon.assert.calledWithExactly(hub.root.on,
+				"some.namespace.message", fn);
 		}
 	)
 	

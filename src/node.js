@@ -104,6 +104,31 @@
 		};
 	}
 	
+	var TopicScopeDoes = hub.does.define("emit", "on", "un", "create",
+			"factory", "peer", "mix"
+		);
+	["resolve", "reject"].forEach(function (name) {
+		TopicScopeDoes.prototype[name] = function () {
+			var does = this._.promise().does;
+			return does[name].apply(does, arguments);
+		};
+	});
+
+	var topicScopeProto = {};
+	["on", "un", "emit", "peer", "create", "factory"].forEach(
+		function (name) {
+			topicScopeProto[name] = function () {
+				var args = array_slice.call(arguments);
+				if (!args[0]) {
+					throw new TypeError("Topic is " + args[0]);
+				}
+				args[0] = this.namespace ? this.namespace + "." + args[0] :
+					args[0];
+				return this.node[name].apply(hub, args);
+			};
+		}
+	);
+
 	var nodeProto = {
 		create: hub.create,
 		factory: hub.factory,
@@ -122,6 +147,30 @@
 			} else {
 				this.on(topic, factory);
 			}
+		},
+		topicScope: function (topic, scope, relative) {
+			if (!topic) {
+				throw new TypeError('Topic is ' + topic);
+			}
+			if (!scope) {
+				scope = hub.scope();
+			}
+			scope.topic = topic;
+			if (relative) {
+				var p = topic.lastIndexOf(".");
+				scope.namespace = p === -1 ? "" : topic.substring(0, p);
+			} else {
+				scope.namespace = topic;
+			}
+			scope.node = this;
+			scope.on = topicScopeProto.on;
+			scope.un = topicScopeProto.un;
+			scope.peer = topicScopeProto.peer;
+			scope.emit = topicScopeProto.emit;
+			scope.create = topicScopeProto.create;
+			scope.factory = topicScopeProto.factory;
+			scope.does = new TopicScopeDoes(scope);
+			return scope;
 		}
 	};
 	
@@ -164,7 +213,7 @@
 			}
 			var scope = this.propagate ? this : hub.scope();
 			if (!scope.topic) {
-				scope = hub.topicScope(topic, scope);
+				scope = thiz.topicScope(topic, scope, true);
 			}
 			if (chain) {
 				chain.apply(scope, slicedArgs);
@@ -245,25 +294,35 @@
 				children.push(newChild);
 			}
 		};
-		thiz.un = function (topic, fn) {
+		thiz.un = function (topic, fn, topicMatcher) {
 			if (typeof topic === function_string) {
 				return thiz.un("**", topic);
 			}
-			if (chainTopic === topic) {
-				return chain ? chain.un(fn) : -1;
+			if (!topicMatcher) {
+				topicMatcher = pathMatcher(topic);
+			}
+			var fnType = typeof fn;
+			if (fnType === "undefined") {
+				if (chain && topicMatcher.test(chainTopic)) {
+					chain = hub.chain();
+				}
+			} else if (chainTopic === topic) {
+				if (chain) {
+					chain.un(fn);
+					return true;
+				}
+				return false;
 			}
 			var i, l, child;
 			for (i = 0, l = children.length; i < l; i++) {
 				child = children[i];
-				if (child.matches(topic)) {
-					if (child.un(topic, fn)) {
-						return true;
-					}
+				if ((child.matches(topic) || topicMatcher.test(child.topic)) &&
+						child.un(topic, fn, topicMatcher)) {
+					return true;
 				}
 			}
 			validateTopic(topic);
-			var fnType = typeof fn;
-			if (fnType !== function_string) {
+			if (fnType !== "undefined" && fnType !== function_string) {
 				throw new TypeError("Callback is " + fnType);
 			}
 			return false;

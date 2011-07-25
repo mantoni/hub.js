@@ -121,6 +121,8 @@
 			assertInvoked("a.**.c.d", fn);
 			assertNotInvoked("*.c.d", fn);
 			assertInvoked("**.c.d", fn);
+			assertInvoked("a**", fn);
+			assertInvoked("a.b**", fn);
 		},
 		
 		"test should create and return promise": sinon.test(function () {

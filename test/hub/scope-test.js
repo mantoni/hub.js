@@ -464,27 +464,33 @@ TestCase("ScopeMixTest", {
 (function () {
 	
 	var checkScopeFunctionPrefix = sinon.test(function (property) {
-		this.stub(hub, property);
-		var scope = hub.topicScope("topic");
+		this.stub(this.node, property);
+		var scope = this.node.topicScope("topic");
 		
 		scope[property]("test", function () {});
 		
-		sinon.assert.calledOnce(hub[property]);
-		sinon.assert.calledWith(hub[property], "test");
+		sinon.assert.calledOnce(this.node[property]);
+		sinon.assert.calledWith(this.node[property], "topic.test");
 	});
 	
 	TestCase("TopicScopeTest", {
 		
-		tearDown: function () {
-			hub.reset();
+		setUp: function () {
+			this.node = hub.node();
 		},
 		
 		"test should be function": function () {
-			assertFunction(hub.topicScope);
+			assertFunction(this.node.topicScope);
+		},
+		
+		"test should throw if no topic provided": function () {
+			assertException(function () {
+				this.node.topicScope();
+			}, "TypeError");
 		},
 		
 		"test should implement methods on scope": sinon.test(function () {		
-			var scope = hub.topicScope("x");
+			var scope = this.node.topicScope("x");
 			
 			assertString(scope.topic);
 			assertFunction(scope.on);
@@ -495,49 +501,55 @@ TestCase("ScopeMixTest", {
 		}),
 		
 		"test should expose topic": function () {
-			var scope = hub.topicScope("x");
+			var scope = this.node.topicScope("x");
 			
 			assertEquals("x", scope.topic);
 		},
 		
+		"test should expose node": function () {
+			var scope = this.node.topicScope("x");
+			
+			assertSame(this.node, scope.node);
+		},
+		
 		"test should prefix topic according to context": sinon.test(
 			function () {
-				this.stub(hub, "on");
-				var scope = hub.topicScope("some.topic");
-			
+				this.stub(this.node, "on");
+				var scope = this.node.topicScope("some.topic");
+				
 				scope.on("test", function () {});
-			
-				sinon.assert.calledOnce(hub.on);
-				sinon.assert.calledWith(hub.on, "some.test");
+				
+				sinon.assert.calledOnce(this.node.on);
+				sinon.assert.calledWith(this.node.on, "some.topic.test");
 			}
 		),
 	
 		"test on should invoke on with topic prefix": function () {
-			checkScopeFunctionPrefix("on");
+			checkScopeFunctionPrefix.call(this, "on");
 		},
 
 		"test un should invoke un with topic prefix": function () {
-			checkScopeFunctionPrefix("un");
+			checkScopeFunctionPrefix.call(this, "un");
 		},
 	
 		"test peer should invoke peer with topic prefix": function () {
-			checkScopeFunctionPrefix("peer");
+			checkScopeFunctionPrefix.call(this, "peer");
 		},
 	
 		"test emit should invoke emit with topic prefix": function () {
-			checkScopeFunctionPrefix("emit");
+			checkScopeFunctionPrefix.call(this, "emit");
 		},
 			
 		"test create should invoke create with topic prefix": function () {
-			checkScopeFunctionPrefix("create");
+			checkScopeFunctionPrefix.call(this, "create");
 		},
 		
 		"test factory should invoke factory with topic prefix": function () {
-			checkScopeFunctionPrefix("factory");
+			checkScopeFunctionPrefix.call(this, "factory");
 		},
 		
 		"test should throw if no topic is provided": function () {		
-			var scope = hub.topicScope("x");
+			var scope = this.node.topicScope("x");
 			
 			assertException(function () {
 				scope.on(null, function () {});
@@ -555,17 +567,78 @@ TestCase("ScopeMixTest", {
 				scope.emit(null, function () {});
 			}, "TypeError");
 		}
-			
+		
 	});
 
 }());
 
+TestCase("HubTopicScopeNamespaceTest", {
+	
+	"test should forward to root implementation": sinon.test(function () {
+		this.stub(hub.root, "topicScope");
+		var scope = hub.scope();
+		
+		hub.topicScope("topic", scope, true);
+		
+		sinon.assert.calledOnce(hub.root.topicScope);
+		sinon.assert.calledWith(hub.root.topicScope, "topic", scope, true);
+	})
+	
+});
+
+TestCase("TopicScopeNamespaceTest", {
+	
+	setUp: function () {
+		this.node = hub.node();
+	},
+	
+	"test should be string": function () {
+		var scope = this.node.topicScope("x");
+		
+		assertEquals("string", typeof scope.namespace);
+	},
+	
+	"test should equal topic by default": function () {
+		var scope = this.node.topicScope("some.topic");
+		
+		assertEquals("some.topic", scope.namespace);
+	},
+	
+	"test should be namespace if requested": function () {
+		var scope = this.node.topicScope("some.topic", null, true);
+		
+		assertEquals("some", scope.namespace);
+	},
+	
+	"test should be empty if topic has no separator": function () {
+		var scope = this.node.topicScope("topic", null, true);
+		
+		assertEquals("", scope.namespace);
+	}
+	
+});
+
 TestCase("TopicScopeOnTest", {
 
-	"test should throw if no callback is provided": function () {		
+	setUp: function () {
+		this.node = hub.node();
+	},
+
+	"test should throw if no callback is provided": function () {
+		var scope = this.node.topicScope("topic");
 		assertException(function () {
-			hub.topicScope().on("message");
+			scope.on("message");
 		}, "TypeError");
-	}
+	},
+	
+	"test should call 'on' with message": sinon.test(function () {
+		var scope = this.node.topicScope("topic", null, true);
+		var spy = sinon.spy();
+		this.stub(this.node, "on");
+		
+		scope.on("message", function () {});
+		
+		sinon.assert.calledWith(this.node.on, "message");
+	})
 
 });

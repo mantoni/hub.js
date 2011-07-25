@@ -396,10 +396,33 @@ TestCase("NodeUnTest", {
 		this.node.emit("anything");
 		
 		sinon.assert.notCalled(spy);
+	},
+	
+	"test should unsubscribe all matches if no callback is given": function () {
+		var spy1 = sinon.spy();
+		var spy2 = sinon.spy();
+		hub.on("test.a", spy1);
+		hub.on("test.b", spy2);
+		
+		hub.un("test.*");
+		
+		sinon.assert.notCalled(spy1);
+		sinon.assert.notCalled(spy2);
 	}
 	
 });
 
+TestCase("NodeTopicScopeTest", {
+
+	setUp: function () {
+		this.node = hub.node();
+	},
+	
+	"test should be function": function () {
+		assertFunction(this.node.topicScope);
+	}
+
+});
 
 TestCase("NodeEmitTest", {
 	
@@ -506,15 +529,15 @@ TestCase("NodeEmitScopeTest", {
 		sinon.assert.calledOn(spy, scope);
 	}),
 	
-	"test should pass scope object to hub.topicScope": sinon.test(
+	"test should pass scope object to this.topicScope": sinon.test(
 		function () {
-			this.spy(hub, "topicScope");
+			this.spy(this.node, "topicScope");
 			var scope = hub.scope();
 			
 			this.node.emit.call(scope, "x");
 			
-			sinon.assert.calledOnce(hub.topicScope);
-			sinon.assert.calledWith(hub.topicScope, "x", scope);
+			sinon.assert.calledOnce(this.node.topicScope);
+			sinon.assert.calledWith(this.node.topicScope, "x", scope);
 		}
 	)
 	

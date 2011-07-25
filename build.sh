@@ -17,7 +17,7 @@
 #
 
 # hub.js version to build:
-HUB_VERSION="0.1.0"
+HUB_VERSION="0.1.1"
 
 # Closure Compiler version:
 CC_VERSION="20110119"
@@ -113,7 +113,7 @@ lint() {
 	LINT_OPT="--node false"
 	TESTS_HUB=`ls test/hub/*.js`
 	TESTS_PATTERNS=`ls test/patterns/*.js`
-	FILES="${SOURCE_FILES} $TESTS_HUB $TESTS_PATTERNS"
+	FILES="$SOURCE_FILES $TESTS_HUB $TESTS_PATTERNS"
 	for FILE in $FILES
 	do
 		LINT_RESULT=`jslint $LINT_OPT $FILE | sed -n -e '4,100p'`

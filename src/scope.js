@@ -8,7 +8,6 @@
 (function () {
 	
 	var scopeProto = {};
-	var scopeFunctionCache = {};
 	var array_slice = Array.prototype.slice;
 	var array_empty = [];
 	
@@ -94,60 +93,8 @@
 	}
 	hub.scope = scope;
 	
-	function scoped(topic, fn) {
-		return function () {
-			var args = array_slice.call(arguments);
-			if (!args[0]) {
-				throw new TypeError("Topic is " + args[0]);
-			}
-			args[0] = topic + args[0];
-			return fn.apply(hub, args);
-		};
-	}
-	
-	var TopicScopeDoes = hub.does.define("emit", "on", "un", "create",
-		"factory", "peer", "mix"
-	);
-	["resolve", "reject"].forEach(function (name) {
-		TopicScopeDoes.prototype[name] = function () {
-			var does = this._.promise().does;
-			return does[name].apply(does, arguments);
-		};
-	});
-	
-	hub.topicScope = function (topic, scope) {
-		if (!scope) {
-			scope = hub.scope();
-		}
-		var p = topic.lastIndexOf(".");
-		var namespace = p === -1 ? "" : (topic.substring(0, p) + ".");
-		var cache = scopeFunctionCache[namespace];
-		if (!cache) {
-			cache = {
-				on: scoped(namespace, hub.on),
-				un: scoped(namespace, hub.un),
-				peer: scoped(namespace, hub.peer),
-				emit: scoped(namespace, hub.emit),
-				create: scoped(namespace, hub.create),
-				factory: scoped(namespace, hub.factory)
-			};
-			scopeFunctionCache[namespace] = cache;
-		}
-		scope.topic = topic;
-		scope.on = cache.on;
-		scope.un = cache.un;
-		scope.peer = cache.peer;
-		scope.emit = cache.emit;
-		scope.create = cache.create;
-		scope.factory = cache.factory;
-		scope.does = new TopicScopeDoes(scope);
-		return scope;
-	};
-	
-	var reset = hub.reset;
-	hub.reset = function () {
-		scopeFunctionCache = {};
-		reset();
+	hub.topicScope = function (topic, scope, relative) {
+		return hub.root.topicScope(topic, scope, relative);
 	};
 	
 }());
