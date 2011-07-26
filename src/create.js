@@ -43,7 +43,10 @@
 		}
 		assertFunction(fn);
 		var object = {};
-		var scope = topic ? hub.topicScope(topic) : hub.scope();
+		var scope = this.propagate ? this : hub.scope();
+		if (topic) {
+			scope = hub.topicScope(topic, scope);
+		}
 		scope.mix = function () {
 			hub.apply("emit", arguments).then(hub.does.mix(object));
 		};

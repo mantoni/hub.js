@@ -117,15 +117,20 @@ TestCase("CreateMixTest", {
 		
 		sinon.assert.calledTwice(hub.mix);
 		assertEquals("test", hub.mix.getCall(1).args[1]);
-	})
-
-});
-
-TestCase("CreateOnTest", {
+	}),
 	
-	tearDown: function () {
-		hub.reset();
-	},
+	"test should use scope provided by hub.scope": sinon.test(
+		function () {
+			var object = {};
+			this.stub(hub, "scope").returns(object);
+			var spy = sinon.spy();
+			
+			hub.create(spy);
+			
+			sinon.assert.calledOnce(hub.scope);
+			sinon.assert.calledOn(spy, object);
+		}
+	),
 	
 	"test should use scope provided by hub.topicScope": sinon.test(
 		function () {
@@ -141,18 +146,22 @@ TestCase("CreateOnTest", {
 		}
 	),
 	
-	"test should use scope provided by hub.scope": sinon.test(
-		function () {
-			var object = {};
-			this.stub(hub, "scope").returns(object);
-			var spy = sinon.spy();
-			
-			hub.create(spy);
-			
-			sinon.assert.calledOnce(hub.scope);
-			sinon.assert.calledOn(spy, object);
-		}
-	),
+	"test should use given scope": function () {
+		var scope = hub.scope();
+		var spy = sinon.spy();
+		
+		hub.create.call(scope, spy);
+		
+		sinon.assert.calledOn(spy, scope);
+	}
+
+});
+
+TestCase("CreateOnTest", {
+	
+	tearDown: function () {
+		hub.reset();
+	},
 	
 	"test should invoke hub.on prefixed with current topic": sinon.test(
 		function () {
