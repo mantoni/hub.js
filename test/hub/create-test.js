@@ -55,11 +55,10 @@ TestCase("CreateInvokeTest", {
 	
 	"test should pass arguments to function": function () {
 		var spy = sinon.spy();
-		var args = [123, "abc"];
 		
-		hub.create(spy, args);
+		hub.create(spy, 123, "abc");
 		
-		sinon.assert.calledWithExactly(spy, args[0], args[1]);
+		sinon.assert.calledWithExactly(spy, 123, "abc");
 	},
 	
 	"test should accept string and function": function () {

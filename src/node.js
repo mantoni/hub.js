@@ -132,15 +132,15 @@
 	var nodeProto = {
 		create: hub.create,
 		factory: hub.factory,
-		peer: function (topic, factory, args) {
+		peer: function (topic, factory) {
 			var object;
 			if (typeof topic === function_string) {
-				object = hub.create(topic, factory);
+				object = hub.create.apply(hub, arguments);
 				if (object) {
 					this.on(object);
 				}
 			} else if (typeof factory === function_string) {
-				object = hub.create(topic, factory, args);
+				object = hub.create.apply(hub, arguments);
 				if (object) {
 					this.on(topic, object);
 				}

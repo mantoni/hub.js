@@ -35,9 +35,10 @@
 		return object;
 	}
 	
-	function create(topic, fn, args) {
+	function create(topic, fn) {
+		var args = Array.prototype.slice.call(arguments, 2);
 		if (typeof topic !== "string") {
-			args = fn;
+			args.unshift(fn);
 			fn = topic;
 			topic = null;
 		}
@@ -63,6 +64,7 @@
 		return function () {
 			return hub.create(topic, fn);
 		};
+//		return hub.does.create(topic, fn);
 	}
 	
 	hub.mix = mix;

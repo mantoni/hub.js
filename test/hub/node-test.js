@@ -694,11 +694,10 @@ TestCase("NodePeerTest", {
 			this.stub(hub, "create");
 			
 			var factory = function () {};
-			var args = [123];
-			this.node.peer(factory, args);
+			this.node.peer(factory, 123, "abc");
 			
 			sinon.assert.calledOnce(hub.create);
-			sinon.assert.calledWith(hub.create, factory, args);
+			sinon.assert.calledWith(hub.create, factory, 123, "abc");
 		}
 	),
 
@@ -718,13 +717,12 @@ TestCase("NodePeerTest", {
 		function () {
 			this.stub(hub, "create");
 			var factory = function () {};
-			var args = [123];
 
-			this.node.peer("topic", factory, args);
+			this.node.peer("topic", factory, 123, "abc");
 
 			sinon.assert.calledOnce(hub.create);
 			sinon.assert.calledWithExactly(hub.create, "topic", factory, 
-				args);
+				123, "abc");
 		}
 	),
 
