@@ -204,22 +204,21 @@
 			if (topic.indexOf("{") !== -1) {
 				topic = hub.substitute(topic, slicedArgs);
 			}
-			if (topic !== rootTopic && !chainTopicMatcher.test(topic)) {
-				if (topic.indexOf("*") === -1 ||
-						!pathMatcher(topic).test(chainTopic)) {
-					return;
-				}
-				topic = rootTopic;
+			var noWildcard = topic.indexOf("*") === -1;
+			if (noWildcard && !chainTopicMatcher.test(topic)) {
+				return;
 			}
 			var scope = this.propagate ? this : hub.scope();
 			if (!scope.topic) {
 				scope = thiz.topicScope(topic, scope, true);
 			}
-			if (chain) {
-				chain.apply(scope, slicedArgs);
-			}
-			if (scope.aborted) {
-				return scope.result();
+			if (noWildcard || pathMatcher(topic).test(chainTopic)) {
+				if (chain) {
+					chain.apply(scope, slicedArgs);
+				}
+				if (scope.aborted) {
+					return scope.result();
+				}
 			}
 			var queue = scope.topicChainQueue;
 			if (queue) {
@@ -316,8 +315,8 @@
 			var i, l, child;
 			for (i = 0, l = children.length; i < l; i++) {
 				child = children[i];
-				if ((child.matches(topic) || topicMatcher.test(child.topic)) &&
-						child.un(topic, fn, topicMatcher)) {
+				if ((child.matches(topic) || topicMatcher.test(child.topic))
+						&& child.un(topic, fn, topicMatcher)) {
 					return true;
 				}
 			}

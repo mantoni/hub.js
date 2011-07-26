@@ -17,7 +17,7 @@
 #
 
 # hub.js version to build:
-HUB_VERSION="0.1.1"
+HUB_VERSION="0.1.2"
 
 # Closure Compiler version:
 CC_VERSION="20110119"

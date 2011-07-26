@@ -381,11 +381,16 @@ TestCase("NodeUnTest", {
 	"test unsubscribe returns true on success": function () {
 		var fn = function () {};
 		this.node.on("x.y", fn);
-		assert(this.node.un("x.y", fn));
+		
+		var result = this.node.un("x.y", fn);
+		
+		assert(result);
 	},
 	
 	"test unsubscribe returns false on failure": function () {
-		assertFalse(this.node.un("x.y", function () {}));
+		var result = this.node.un("x.y", function () {});
+		
+		assertFalse(result);
 	},
 	
 	"test should unsubscribe from ** if no topic is given": function () {
@@ -398,16 +403,29 @@ TestCase("NodeUnTest", {
 		sinon.assert.notCalled(spy);
 	},
 	
-	"test should unsubscribe all matches if no callback is given": function () {
-		var spy1 = sinon.spy();
-		var spy2 = sinon.spy();
-		hub.on("test.a", spy1);
-		hub.on("test.b", spy2);
+	"test should unsubscribe all matches if no callback is given":
+		function () {
+			var spy1 = sinon.spy();
+			var spy2 = sinon.spy();
+			hub.on("test.a", spy1);
+			hub.on("test.b", spy2);
 		
-		hub.un("test.*");
+			hub.un("test.*");
+			hub.emit("test.a");
+			hub.emit("test.b");
 		
-		sinon.assert.notCalled(spy1);
-		sinon.assert.notCalled(spy2);
+			sinon.assert.notCalled(spy1);
+			sinon.assert.notCalled(spy2);
+		},
+		
+	"test should not unsubscribe parent node": function () {
+		var spy = sinon.spy();
+		hub.on("test.a", spy);
+		
+		hub.un("test.a.*");
+		hub.emit("test.a");
+		
+		sinon.assert.calledOnce(spy);
 	}
 	
 });
@@ -498,6 +516,16 @@ TestCase("NodeEmitTest", {
 		node.emit("a").then(spy);
 		
 		sinon.assert.calledWith(spy, "test");
+	},
+	
+	"test should not invoke parent on multicast": function () {
+		var spy = sinon.spy();
+		var node = hub.node();
+		node.on("a.b", spy);
+		
+		node.emit("a.b.*");
+		
+		sinon.assert.notCalled(spy);
 	}
 	
 });
