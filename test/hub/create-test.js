@@ -153,7 +153,17 @@ TestCase("CreateMixTest", {
 		hub.create.call(scope, spy);
 		
 		sinon.assert.calledOn(spy, scope);
-	}
+	},
+	
+	"test should return promise": sinon.test(function () {
+		var result;
+		hub.create(function () {
+			result = this.mix("nothing");
+		});
+		
+		assertObject(result);
+		assertFunction(result.then);
+	})
 
 });
 

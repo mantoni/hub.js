@@ -48,7 +48,7 @@
 			scope = hub.topicScope(topic, scope);
 		}
 		scope.mix = function () {
-			hub.apply("emit", arguments).then(hub.does.mix(object));
+			return hub.apply("emit", arguments).then(hub.does.mix(object));
 		};
 		var result = args ? fn.apply(scope, args) : fn.call(scope);
 		return hub.mix(object, result);
