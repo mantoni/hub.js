@@ -11,11 +11,11 @@
  */
 TestCase("NodeTest", {
 
-	"test method exists": function () {
+	"test should be function": function () {
 		assertFunction(hub.node);
 	},
 
-	"test implements emit, add and remove": function () {
+	"test should implement emit, add and remove": function () {
 		var node = hub.node();
 		assertFunction(node.emit);
 		assertFunction(node.on);
