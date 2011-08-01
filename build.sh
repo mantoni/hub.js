@@ -17,7 +17,7 @@
 #
 
 # hub.js version to build:
-HUB_VERSION="0.1.2"
+HUB_VERSION="0.1.3"
 
 # Closure Compiler version:
 CC_VERSION="20110119"
@@ -41,7 +41,7 @@ COVERAGE_FILENAME="coverage-$COVERAGE_VERSION.jar"
 COVERAGE_DOWNLOAD="http://js-test-driver.googlecode.com/files/$COVERAGE_FILENAME"
 COVERAGE_CONFIG=".jstd-coverage.conf"
 
-SOURCE_FILES="src/head.js src/util.js src/does.js src/iterator.js src/chain.js src/create.js src/node.js src/root.js src/promise.js src/scope.js"
+SOURCE_FILES="src/head.js src/util.js src/does.js src/iterator.js src/chain.js src/create.js src/node.js src/root.js src/promise.js src/scope.js src/tail.js"
 
 download() {
 	if [ ! -e lib ]; then
