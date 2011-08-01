@@ -20,9 +20,6 @@
 		if (type !== "string") {
 			throw new Error("Topic is " + type);
 		}
-		if (!topic) {
-			throw new Error("Topic is empty");
-		}
 		if (!(/^[a-zA-Z0-9\.\{\}\*]+$/.test(topic))) {
 			throw new Error("Illegal topic: " + topic);
 		}
@@ -150,7 +147,7 @@
 		},
 		topicScope: function (topic, scope, relative) {
 			if (!topic) {
-				throw new TypeError('Topic is ' + topic);
+				throw new TypeError("Topic is " + topic);
 			}
 			if (!scope) {
 				scope = hub.scope();
@@ -208,7 +205,7 @@
 			if (noWildcard && !chainTopicMatcher.test(topic)) {
 				return;
 			}
-			var scope = this.propagate ? this : hub.scope();
+			var scope = hub.scope(this);
 			if (!scope.topic) {
 				scope = thiz.topicScope(topic, scope, true);
 			}

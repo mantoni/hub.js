@@ -44,7 +44,7 @@
 		}
 		assertFunction(fn);
 		var object = {};
-		var scope = this.propagate ? this : hub.scope();
+		var scope = hub.scope(this);
 		if (topic) {
 			scope = hub.topicScope(topic, scope);
 		}
@@ -61,10 +61,7 @@
 		} else {
 			assertFunction(fn);
 		}
-		return function () {
-			return hub.create(topic, fn);
-		};
-//		return hub.does.create(topic, fn);
+		return hub.does.create(topic, fn);
 	}
 	
 	hub.mix = mix;

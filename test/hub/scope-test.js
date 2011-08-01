@@ -79,7 +79,7 @@ TestCase("ScopeTest", {
 			sinon.assert.calledOnce(spy);
 		},
 	
-	"test chain result should be promise": function () {
+	"test should return promise": function () {
 		var chain = hub.chain(function () {
 			this.promise();
 		});
@@ -88,6 +88,14 @@ TestCase("ScopeTest", {
 
 		assertObject(promise);
 		assertFunction(promise.then);
+	},
+	
+	"test should return argument if is scope": function () {
+		var scope = hub.scope();
+		
+		var result = hub.scope(scope);
+		
+		assertSame(scope, result);
 	}
 
 });

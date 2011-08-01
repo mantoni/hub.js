@@ -8,7 +8,6 @@
 (function () {
 	
 	var scopeProto = {};
-	var array_slice = Array.prototype.slice;
 	var array_empty = [];
 	
 	["then", "join", "wait", "resolve", "reject"].forEach(function (name) {
@@ -19,6 +18,9 @@
 	});
 	
 	function scope(object) {
+		if (object && object.propagate) {
+			return object;
+		}
 		var iteratorStack = [];
 		var promise;
 		var result;
@@ -41,7 +43,7 @@
 		 */
 		thiz.propagate = function () {
 			if (arguments.length) {
-				args = array_slice.call(arguments);
+				args = Array.prototype.slice.call(arguments);
 			}
 			var size = iteratorStack.length;
 			if (!size) {
