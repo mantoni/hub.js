@@ -28,9 +28,83 @@ TestCase("ApplyTest", {
 	})
 	
 });
-/*
- * Test cases for hub.resolve.
- */
+
+TestCase("TypeOfTest", {
+	
+	"test should be function": function () {
+		assertFunction(hub.typeOf);
+	},
+	
+	"test should return undefined": function () {
+		assertEquals("undefined", hub.typeOf());
+	},
+	
+	"test should return null": function () {
+		assertEquals("null", hub.typeOf(null));
+	},
+	
+	"test should return boolean": function () {
+		assertEquals("boolean", hub.typeOf(true));
+		assertEquals("boolean", hub.typeOf(false));
+		assertEquals("boolean", hub.typeOf(new Boolean()));
+	},
+	
+	"test should return number": function () {
+		assertEquals("number", hub.typeOf(0));
+		assertEquals("number", hub.typeOf(1));
+		assertEquals("number", hub.typeOf(-1));
+		assertEquals("number", hub.typeOf(0.0001));
+		assertEquals("number", hub.typeOf(new Number()));
+	},
+	
+	"test should return string": function () {
+		assertEquals("string", hub.typeOf(""));
+		assertEquals("string", hub.typeOf("x"));
+		assertEquals("string", hub.typeOf(new String()));
+	},
+	
+	"test should return function": function () {
+		assertEquals("function", hub.typeOf(function () {}));
+		assertEquals("function", hub.typeOf(new Function()));
+	},
+
+	"test should return object": function () {
+		assertEquals("object", hub.typeOf({}));
+		assertEquals("object", hub.typeOf(new Object()));
+	},
+
+	"test should return array": function () {
+		assertEquals("array", hub.typeOf([]));
+		assertEquals("array", hub.typeOf(new Array()));
+	},
+	
+	"test should return date": function () {
+		assertEquals("date", hub.typeOf(new Date()));
+	},
+	
+	"test should return date": function () {
+		assertEquals("regexp", hub.typeOf(/.*/));
+		assertEquals("regexp", hub.typeOf(new RegExp()));
+	}
+	
+});
+
+TestCase("ErrorTest", {
+	
+	"test should be of type Error": function () {
+		var error = new hub.Error();
+		
+		assert(error instanceof Error);
+	},
+	
+	"test should have name hub.Error": function () {
+		assertException(function () {
+			throw new hub.Error();
+		}, "hub.Error");
+	}
+	
+});
+
 TestCase("ResolveTest", {
 	
 	"test should be function": function () {
@@ -125,13 +199,13 @@ TestCase("SubstituteTest", {
 		"test empty object": function () {
 			var o = hub.merge({}, {});
 			
-			assertEquals("[object Object]", Object.prototype.toString.call(o));
+			assertEquals("object", hub.typeOf(o));
 		},
 
 		"test empty array": function () {
 			var a = hub.merge([], []);
 			
-			assertEquals("[object Array]", Object.prototype.toString.call(a));
+			assertEquals("array", hub.typeOf(a));
 		},
 
 		"test should merge object properties": function () {
@@ -157,8 +231,8 @@ TestCase("SubstituteTest", {
 			assertEquals("Cannot merge value foo with bar", error.toString());
 			assertEquals("foo", error.context.target);
 			assertEquals("bar", error.context.source);
-			assertEquals("[object String]", error.context.targetType);
-			assertEquals("[object String]", error.context.sourceType);
+			assertEquals("string", error.context.targetType);
+			assertEquals("string", error.context.sourceType);
 		},
 
 		"test should not throw for same string values": function () {
@@ -201,8 +275,8 @@ TestCase("SubstituteTest", {
 			
 			assertSame(true, error.context.target);
 			assertSame(false, error.context.source);
-			assertEquals("[object Boolean]", error.context.targetType);
-			assertEquals("[object Boolean]", error.context.sourceType);
+			assertEquals("boolean", error.context.targetType);
+			assertEquals("boolean", error.context.sourceType);
 		},
 
 		"test should merge equal strings": function () {
@@ -215,18 +289,17 @@ TestCase("SubstituteTest", {
 			
 			assertSame("", error.context.target);
 			assertSame("a", error.context.source);
-			assertEquals("[object String]", error.context.targetType);
-			assertEquals("[object String]", error.context.sourceType);
+			assertEquals("string", error.context.targetType);
+			assertEquals("string", error.context.sourceType);
 		},
 
 		"test should fail on object and array": function () {
 			var error = mergeError({}, []);
 			
 			assertEquals("validation", error.type);
-			assertEquals("Cannot merge type [object Object] with [object Array]",
-				error.toString());
-			assertEquals("[object Object]", error.context.targetType);
-			assertEquals("[object Array]", error.context.sourceType);
+			assertEquals("Cannot merge object with array", error.toString());
+			assertEquals("object", error.context.targetType);
+			assertEquals("array", error.context.sourceType);
 		}
 
 	});

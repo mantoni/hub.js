@@ -35,6 +35,17 @@ hub.apply = function (name, args) {
 	return this[name].apply(this, args);
 };
 
+hub.typeOf = function (value) {
+	if (value === null) {
+		return "null";
+	}
+	if (value === undefined) {
+		return "undefined";
+	}
+	var type = Object.prototype.toString.call(value);
+	return type.substring(8, type.length - 1).toLowerCase();
+};
+
 /**
  * resolves a dot notation path from an object. If the path cannot be
  * resolved, the optional return value is returned.
@@ -92,12 +103,14 @@ hub.substitute = function (string, values, defaultValue) {
  * @param {Object} context the context for the error.
  */
 hub.Error = function (type, description, context) {
+	this.name = "hub.Error";
 	this.type = type;
 	this.context = context;
 	this.toString = function () {
 		return hub.substitute(description, context);
 	};
 };
+hub.Error.prototype = Error.prototype;
 
 /**
  * merges the source object into the target object.
@@ -113,12 +126,11 @@ hub.merge = function (target, source) {
 	if (source === undefined || source === null) {
 		return target;
 	}
-	var toString = Object.prototype.toString;
-	var sourceType = toString.call(source);
-	var targetType = toString.call(target);
+	var sourceType = hub.typeOf(source);
+	var targetType = hub.typeOf(target);
 	var k;
 	if (targetType === sourceType) {
-		if (sourceType === "[object Object]") {
+		if (sourceType === "object") {
 			for (k in source) {
 				if (source.hasOwnProperty(k)) {
 					target[k] = hub.merge(target[k], source[k]);
@@ -126,14 +138,14 @@ hub.merge = function (target, source) {
 			}
 			return target;
 		}
-		if (sourceType === "[object Array]") {
+		if (sourceType === "array") {
 			return target.concat(source);
 		}
 	}
 	throw new hub.Error("validation",
 		targetType === sourceType ?
 			"Cannot merge value {target} with {source}" :
-			"Cannot merge type {targetType} with {sourceType}", {
+			"Cannot merge {targetType} with {sourceType}", {
 				target: target,
 				source: source,
 				targetType: targetType,
