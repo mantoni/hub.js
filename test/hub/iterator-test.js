@@ -139,8 +139,19 @@ TestCase("IteratorHasNextTest", {
 			
 			assertEquals(["a"], arr);
 		},
+		
+		"test should not move next if value was found before position":
+			function () {
+				var arr = ["a", "b"];
+				var iterator = hub.iterator(arr);
+				iterator();
+				
+				iterator.remove("a");
+
+				assertEquals("b", iterator());
+			},
 	
-		"test remove should return true if found": function () {
+		"test should return true if value was found": function () {
 			var iterator = hub.iterator(["a"]);
 			
 			var result = iterator.remove("a");
@@ -148,7 +159,7 @@ TestCase("IteratorHasNextTest", {
 			assert(result);
 		},
 	
-		"test remove should return false if not found": function () {
+		"test should return false if value was not found": function () {
 			var iterator = hub.iterator(["a"]);
 			
 			var result = iterator.remove("b");
@@ -156,7 +167,7 @@ TestCase("IteratorHasNextTest", {
 			assertFalse(result);
 		},
 	
-		"test remove should return false if no next": function () {
+		"test should return false if no next": function () {
 			var iterator = hub.iterator([]);
 			
 			var result = iterator.remove();

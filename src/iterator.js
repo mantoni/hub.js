@@ -27,9 +27,8 @@ hub.iterator = function (array) {
 		if (index >= length) {
 			throw new Error("Iterator out of bounds.");
 		}
-		var item = array[index++];
-		iterator.hasNext = index < length;
-		return item;
+		iterator.hasNext = index < length - 1;
+		return array[index++];
 	}
 	/**
 	 * indicated whether more elements are available for iteration.
@@ -50,11 +49,7 @@ hub.iterator = function (array) {
 		var i;
 		if (type === "undefined") {
 			object = index;
-		} else if (type === "number") {
-			if (object < index) {
-				index--;
-			}
-		} else {
+		} else if (type !== "number") {
 			for (i = array.length - 1; i >= 0; i--) {
 				if (array[i] === object) {
 					object = i;
@@ -69,6 +64,9 @@ hub.iterator = function (array) {
 			return false;
 		}
 		array.splice(object, 1);
+		if (object < index) {
+			index--;
+		}
 		iterator.hasNext = index < --length;
 		return true;
 	};
