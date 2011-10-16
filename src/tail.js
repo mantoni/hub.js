@@ -1,5 +1,5 @@
 /*jslint undef: true, white: true*/
-/*global hub*/
+/*global hub module*/
 /**
  * Copyright 2011, Maximilian Antoni
  * Released under the MIT license:

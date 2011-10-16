@@ -46,7 +46,7 @@ TestCase("TypeOfTest", {
 	"test should return boolean": function () {
 		assertEquals("boolean", hub.typeOf(true));
 		assertEquals("boolean", hub.typeOf(false));
-		assertEquals("boolean", hub.typeOf(new Boolean()));
+		assertEquals("boolean", hub.typeOf(Boolean()));
 	},
 	
 	"test should return number": function () {
@@ -54,35 +54,32 @@ TestCase("TypeOfTest", {
 		assertEquals("number", hub.typeOf(1));
 		assertEquals("number", hub.typeOf(-1));
 		assertEquals("number", hub.typeOf(0.0001));
-		assertEquals("number", hub.typeOf(new Number()));
+		assertEquals("number", hub.typeOf(Number()));
 	},
 	
 	"test should return string": function () {
 		assertEquals("string", hub.typeOf(""));
 		assertEquals("string", hub.typeOf("x"));
-		assertEquals("string", hub.typeOf(new String()));
+		assertEquals("string", hub.typeOf(String()));
 	},
 	
 	"test should return function": function () {
 		assertEquals("function", hub.typeOf(function () {}));
-		assertEquals("function", hub.typeOf(new Function()));
 	},
 
 	"test should return object": function () {
 		assertEquals("object", hub.typeOf({}));
-		assertEquals("object", hub.typeOf(new Object()));
 	},
 
 	"test should return array": function () {
 		assertEquals("array", hub.typeOf([]));
-		assertEquals("array", hub.typeOf(new Array()));
 	},
 	
 	"test should return date": function () {
 		assertEquals("date", hub.typeOf(new Date()));
 	},
 	
-	"test should return date": function () {
+	"test should return regexp": function () {
 		assertEquals("regexp", hub.typeOf(/.*/));
 		assertEquals("regexp", hub.typeOf(new RegExp()));
 	}
