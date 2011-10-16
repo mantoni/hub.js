@@ -23,7 +23,7 @@ HUB_VERSION="0.1.3"
 CC_VERSION="20110119"
 
 # JsTestDriver version:
-JSTD_VERSION="1.3.2"
+JSTD_VERSION="1.3.3c"
 
 # Coverage version:
 COVERAGE_VERSION=$JSTD_VERSION
