@@ -1,0 +1,44 @@
+var test      = require('utest');
+var assert    = require('assert');
+var sinon     = require('sinon');
+
+var hub       = require('../lib/hub');
+var strategy  = require('../lib/strategy');
+
+
+test('emit-strategy', {
+
+  before: function () {
+    this.hub = hub.create();
+  },
+
+
+  'should use LAST by default': sinon.test(function () {
+    this.spy(strategy, 'LAST');
+    this.hub.on('test', sinon.stub().returns('a'));
+    this.hub.on('test', sinon.stub().returns('b'));
+    var spy = sinon.spy();
+    
+    this.hub.emit('test', spy);
+    
+    sinon.assert.calledOnce(strategy.LAST);
+    sinon.assert.calledWith(strategy.LAST, ['a', 'b']);
+    sinon.assert.calledWith(spy, null, 'b');
+  }),
+
+
+  'should use given strategy': sinon.test(function () {
+    this.spy(strategy, 'CONCAT');
+    this.hub.on('test', sinon.stub().returns('a'));
+    this.hub.on('test', sinon.stub().returns('b'));
+    var spy = sinon.spy();
+    
+    this.hub.emit('test', strategy.CONCAT, spy);
+    
+    sinon.assert.calledOnce(strategy.CONCAT);
+    sinon.assert.calledWith(strategy.CONCAT, ['a', 'b']);
+    sinon.assert.calledWith(spy, null, ['a', 'b']);
+  })
+
+
+});
