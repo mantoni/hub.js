@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+	Copyright 2011, Maximilian Antoni
+	Released under the MIT license:
+	https://github.com/mantoni/hub.js/raw/master/LICENSE
+-->
+<html>
+	<head>
+		<title>Benchmarks for hub.js</title>
+	</head>
+	<body>
+		<h2>Benchmarks for hub.js</h2>
+		<p>
+			Each function is executed
+			<select onchange="window.location.href='?' + this.value">
+			<script type="text/javascript">
+				iterations = 50000;
+				var search = window.location.search;
+				if (search) {
+					iterations = Number(search.substring(1)) || iterations;
+				}
+				function formatNumber(n) {
+					var p = n.length - 3;
+					while(p > 0) {
+						n = n.substring(0, p) + "," + n.substring(p);
+						p -= 3;
+					}
+					return n;
+				}
+				for (var i = 3; i < 7; i++) {
+					for (var j = 0; j < 10; j+=2.5) {
+						var times = Math.pow(10, i) * (j || 1);
+						document.write("<option value=\"" + times + "\"" + (iterations === times ? " selected=\"selected\"" : "") + ">" + formatNumber(String(times)) + "</option>");
+					}
+				}
+			</script>
+			</select> times.
+		</p>
+		<table border="1" cellspacing="1" cellpadding="4">
+		</table>
+		<br/>
+		<table border="1" cellspacing="1" cellpadding="4" style="visibility: hidden;">
+		</table>
+		<script type="text/javascript" src="../../src/head.js"></script>
+		<script type="text/javascript" src="../../src/util.js"></script>
+		<script type="text/javascript" src="../../src/does.js"></script>
+		<script type="text/javascript" src="../../src/iterator.js"></script>
+		<script type="text/javascript" src="../../src/chain.js"></script>
+		<script type="text/javascript" src="../../src/create.js"></script>
+		<script type="text/javascript" src="../../src/node.js"></script>
+		<script type="text/javascript" src="../../src/root.js"></script>
+		<script type="text/javascript" src="../../src/promise.js"></script>
+		<script type="text/javascript" src="../../src/scope.js"></script>
+		<script type="text/javascript" src="benchmark.js"></script>
+		<script type="text/javascript" src="benchmark-publish.js"></script>
+		<script type="text/javascript" src="benchmark-promise.js"></script>
+		<script type="text/javascript" src="benchmark-merge.js"></script>
+	</body>
+</html>
