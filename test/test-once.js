@@ -37,12 +37,12 @@ test('hub.once', {
     var spy = sinon.spy();
 
     this.hub.once('test', function (a, b, callback) {
-      callback(null, '=' + a + b);
+      callback(null, a + b);
     });
     this.hub.emit('test', 'a', 'b', spy);
 
     sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, null, '=ab');
+    sinon.assert.calledWith(spy, null, 'ab');
   }
 
 });
