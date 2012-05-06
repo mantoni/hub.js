@@ -1,10 +1,15 @@
-Event oriented JavaScript - hub.js
-==================================
+# Event oriented JavaScript - hub.js
 
 [![Build Status](https://secure.travis-ci.org/mantoni/hub.js.png?branch=rewrite)](http://travis-ci.org/mantoni/hub.js)
 
-Run tests: `make`
+## Run tests
 
-Compile for browsers with [nomo.js](https://github.com/mantoni/nomo.js): `make compile`
+`make`
 
-More information at http://mantoni.github.com/hub.js
+## Compile for browsers
+
+This requires [nomo.js](https://github.com/mantoni/nomo.js).
+
+`make compile`
+
+Visit http://mantoni.github.com/hub.js
