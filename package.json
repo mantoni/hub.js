@@ -6,7 +6,7 @@
   "homepage"        : "http://mantoni.github.com/hub.js",
   "main"            : "./lib/hub.js",
   "engines"         : {
-    "node"          : "*"
+    "node"          : "0.6"
   },
   "scripts"         : {
     "test"          : "make test"
