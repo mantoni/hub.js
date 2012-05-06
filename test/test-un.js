@@ -8,7 +8,7 @@ var hub       = require('../lib/hub');
 test('hub.un', {
 
   before: function () {
-    this.hub = hub.create();
+    this.hub = hub();
   },
 
 

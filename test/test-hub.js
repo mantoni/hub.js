@@ -2,35 +2,29 @@ var test      = require('utest');
 var assert    = require('assert');
 
 var hub       = require('../lib/hub');
+var ErrorList = require('../lib/error-list');
 var strategy  = require('../lib/strategy');
 
 
-test('hub.create', {
+test('hub', {
 
 
   'should create instance of Hub': function () {
-    assert(hub.create() instanceof hub.Hub);
-  }
+    assert(hub() instanceof hub.Hub);
+  },
 
 
-});
+  "should expose ErrorList": function () {
+    assert.strictEqual(hub.ErrorList, ErrorList);
+  },
 
 
-test('hub.LAST', {
-
-
-  'should be same as strategy.LAST': function () {
+  "should expose strategy.LAST": function () {
     assert.strictEqual(hub.LAST, strategy.LAST);
-  }
+  },
 
 
-});
-
-
-test('hub.CONCAT', {
-
-
-  'should be same as strategy.CONCAT': function () {
+  "should expose strategy.CONCAT": function () {
     assert.strictEqual(hub.CONCAT, strategy.CONCAT);
   }
 
