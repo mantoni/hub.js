@@ -3,10 +3,13 @@
   "version"         : "0.2.0",
   "description"     : "Event oriented programming",
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
-  "homepage"        : "https://github.com/mantoni/hub.js",
+  "homepage"        : "http://mantoni.github.com/hub.js",
   "main"            : "./lib/hub.js",
   "engines"         : {
     "node"          : "*"
+  },
+  "scripts"         : {
+    "test"          : "make test"
   },
   "repository"      : {
     "type"          : "git",
