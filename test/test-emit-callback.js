@@ -226,13 +226,11 @@ test('emit-callback', {
 
   'should err ErrorList with all errors as cause': function () {
     var spy   = sinon.spy();
-    var err1  = new TypeError('a');
-    var err2  = new RangeError('b');
     this.hub.on('test', function (callback) {
-      callback(err1);
+      callback(new TypeError('a'));
     });
     this.hub.on('test', function (callback) {
-      callback(err2);
+      callback(new RangeError('b'));
     });
 
     this.hub.emit('test', spy);
@@ -250,12 +248,10 @@ test('emit-callback', {
 
   'should err ErrorList for callback err and exception': function () {
     var spy   = sinon.spy();
-    var err1  = new TypeError('a');
-    var err2  = new RangeError('b');
     this.hub.on('test', function (callback) {
-      callback(err1);
+      callback(new TypeError('a'));
     });
-    this.hub.on('test', sinon.stub().throws(err2));
+    this.hub.on('test', sinon.stub().throws(new RangeError('b')));
 
     this.hub.emit('test', spy);
 
@@ -266,10 +262,8 @@ test('emit-callback', {
 
   'should err ErrorList if all listeners throw': function () {
     var spy   = sinon.spy();
-    var err1  = new TypeError('a');
-    var err2  = new RangeError('b');
-    this.hub.on('test', sinon.stub().throws(err1));
-    this.hub.on('test', sinon.stub().throws(err2));
+    this.hub.on('test', sinon.stub().throws(new TypeError('a')));
+    this.hub.on('test', sinon.stub().throws(new RangeError('b')));
 
     this.hub.emit('test', spy);
 
@@ -279,11 +273,9 @@ test('emit-callback', {
 
 
   'should throw ErrorList if all listeners throw': function () {
-    var err1  = new TypeError('a');
-    var err2  = new RangeError('b');
     var self  = this;
-    this.hub.on('test', sinon.stub().throws(err1));
-    this.hub.on('test', sinon.stub().throws(err2));
+    this.hub.on('test', sinon.stub().throws(new TypeError('a')));
+    this.hub.on('test', sinon.stub().throws(new RangeError('b')));
 
     assert.throws(function () {
       self.hub.emit('test');
