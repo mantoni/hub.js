@@ -14,17 +14,17 @@ test('hub', {
   },
 
 
-  "should expose ErrorList": function () {
+  'should expose ErrorList': function () {
     assert.strictEqual(hub.ErrorList, ErrorList);
   },
 
 
-  "should expose strategy.LAST": function () {
+  'should expose strategy.LAST': function () {
     assert.strictEqual(hub.LAST, strategy.LAST);
   },
 
 
-  "should expose strategy.CONCAT": function () {
+  'should expose strategy.CONCAT': function () {
     assert.strictEqual(hub.CONCAT, strategy.CONCAT);
   }
 
