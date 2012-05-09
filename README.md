@@ -1,4 +1,4 @@
-# Event oriented JavaScript - hub.js
+# Pub/Sub oriented JavaScript
 
 [![Build Status](https://secure.travis-ci.org/mantoni/hub.js.png?branch=rewrite)](http://travis-ci.org/mantoni/hub.js)
 
