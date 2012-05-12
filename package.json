@@ -1,7 +1,7 @@
 {
   "name"            : "hub",
   "version"         : "0.2.0",
-  "description"     : "Event oriented programming",
+  "description"     : "Pub/Sub oriented JavaScript",
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
   "homepage"        : "http://mantoni.github.com/hub.js",
   "main"            : "./lib/hub.js",
