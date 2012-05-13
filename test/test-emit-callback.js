@@ -58,9 +58,8 @@ test('emit-callback', {
 
 
   'should throw if no callback was given and listener throws': function () {
-    var thrown = new Error();
     var caught;
-    this.hub.on('test', sinon.stub().throws(thrown));
+    this.hub.on('test', sinon.stub().throws(new Error('oups')));
 
     try {
       this.hub.emit('test');
@@ -68,7 +67,7 @@ test('emit-callback', {
       caught = e;
     }
 
-    assert.strictEqual(caught, thrown);
+    assert.equal(caught.message, 'oups');
   },
 
 
