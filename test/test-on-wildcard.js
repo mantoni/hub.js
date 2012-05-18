@@ -126,6 +126,66 @@ test('hub.on wildcard', {
     this.hub.emit('a.b.test.c.d');
 
     sinon.assert.calledOnce(spy);
+  },
+
+
+  'should invoke **.bar.test before *.bar.*': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('*.bar.*', spy2);
+    this.hub.on('**.bar.test', spy1);
+    this.hub.emit('foo.bar.test');
+
+    sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'should invoke *.bar.* before *.bar.test': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('*.bar.test', spy2);
+    this.hub.on('*.bar.*', spy1);
+    this.hub.emit('foo.bar.test');
+
+    sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'should invoke *.bar.test before foo.**': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('foo.**', spy2);
+    this.hub.on('*.bar.test', spy1);
+    this.hub.emit('foo.bar.test');
+
+    sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'should invoke foo.** before foo.*.test': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('foo.*.test', spy2);
+    this.hub.on('foo.**', spy1);
+    this.hub.emit('foo.bar.test');
+
+    sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'should invoke foo.*.test before foo.bar.*': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('foo.bar.*', spy2);
+    this.hub.on('foo.*.test', spy1);
+    this.hub.emit('foo.bar.test');
+
+    sinon.assert.callOrder(spy1, spy2);
   }
 
 

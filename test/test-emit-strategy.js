@@ -38,11 +38,11 @@ test('emit-strategy', {
 
   'should use LAST by default with wildcards': sinon.test(function () {
     this.spy(strategy, 'LAST');
-    this.hub.on('*', sinon.stub().returns('a'));
-    this.hub.on('*', sinon.stub().returns('b'));
+    this.hub.on('**', sinon.stub().returns('a'));
+    this.hub.on('test.*', sinon.stub().returns('b'));
     var spy = sinon.spy();
 
-    this.hub.emit('test', spy);
+    this.hub.emit('test.test', spy);
 
     sinon.assert.calledOnce(strategy.LAST);
     sinon.assert.calledWith(strategy.LAST, ['a', 'b']);
@@ -67,11 +67,11 @@ test('emit-strategy', {
   'should use given strategy with return values and wildcards': sinon.test(
     function () {
       this.spy(strategy, 'CONCAT');
-      this.hub.on('*', sinon.stub().returns('a'));
-      this.hub.on('*', sinon.stub().returns('b'));
+      this.hub.on('**', sinon.stub().returns('a'));
+      this.hub.on('test.*', sinon.stub().returns('b'));
       var spy = sinon.spy();
 
-      this.hub.emit('test', strategy.CONCAT, spy);
+      this.hub.emit('test.test', strategy.CONCAT, spy);
 
       sinon.assert.calledOnce(strategy.CONCAT);
       sinon.assert.calledWith(strategy.CONCAT, ['a', 'b']);
@@ -101,15 +101,15 @@ test('emit-strategy', {
   'should use given strategy with callback values and wildcards': sinon.test(
     function () {
       this.spy(strategy, 'CONCAT');
-      this.hub.on('*', function (callback) {
+      this.hub.on('**', function (callback) {
         callback(null, 'a');
       });
-      this.hub.on('*', function (callback) {
+      this.hub.on('test.*', function (callback) {
         callback(null, 'b');
       });
       var spy = sinon.spy();
 
-      this.hub.emit('test', strategy.CONCAT, spy);
+      this.hub.emit('test.test', strategy.CONCAT, spy);
 
       sinon.assert.calledOnce(strategy.CONCAT);
       sinon.assert.calledWith(strategy.CONCAT, ['a', 'b']);
@@ -144,17 +144,17 @@ test('emit-strategy', {
   'should use given strategy with callback and return value and wildcards':
     sinon.test(function () {
       this.spy(strategy, 'CONCAT');
-      this.hub.on('*', function (callback) {
+      this.hub.on('**', function (callback) {
         setTimeout(function () {
           callback(null, 'a');
         }, 10);
       });
-      this.hub.on('*', function () {
+      this.hub.on('*.test', function () {
         return 'b';
       });
       var spy = sinon.spy();
 
-      this.hub.emit('test', strategy.CONCAT, spy);
+      this.hub.emit('test.test', strategy.CONCAT, spy);
       this.clock.tick(10);
 
       sinon.assert.calledOnce(strategy.CONCAT);
