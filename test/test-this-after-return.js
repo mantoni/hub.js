@@ -65,7 +65,7 @@ test('this.afterReturn', {
 
     this.hub.emit('test', hub.CONCAT, function () {});
 
-    sinon.assert.calledWith(spy, null, [undefined, 1, 2]);
+    sinon.assert.calledWith(spy, null, [1, 2]);
   },
 
 

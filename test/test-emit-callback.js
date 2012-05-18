@@ -12,7 +12,6 @@ var assert    = require('assert');
 var sinon     = require('sinon');
 
 var hub       = require('../lib/hub');
-var ErrorList = require('../lib/error-list');
 
 
 test('emit-callback', {
@@ -246,11 +245,10 @@ test('emit-callback', {
     sinon.assert.calledOnce(spy);
     var error = spy.firstCall.args[0];
     assert.equal(error.toString(),
-      'ErrorList: Multiple listeners err\'d:\n' +
+      'ErrorList: Multiple callbacks err\'d:\n' +
       '  - TypeError: a\n' +
       '  - RangeError: b');
     assert(error instanceof Error);
-    assert(error instanceof ErrorList);
   },
 
 
@@ -264,7 +262,7 @@ test('emit-callback', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    assert(spy.firstCall.args[0] instanceof ErrorList);
+    assert(spy.firstCall.args[0] instanceof Error);
   },
 
 
@@ -276,7 +274,7 @@ test('emit-callback', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    assert(spy.firstCall.args[0] instanceof ErrorList);
+    assert(spy.firstCall.args[0] instanceof Error);
   },
 
 
@@ -287,7 +285,7 @@ test('emit-callback', {
 
     assert.throws(function () {
       self.hub.emit('test');
-    }, /ErrorList/);
+    }, /^ErrorList/);
   },
 
 
