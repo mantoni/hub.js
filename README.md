@@ -6,16 +6,14 @@ http://mantoni.github.com/hub.js
 
 ## Run tests
 
-`make`
+```
+make
+```
 
 ## Compile for browsers
 
 This requires [nomo.js](https://github.com/mantoni/nomo.js).
 
-`make compile`
-
-## TODO
-
-* Broadcast events: emit('any.*', 123)
-* Matchers should be able to stop propagation or explicitly propagate event
-* More strategies
+```
+make compile
+```
