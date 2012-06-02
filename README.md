@@ -20,29 +20,43 @@ var hub = hubjs();
 ### Publish / Subscribe
 
 ```js
-hub.on('some.event', function (a, b) { /* ... */ });
+hub.on('some.event', function (a, b) {
+  // ...
+});
 hub.emit('some.event', 'any', 'args');
 ```
 
 ### Return values
 
 ```js
-hub.on('answer', function () { return 42; });
-hub.emit('answer', function (err, value) { console.log(value); });
+hub.on('answer', function () {
+  return 42;
+});
+hub.emit('answer', function (err, value) {
+  console.log(value);
+});
 ```
 
 ### Callbacks
 
 ```js
-hub.on('answer', function (callback) { callback(null, 42); });
-hub.emit('answer', function (err, value) { console.log(value); });
+hub.on('answer', function (callback) {
+  callback(null, 42);
+});
+hub.emit('answer', function (err, value) {
+  console.log(value);
+});
 ```
 
 ### Errors
 
 ```js
-hub.on('answer', function () { throw new Error('ouch!'); });
-hub.emit('answer', function (err) { console.log(err); });
+hub.on('answer', function () {
+  throw new Error('ouch!');
+});
+hub.emit('answer', function (err) {
+  console.log(err);
+});
 ```
 
 ### Strategies
@@ -52,7 +66,7 @@ hub.on('answer.a', function () { return 2; });
 hub.on('answer.b', function () { return 3; });
 hub.on('answer.c', function () { return 7; });
 
-hub.emit('answer.*', hubjs.CONCAT, function (results) {
+hub.emit('answer.*', hubjs.CONCAT, function (err, results) {
   console.log(results.join(' * ')); // = 2 * 3 * 7
 });
 ```
