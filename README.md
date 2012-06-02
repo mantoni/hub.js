@@ -94,6 +94,45 @@ hub.emit('answer.*', hubjs.CONCAT, function (err, results) {
 });
 ```
 
+## API
+
+`hub([listeners])` - the hub module exports a factory function which takes optional listeners and returns a hub instance. All functions in the given listeners object will be installed on the hub instance using `on`.
+
+`hub.on(event, function)` - registers a listener for an event. The event may contain `*` or `**` to register a "matcher" (see below). If the listener function expects more arguments than are passed to `emit`, the last argument will be a callback function. The listener is expected to invoke the callback once completed with an error object or `null` and a single return value.
+
+`hub.un(event)` - unregisters all listeners for the given event.
+
+`hub.un(event, function)` - unregisters a single listener for an event.
+
+`hub.once(event, function)` - registers a listerner for an event that will be automatically unregistered on the first invocation.
+
+`hub.emit(event[, arg1, arg2, ...][[, strategy], callback])` - invokes all listeners for an event. The optional arguments are passed to each listener. The event may contain `*` or `**` to invoke all listeners registered for matching events (broadcasting). The optional callback will be invoked once all listeners returned. The first argument is an error if at least one of the listeners threw, the second argument is a return value. If a callback is given, the optional strategy filters the return values of the listeners. By default the strategy `hub.LAST` is used.
+
+### Matchers
+
+A "matcher" is an event that contains at least one `*`. A single `*` matches a of an event name and stops at a dot while a `**` does not stop at a dot.
+Matchers are different from listeners in these points:
+
+ - they get invoked before the listeners allowing AOPish usage
+ - the invocation order is not in registration order as for listeners, but follows special rules
+ - the scope is set to a special object providing additional features
+
+The matcher scope (`this`) has this API:
+
+`event` - the current event
+
+`stop()` - prevents listener execution. This does not prevent other matchers from being invoked.
+
+`beforeReturn(function)` - registers a function that gets invoked before the callback that was passed to `emit` is invoked.
+
+`afterReturn(function)` - registers a function that gets invoked after the callback that was passed to `emit` is invoked.
+
+### Strategies
+
+`LAST` - returns the last non-undefined value
+
+`CONCAT` - returns an array of all listener return values
+
 ## Run tests
 
 ```
