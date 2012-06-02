@@ -5,5 +5,6 @@ test:
 
 compile: test
 	@nomo
+	@node_modules/.bin/uglifyjs hub.js > hub.min.js
 
 .PHONY: test
