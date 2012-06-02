@@ -1,5 +1,5 @@
 {
-  "name"            : "hub",
+  "name"            : "hubjs",
   "version"         : "0.2.0",
   "description"     : "Pub/Sub oriented JavaScript",
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
@@ -16,7 +16,7 @@
     "url"           : "https://github.com/mantoni/hub.js.git"
   },
   "dependencies"    : {
-    "listen"        : "~0.1.1"
+    "listen"        : "~0.1.2"
   },
   "devDependencies" : {
     "utest"         : "~0.0.6",
