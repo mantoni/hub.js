@@ -121,8 +121,10 @@ The API of the `this` object passed to matchers:
 
 ### Strategies
 
+Strategies are functions that take an array of non-undefined values and return a result of any type. These pre-defined strategies exist:
+
  - `LAST` - returns the last non-undefined value
- - `CONCAT` - returns an array of all listener return values
+ - `CONCAT` - returns an array of all non-undefined listener return values
 
 ## Run tests
 

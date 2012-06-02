@@ -30,13 +30,6 @@ test('strategy-last', {
   },
 
 
-  'should ignore undefined values': function () {
-    var value = strategy.LAST(['a', undefined, 'b', undefined]);
-
-    assert.equal(value, 'b');
-  },
-
-
   'should not ignore null values': function () {
     var value = strategy.LAST(['a', null]);
 
