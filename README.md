@@ -59,18 +59,6 @@ hub.emit('answer', function (err) {
 });
 ```
 
-### Strategies
-
-```js
-hub.on('answer.a', function () { return 2; });
-hub.on('answer.b', function () { return 3; });
-hub.on('answer.c', function () { return 7; });
-
-hub.emit('answer.*', hubjs.CONCAT, function (err, results) {
-  console.log(results.join(' * ')); // = 2 * 3 * 7
-});
-```
-
 ### Wildcard Subscriptions
 
 ```js
@@ -92,6 +80,18 @@ hub.on('server.*', function (data) {
 hub.emit('module.**.start');
 
 hub.emit('**.destroy');
+```
+
+### Strategies
+
+```js
+hub.on('answer.a', function () { return 2; });
+hub.on('answer.b', function () { return 3; });
+hub.on('answer.c', function () { return 7; });
+
+hub.emit('answer.*', hubjs.CONCAT, function (err, results) {
+  console.log(results.join(' * ')); // = 2 * 3 * 7
+});
 ```
 
 ## Run tests
