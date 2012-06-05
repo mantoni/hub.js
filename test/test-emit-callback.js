@@ -301,7 +301,33 @@ test('emit-callback', {
 
       sinon.assert.notCalled(spy);
     }
-  )
+  ),
+
+
+  'should pass callback as last arg if fewer args are emitted': function () {
+    this.hub.on('test', function (a, b, callback) {
+      callback("value");
+    });
+    var spy = sinon.spy();
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, "value");
+  },
+
+
+  'should use null return value if fewer args are emitter': function () {
+    this.hub.on('test', function (a, b) {
+      return null;
+    });
+    var spy = sinon.spy();
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null);
+  }
 
 
 });
