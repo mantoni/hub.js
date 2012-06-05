@@ -41,7 +41,7 @@ test('this.afterReturn', {
 
   'should invoke callback after emit and return': function () {
     var emitSpy         = sinon.spy();
-    var afterReturnSpy = sinon.spy();
+    var afterReturnSpy  = sinon.spy();
     var callbackSpy     = sinon.spy();
     this.hub.on('*', function () {
       this.afterReturn(afterReturnSpy);
