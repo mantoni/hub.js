@@ -13,6 +13,7 @@ var sinon     = require('sinon');
 
 var hub       = require('../lib/hub');
 var strategy  = require('../lib/strategy');
+var listen    = require('listen');
 
 
 test('hub', {
@@ -20,6 +21,11 @@ test('hub', {
 
   'should create instance of Hub': function () {
     assert(hub() instanceof hub.Hub);
+  },
+
+
+  'should expose listen': function () {
+    assert.strictEqual(hub.listen, listen);
   },
 
 
