@@ -98,8 +98,53 @@ test('this.afterReturn', {
     assert.throws(function () {
       self.hub.emit('test');
     }, RangeError);
+
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, err);
+  },
+
+
+  'should invoke second callback if first throws': function () {
+    var error = new Error();
+    var spy   = sinon.spy();
+    var err;
+    this.hub.on('*', function () {
+      this.afterReturn(function () {
+        throw error;
+      });
+    });
+    this.hub.on('*', function () {
+      this.afterReturn(spy);
+    });
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      err = e;
+    }
+
+    assert.strictEqual(err, error);
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should throw error list if multiple callbacks throw': function () {
+    function thrower() {
+      this.afterReturn(function () {
+        throw new Error();
+      });
+    }
+    this.hub.on('*', thrower);
+    this.hub.on('*', thrower);
+    var err;
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      err = e;
+    }
+
+    assert.equal(err.name, "ErrorList");
   }
 
 

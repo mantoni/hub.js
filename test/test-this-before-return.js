@@ -100,6 +100,92 @@ test('this.beforeReturn', {
     }, RangeError);
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, err);
+  },
+
+
+  'should invoke second callback if first throws': function () {
+    var error = new Error();
+    var spy   = sinon.spy();
+    var err;
+    this.hub.on('*', function () {
+      this.beforeReturn(function () {
+        throw error;
+      });
+    });
+    this.hub.on('*', function () {
+      this.beforeReturn(spy);
+    });
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      err = e;
+    }
+
+    assert.strictEqual(err, error);
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should throw error list if multiple callbacks throw': function () {
+    function thrower() {
+      this.beforeReturn(function () {
+        throw new Error();
+      });
+    }
+    this.hub.on('*', thrower);
+    this.hub.on('*', thrower);
+    var err;
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      err = e;
+    }
+
+    assert.equal(err.name, "ErrorList");
+  },
+
+
+  'should invoke emit callback with error if callback throws': function () {
+    var error = new Error();
+    var spy   = sinon.spy();
+    this.hub.on('*', function () {
+      this.beforeReturn(function () {
+        throw error;
+      });
+    });
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, error);
+  },
+
+
+  'should merge callback error with listener error': function () {
+    var error1  = new Error();
+    var error2  = new Error();
+    var spy     = sinon.spy();
+    this.hub.on('*', function () {
+      this.beforeReturn(function () {
+        throw error1;
+      });
+    });
+    this.hub.on('test', function () {
+      throw error2;
+    });
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    var err = spy.firstCall.args[0];
+    assert.equal(err.name, "ErrorList");
+    assert.deepEqual(err.errors, [error1, error2]);
+/*    sinon.assert.calledWithMatch(spy, {
+      name    : "ErrorList",
+      errors  : [error1, error2]
+    });*/
   }
 
 
