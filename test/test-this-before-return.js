@@ -179,13 +179,10 @@ test('this.beforeReturn', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    var err = spy.firstCall.args[0];
-    assert.equal(err.name, "ErrorList");
-    assert.deepEqual(err.errors, [error1, error2]);
-/*    sinon.assert.calledWithMatch(spy, {
+    sinon.assert.calledWithMatch(spy, {
       name    : "ErrorList",
       errors  : [error1, error2]
-    });*/
+    });
   }
 
 

@@ -89,14 +89,10 @@ function testCases(event) {
       this.hub.emit('test', spy);
 
       sinon.assert.calledOnce(spy);
-      assert.deepEqual(spy.firstCall.args[0].name, "ErrorList");
-      assert.deepEqual(spy.firstCall.args[0].errors, [err1, err2]);
-      /*
       sinon.assert.calledWith(spy, sinon.match({
         name    : 'ErrorList',
         errors  : [err1, err2]
       }));
-      */
     }
 
   };
