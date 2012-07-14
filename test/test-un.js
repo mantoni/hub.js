@@ -51,9 +51,23 @@ test('hub.un', {
 
   'should ignore unknown event names': function () {
     var self = this;
-    
+
     assert.doesNotThrow(function () {
       self.hub.un('test', function () {});
+    });
+  },
+
+
+  'should not fail if un is called in emit': function () {
+    var self  = this;
+    var fn    = function () {};
+    this.hub.on('test', function () {
+      self.hub.un('test', fn);
+    });
+    this.hub.on('test', fn);
+
+    assert.doesNotThrow(function () {
+      self.hub.emit('test');
     });
   }
 
