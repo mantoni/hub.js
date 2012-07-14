@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test      = require('utest');
-var assert    = require('assert');
-var sinon     = require('sinon');
+var test    = require('utest');
+var assert  = require('assert');
+var sinon   = require('sinon');
 
-var hub       = require('../lib/hub');
+var hub     = require('../lib/hub');
 
 
 test('hub.un', {
