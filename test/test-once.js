@@ -52,6 +52,21 @@ test('hub.once', {
 
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, null, 'ab');
+  },
+
+
+  'should not invoke listener again if it emits same event': function () {
+    var self  = this;
+    var spy   = sinon.spy(function () {
+      self.hub.emit('a');
+    });
+
+    this.hub.once('a', spy);
+    assert.doesNotThrow(function () {
+      self.hub.emit('a');
+    });
+
+    sinon.assert.calledOnce(spy);
   }
 
 });

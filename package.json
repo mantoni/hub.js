@@ -1,6 +1,6 @@
 {
   "name"            : "hubjs",
-  "version"         : "0.2.2",
+  "version"         : "0.2.3",
   "description"     : "Pub/Sub oriented JavaScript",
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
   "homepage"        : "http://mantoni.github.com/hub.js",
