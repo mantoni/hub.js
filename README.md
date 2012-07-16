@@ -132,9 +132,17 @@ Strategies are functions that take an array of non-undefined values and return a
 make
 ```
 
-## Compile for browsers and minify
+## Run tests in your browser
 
 This requires [nomo.js](https://github.com/mantoni/nomo.js).
+
+```
+nomo server
+```
+
+Open http://localhost:4444/test in your browser.
+
+## Compile for browsers and minify
 
 ```
 make compile
