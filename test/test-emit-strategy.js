@@ -1,3 +1,4 @@
+/*jslint plusplus: true, vars: true, node: true, indent: 2, maxlen: 78 */
 /**
  * hub.js
  *
@@ -173,7 +174,7 @@ test('emit-strategy', {
 
     sinon.assert.calledOnce(strategy.CONCAT);
     sinon.assert.calledWith(strategy.CONCAT, ['a', 'b']);
-    sinon.assert.calledWith(spy, null, ['a', 'b']);    
+    sinon.assert.calledWith(spy, null, ['a', 'b']);
   })
 
 

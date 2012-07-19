@@ -1,3 +1,4 @@
+/*jslint plusplus: true, vars: true, node: true, indent: 2, maxlen: 78 */
 /**
  * hub.js
  *
@@ -24,7 +25,7 @@ test('this.afterReturn', {
   'should throw if no callback is given': function () {
     this.hub.on('*', function () {
       var self = this;
-      
+
       assert.throws(function () {
         self.afterReturn();
       }, TypeError);
@@ -129,11 +130,11 @@ test('this.afterReturn', {
 
 
   'should throw error list if multiple callbacks throw': function () {
-    function thrower() {
+    var thrower = function () {
       this.afterReturn(function () {
         throw new Error();
       });
-    }
+    };
     this.hub.on('*', thrower);
     this.hub.on('*', thrower);
     var err;

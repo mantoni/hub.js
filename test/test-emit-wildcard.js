@@ -1,3 +1,4 @@
+/*jslint plusplus: true, vars: true, node: true, indent: 2, maxlen: 78 */
 /**
  * hub.js
  *
