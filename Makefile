@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 test:
+	@node_modules/.bin/autolint --once
 	@node -e "require('urun')('test');"
 
 compile: test
