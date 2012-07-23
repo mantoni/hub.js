@@ -19,11 +19,6 @@ var listen    = require('listen');
 test('hub', {
 
 
-  'should create instance of Hub': function () {
-    assert(hub() instanceof hub.Hub);
-  },
-
-
   'should expose listen': function () {
     assert.strictEqual(hub.listen, listen);
   },
@@ -39,48 +34,51 @@ test('hub', {
   },
 
 
-  'should call on for each key-function pair': sinon.test(function () {
-    this.stub(hub.Hub.prototype, "on");
-    var listener1 = function () {};
-    var listener2 = function () {};
+  'should register event-function pair': function () {
+    var listener1 = sinon.spy();
+    var listener2 = sinon.spy();
 
-    hub({
+    var instance = hub({
       'a' : listener1,
       'b' : listener2
     });
+    instance.emit('a');
+    instance.emit('b');
 
-    sinon.assert.calledTwice(hub.Hub.prototype.on);
-    sinon.assert.calledWith(hub.Hub.prototype.on, 'a', listener1);
-    sinon.assert.calledWith(hub.Hub.prototype.on, 'b', listener2);
-  }),
+    sinon.assert.called(listener1);
+    sinon.assert.called(listener2);
+  },
 
 
-  'should call on for function on prototype': sinon.test(function () {
-    this.stub(hub.Hub.prototype, "on");
+  'should register function from prototype': function () {
     function Type() {}
-    Type.prototype.test = function () {};
+    Type.prototype.test = sinon.spy();
     var type = new Type();
 
-    hub(type);
+    var instance = hub(type);
+    instance.emit('test');
 
-    sinon.assert.calledOnce(hub.Hub.prototype.on);
-    sinon.assert.calledWith(hub.Hub.prototype.on, 'test', type.test);
-  }),
+    sinon.assert.called(type.test);
+  },
 
 
-  'should not call on with non-function values': sinon.test(function () {
-    this.stub(hub.Hub.prototype, "on");
-
-    hub({
-      'a' : 'x',
-      'b' : 123,
-      'c' : true,
-      'd' : {},
-      'e' : new Date()
+  'should not throw if called with non function values': function () {
+    assert.doesNotThrow(function () {
+      var instance = hub({
+        'a' : 'x',
+        'b' : 123,
+        'c' : true,
+        'd' : {},
+        'e' : new Date()
+      });
+      instance.emit('a');
+      instance.emit('b');
+      instance.emit('c');
+      instance.emit('d');
+      instance.emit('e');
     });
 
-    sinon.assert.notCalled(hub.Hub.prototype.on);
-  })
+  }
 
 
 });
