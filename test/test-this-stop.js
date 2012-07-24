@@ -21,13 +21,13 @@ test('this.stop', {
   },
 
 
-  'should stop emitted event in wildcard listener': function () {
+  'should stop emitted event in on(*)': function () {
     var spy = sinon.spy();
+    this.hub.on('test', spy);
+
     this.hub.on('*', function () {
       this.stop();
     });
-    this.hub.on('test', spy);
-
     this.hub.emit('test');
 
     sinon.assert.notCalled(spy);
@@ -37,16 +37,42 @@ test('this.stop', {
   'should not stop other matchers': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
+
     this.hub.on('*', spy1);
     this.hub.on('*', function () {
       this.stop();
     });
     this.hub.on('*', spy2);
-
     this.hub.emit('test');
 
     sinon.assert.calledOnce(spy1);
     sinon.assert.calledOnce(spy2);
+  },
+
+
+  'should stop emitted event in before(test)': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.before('test', function () {
+      this.stop();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'should stop emitted event in on(test)': function () {
+    var spy = sinon.spy();
+    this.hub.after('test', spy);
+
+    this.hub.on('test', function () {
+      this.stop();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 

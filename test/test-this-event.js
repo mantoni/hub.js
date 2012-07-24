@@ -21,9 +21,39 @@ test('this.event', {
   },
 
 
-  'should be emitted event in wildcard listener': function () {
+  'should be emitted event in on(*)': function () {
     var spy = sinon.spy();
     this.hub.on('*', spy);
+
+    this.hub.emit('test');
+
+    assert.equal(spy.thisValues[0].event, 'test');
+  },
+
+
+  'should be emitted event in before(test)': function () {
+    var spy = sinon.spy();
+    this.hub.before('test', spy);
+
+    this.hub.emit('test');
+
+    assert.equal(spy.thisValues[0].event, 'test');
+  },
+
+
+  'should be emitted event in on(test)': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.emit('test');
+
+    assert.equal(spy.thisValues[0].event, 'test');
+  },
+
+
+  'should be emitted event in after(test)': function () {
+    var spy = sinon.spy();
+    this.hub.after('test', spy);
 
     this.hub.emit('test');
 
