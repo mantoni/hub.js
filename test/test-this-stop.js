@@ -73,6 +73,19 @@ test('this.stop', {
     this.hub.emit('test');
 
     sinon.assert.notCalled(spy);
+  },
+
+
+  'should return result if stopped in on(test)': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('test', function () {
+      this.stop();
+      return 'some result';
+    });
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledWith(spy, null, 'some result');
   }
 
 

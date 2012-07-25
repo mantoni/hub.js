@@ -12,7 +12,6 @@ var assert    = require('assert');
 var sinon     = require('sinon');
 
 var hub       = require('../lib/hub');
-var strategy  = require('../lib/strategy');
 var listen    = require('listen');
 
 
@@ -21,16 +20,6 @@ test('hub', {
 
   'should expose listen': function () {
     assert.strictEqual(hub.listen, listen);
-  },
-
-
-  'should expose strategy.LAST': function () {
-    assert.strictEqual(hub.LAST, strategy.LAST);
-  },
-
-
-  'should expose strategy.CONCAT': function () {
-    assert.strictEqual(hub.CONCAT, strategy.CONCAT);
   },
 
 

@@ -10,28 +10,28 @@
 var test      = require('utest');
 var assert    = require('assert');
 
-var strategy  = require('../lib/strategy');
+var hub       = require('../lib/hub');
 
 
 test('strategy-last', {
 
 
   'should return last value of array': function () {
-    var value = strategy.LAST(['a', 'b', 'c']);
+    var value = hub.LAST(['a', 'b', 'c']);
 
     assert.equal(value, 'c');
   },
 
 
   'should return undefined if array is empty': function () {
-    var value = strategy.LAST([]);
+    var value = hub.LAST([]);
 
     assert.equal(typeof value, 'undefined');
   },
 
 
   'should not ignore null values': function () {
-    var value = strategy.LAST(['a', null]);
+    var value = hub.LAST(['a', null]);
 
     assert.strictEqual(value, null);
   }

@@ -52,6 +52,29 @@ test('hub.after', {
     this.hub.emit('test');
 
     sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'should be invoked with the result of on': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('greet', function (name) { return 'Hello ' + name; });
+    this.hub.after('greet', spy);
+    this.hub.emit('greet', 'cjno');
+
+    sinon.assert.calledWith(spy, null, 'Hello cjno');
+  },
+
+
+  'should be invoked with the err of on': function () {
+    var spy = sinon.spy();
+    var err = new Error('D`oh!');
+
+    this.hub.on('greet', sinon.stub().throws(err));
+    this.hub.after('greet', spy);
+    this.hub.emit('greet', 'cjno', function () {});
+
+    sinon.assert.calledWith(spy, err);
   }
 
 });

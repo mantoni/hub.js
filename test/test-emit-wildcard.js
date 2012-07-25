@@ -41,8 +41,8 @@ test('emit-wildcard', {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     var spy3 = sinon.spy();
-    this.hub.on('**', spy1);
-    this.hub.on('foo.*', spy2);
+    this.hub.on('**',         spy1);
+    this.hub.on('foo.*',      spy2);
     this.hub.on('foo.*.test', spy3);
 
     this.hub.emit('foo.**');

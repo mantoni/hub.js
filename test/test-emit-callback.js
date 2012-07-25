@@ -86,6 +86,23 @@ test('emit-callback', {
     },
 
 
+  'should throw if listener threw and event was stopped': function () {
+    var caught;
+    this.hub.on('test', function () {
+      this.stop();
+      throw new Error('oups');
+    });
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      caught = e;
+    }
+
+    assert.equal(caught.message, 'oups');
+  },
+
+
   'should not invoke listener if wildcard listener threw': function () {
     var spy = sinon.spy();
     this.hub.on('*', sinon.stub().throws(new Error()));
