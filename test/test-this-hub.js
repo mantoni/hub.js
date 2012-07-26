@@ -31,6 +31,26 @@ test('this.hub', {
   },
 
 
+  'should be hub instance in before(*)': function () {
+    var spy = sinon.spy();
+    this.hub.before('*', spy);
+
+    this.hub.emit('test');
+
+    assert.strictEqual(spy.thisValues[0].hub, this.hub);
+  },
+
+
+  'should be hub instance in after(*)': function () {
+    var spy = sinon.spy();
+    this.hub.after('*', spy);
+
+    this.hub.emit('test');
+
+    assert.strictEqual(spy.thisValues[0].hub, this.hub);
+  },
+
+
   'should be hub instance in before(test)': function () {
     var spy = sinon.spy();
     this.hub.before('test', spy);

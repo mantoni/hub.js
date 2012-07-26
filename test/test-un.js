@@ -21,7 +21,7 @@ test('hub.un', {
   },
 
 
-  'should unsubscribe given callback only': function () {
+  'should unsubscribe given on listener only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test', spy1);
@@ -35,7 +35,35 @@ test('hub.un', {
   },
 
 
-  'should unsubscribe all callbacks': function () {
+  'should unsubscribe given before listener only': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    this.hub.before('test', spy1);
+    this.hub.before('test', spy2);
+
+    this.hub.un('test', spy1);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy1);
+    sinon.assert.calledOnce(spy2);
+  },
+
+
+  'should unsubscribe given after listener only': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    this.hub.after('test', spy1);
+    this.hub.after('test', spy2);
+
+    this.hub.un('test', spy1);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy1);
+    sinon.assert.calledOnce(spy2);
+  },
+
+
+  'should unsubscribe all listeners': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test', spy1);
@@ -49,7 +77,18 @@ test('hub.un', {
   },
 
 
-  'should ignore unknown event names': function () {
+  'should not unsubscribe different listener': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.un('test', function () {});
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should not throw if listener does not exist': function () {
     var self = this;
 
     assert.doesNotThrow(function () {

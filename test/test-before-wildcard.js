@@ -14,7 +14,7 @@ var sinon   = require('sinon');
 var hub     = require('../lib/hub');
 
 
-test('hub.before', {
+test('hub.before wildcard', {
 
   before: function () {
     this.hub = hub();
@@ -24,7 +24,7 @@ test('hub.before', {
   'should be invoked on emit': function () {
     var spy = sinon.spy();
 
-    this.hub.before('test', spy);
+    this.hub.before('*', spy);
     this.hub.emit('test');
 
     sinon.assert.calledOnce(spy);
@@ -35,8 +35,8 @@ test('hub.before', {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
-    this.hub.before('test', spy1);
-    this.hub.on('test', spy2);
+    this.hub.before('*', spy1);
+    this.hub.on('*', spy2);
     this.hub.emit('test');
 
     sinon.assert.callOrder(spy1, spy2);
@@ -47,8 +47,8 @@ test('hub.before', {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
-    this.hub.on('test', spy2);
-    this.hub.before('test', spy1);
+    this.hub.on('*', spy2);
+    this.hub.before('*', spy1);
     this.hub.emit('test');
 
     sinon.assert.callOrder(spy1, spy2);
@@ -58,7 +58,7 @@ test('hub.before', {
   'should be invoked with arguments from emit': function () {
     var spy = sinon.spy();
 
-    this.hub.before('test', spy);
+    this.hub.before('*', spy);
     this.hub.emit('test', 123, 'abc', [true, false]);
 
     sinon.assert.calledWith(spy, 123, 'abc', [true, false]);

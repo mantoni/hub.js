@@ -34,6 +34,19 @@ test('this.stop', {
   },
 
 
+  'should stop emitted event in before(*)': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.before('*', function () {
+      this.stop();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
   'should not stop other matchers': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
@@ -86,6 +99,19 @@ test('this.stop', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledWith(spy, null, 'some result');
+  },
+
+
+  'should stop emitted event in after(test)': function () {
+    var spy = sinon.spy();
+    this.hub.after('*', spy);
+
+    this.hub.after('test', function () {
+      this.stop();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 
