@@ -63,6 +63,36 @@ test('emit-wildcard', {
     this.hub.emit('foo.**');
 
     sinon.assert.notCalled(spy);
+  },
+
+
+  'should work with all lower case letters': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('*', spy);
+    this.hub.emit('abcdefghijklmnopqrstuvwxyz');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should work with all upper case letters': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('*', spy);
+    this.hub.emit('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should allow underscores': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('*', spy);
+    this.hub.emit('Test_Me');
+
+    sinon.assert.calledOnce(spy);
   }
 
 
