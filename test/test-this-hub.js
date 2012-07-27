@@ -14,71 +14,31 @@ var sinon   = require('sinon');
 var hub     = require('../lib/hub');
 
 
+function run(method, event) {
+  return function () {
+    var h   = hub();
+    var spy = sinon.spy();
+    h[method](event, spy);
+
+    h.emit('test');
+
+    assert.strictEqual(spy.thisValues[0].hub, h);
+  };
+}
+
+
 test('this.hub', {
 
-  before: function () {
-    this.hub = hub();
-  },
+  'should be hub instance in before(*)'     : run('before', '*'),
 
+  'should be hub instance in on(*)'         : run('on', '*'),
 
-  'should be hub instance in on(*)': function () {
-    var spy = sinon.spy();
-    this.hub.on('*', spy);
+  'should be hub instance in after(*)'      : run('after', '*'),
 
-    this.hub.emit('test');
+  'should be hub instance in before(test)'  : run('before', 'test'),
 
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  },
+  'should be hub instance in on(test)'      : run('on', 'test'),
 
-
-  'should be hub instance in before(*)': function () {
-    var spy = sinon.spy();
-    this.hub.before('*', spy);
-
-    this.hub.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  },
-
-
-  'should be hub instance in after(*)': function () {
-    var spy = sinon.spy();
-    this.hub.after('*', spy);
-
-    this.hub.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  },
-
-
-  'should be hub instance in before(test)': function () {
-    var spy = sinon.spy();
-    this.hub.before('test', spy);
-
-    this.hub.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  },
-
-
-  'should be hub instance in on(test)': function () {
-    var spy = sinon.spy();
-    this.hub.on('test', spy);
-
-    this.hub.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  },
-
-
-  'should be hub instance in after(test)': function () {
-    var spy = sinon.spy();
-    this.hub.after('test', spy);
-
-    this.hub.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, this.hub);
-  }
-
+  'should be hub instance in after(test)'   : run('after', 'test')
 
 });
