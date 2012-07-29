@@ -344,7 +344,29 @@ test('emit-callback', {
 
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, null);
-  }
+  },
 
+
+  'should use the same scope in callbacks as in listeners': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+
+    this.hub.on('test', spy1);
+    this.hub.emit('test', spy2);
+
+    assert.strictEqual(spy2.thisValues[0], spy1.thisValues[0]);
+  },
+
+
+  'should use the same scope in callbacks as in listeners on error':
+    function () {
+      var stub  = sinon.stub().throws(new Error());
+      var spy   = sinon.spy();
+
+      this.hub.on('test', stub);
+      this.hub.emit('test', spy);
+
+      assert.strictEqual(spy.thisValues[0], stub.thisValues[0]);
+    }
 
 });
