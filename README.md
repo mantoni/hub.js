@@ -26,7 +26,7 @@ hub.on('some.event', function (a, b) {
 hub.emit('some.event', 'any', 'args');
 ```
 
-### Return values
+### Return Values
 
 ```js
 hub.on('answer', function () {
@@ -39,6 +39,8 @@ hub.emit('answer', function (err, value) {
 
 ### Callbacks
 
+Simply define an (additional) callback argument:
+
 ```js
 hub.on('answer', function (callback) {
   callback(null, 42);
@@ -47,6 +49,8 @@ hub.emit('answer', function (err, value) {
   console.log(value);
 });
 ```
+
+Alternatively, call `this.callback()` to obtain a callback, or even multiple callbacks that will be waited for.
 
 ### Exception Handling
 
@@ -58,6 +62,8 @@ hub.emit('answer', function (err) {
   console.log(err);
 });
 ```
+
+Exceptions from multiple listeners will be merged into an `ErrorList` with an `errors` array containing all the original exceptions.
 
 ### Wildcard Subscriptions
 
@@ -96,9 +102,10 @@ Each event is emitted in 6 phases:
  5. `after(event)`
  6. `after(*)`
 
-Calling `this.stop()` in one of the phases will prevent the following phases from being executed. However, other listeners being registered on the same phase will still be invoked.
+Each phase is completed if all callbacks on all listeners where invoked. The next phase in only executed if the previous one is complete.
+Calling `this.stop()` will prevent the following phases from being executed. Note that other listeners on the same phase will still be invoked.
 
-The first 4 phases will receive the arguments passed to emit. Phase 5 and 6 will receive `(err, value)`, which is the same as passed to the optional callback of an `emit` call.
+The first 4 phases will receive the arguments passed to emit. Phase 5 and 6 will receive `(err, value)`, which is the same as what gets passed to an  `emit` callback.
 
 ### Strategies
 
@@ -139,6 +146,7 @@ The API of the `this` object passed all listeners and callbacks:
  - `args()` - returns a copy of the arguments that followed the emitted event.
  - `stop()` - prevent listener invocation on the following event phases.
  - `stopped()` - returns true if `stop()` has been called.
+ - `callback()` - returns a callback that has to be invoked for the operation to complete. Listeners may obtain mutliple callbacks.
 
 ## Run tests
 
