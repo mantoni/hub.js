@@ -10,7 +10,7 @@ Pub/Sub oriented JavaScript - http://mantoni.github.com/hub.js
 npm install hubjs
 ```
 
-## Usage
+## Instantiation
 
 ```js
 var hubjs = require('hubjs');
@@ -48,7 +48,7 @@ hub.emit('answer', function (err, value) {
 });
 ```
 
-### Errors
+### Exception Handling
 
 ```js
 hub.on('answer', function () {
@@ -61,12 +61,15 @@ hub.emit('answer', function (err) {
 
 ### Wildcard Subscriptions
 
+`*` matches `test`, but not `test.two`, while `**` matches both. `test.*` matches `test.one` but not `one.test`.
+Unless normal listeners, matchers do not get invoked in registration order. The more generic matchers get invoked before the more specific ones, e.g. `a.**` is invoked before `a.b.*` if `a.b.c` is emitted.
+
 ```js
 hub.on('**', function () {
-  console.log('hub event ' + this.event);
+  console.log('hub event ' + this.event + '(' + this.args().join(', ') + ')');
 });
 
-hub.on('server.*', function (data) {
+hub.before('server.*', function (data) {
   if (!data) {
     console.warn('No data passed to ' + this.event + '. Aborting.');
     this.stop();
@@ -82,7 +85,24 @@ hub.emit('module.**.start');
 hub.emit('**.destroy');
 ```
 
+### Event Phases
+
+Each event is emitted in 6 phases:
+
+ 1. `before(*)`
+ 2. `before(event)`
+ 3. `on(*)`
+ 4. `on(event)`
+ 5. `after(event)`
+ 6. `after(*)`
+
+Calling `this.stop()` in one of the phases will prevent the following phases from being executed. However, other listeners being registered on the same phase will still be invoked.
+
+The first 4 phases will receive the arguments passed to emit. Phase 5 and 6 will receive `(err, value)`, which is the same as passed to the optional callback of an `emit` call.
+
 ### Strategies
+
+Strategies are functions that take an array of non-undefined values and return a result of any type.
 
 ```js
 hub.on('answer.a', function () { return 2; });
@@ -94,37 +114,31 @@ hub.emit('answer.*', hubjs.CONCAT, function (err, results) {
 });
 ```
 
+These strategies are pre-defined:
+
+ - `LAST` - returns the last non-undefined value
+ - `CONCAT` - returns an array of all non-undefined listener return values
+
 ## API
 
  - `hub([listeners])` - the hub module exports a factory function which takes optional listeners and returns a hub instance. All functions in the given listeners object will be installed on the hub instance using `on`.
  - `hub.on(event, function)` - registers a listener for an event. The event may contain `*` or `**` to register a "matcher" (see below). If the listener function expects more arguments than are passed to `emit`, the last argument will be a callback function. The listener is expected to invoke the callback once completed with an error object or `null` and a single return value.
+ - `hub.before(event, function)` - like on, but invoked before listeners registered with `on`.
+ - `hub.after(event, function)` - like on, but invoked after listeners registered with `on` and gets invoked with the arguments `(err, value)`.
  - `hub.un(event)` - unregisters all listeners for the given event.
  - `hub.un(event, function)` - unregisters a single listener for an event.
  - `hub.once(event, function)` - registers a listerner for an event that will be automatically unregistered on the first invocation.
- - `hub.emit(event[, arg1, arg2, ...][[, strategy], callback])` - invokes all listeners for an event. The optional arguments are passed to each listener. The event may contain `*` or `**` to invoke all listeners registered for matching events (broadcasting). The optional callback will be invoked once all listeners returned. The first argument is an error if at least one of the listeners threw, the second argument is a return value. If a callback is given, the optional strategy filters the return values of the listeners. By default the strategy `hub.LAST` is used.
+ - `hub.emit(event[, arg1, arg2, ...][[, strategy], callback])` - invokes all listeners for an event. The optional arguments are passed to each listener. The event may contain `*` or `**` to invoke all listeners registered for matching events (broadcasting). The optional callback will be invoked once all listeners returned. The first argument is an error if at least one of the listeners threw, the second argument is the return value. If a callback is given, the optional strategy filters the return values of the listeners. By default the strategy `hub.LAST` is used.
 
-### Matchers
+### API of the scope object in listeners
 
-A "matcher" is an event that contains at least one `*`. A single `*` matches a of an event name and stops at a dot while a `**` does not stop at a dot.
-Matchers are different from listeners in these points:
+The API of the `this` object passed all listeners and callbacks:
 
- - they get invoked before the listeners allowing AOPish usage
- - the invocation order is not in registration order as for listeners, but follows special rules
- - the scope is set to a special object providing additional features
-
-The API of the `this` object passed to matchers:
-
+ - `hub` - the hub instance
  - `event` - the current event
- - `stop()` - prevents listener execution. This does not prevent other matchers from being invoked.
- - `beforeReturn(function)` - registers a function that gets invoked before the callback that was passed to `emit`.
- - `afterReturn(function)` - registers a function that gets invoked after the callback that was passed to `emit`.
-
-### Strategies
-
-Strategies are functions that take an array of non-undefined values and return a result of any type. These pre-defined strategies exist:
-
- - `LAST` - returns the last non-undefined value
- - `CONCAT` - returns an array of all non-undefined listener return values
+ - `args()` - returns a copy of the arguments that followed the emitted event.
+ - `stop()` - prevent listener invocation on the following event phases.
+ - `stopped()` - returns true if `stop()` has been called.
 
 ## Run tests
 
