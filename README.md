@@ -10,7 +10,11 @@ Pub/Sub oriented JavaScript - http://mantoni.github.com/hub.js
 npm install hubjs
 ```
 
-## Instantiation
+You can also `make compile` hub.js for browsers.
+
+## Usage
+
+### Instantiation
 
 ```js
 var hubjs = require('hubjs');
@@ -137,9 +141,9 @@ These strategies are pre-defined:
  - `hub.once(event, function)` - registers a listerner for an event that will be automatically unregistered on the first invocation.
  - `hub.emit(event[, arg1, arg2, ...][[, strategy], callback])` - invokes all listeners for an event. The optional arguments are passed to each listener. The event may contain `*` or `**` to invoke all listeners registered for matching events (broadcasting). The optional callback will be invoked once all listeners returned. The first argument is an error if at least one of the listeners threw, the second argument is the return value. If a callback is given, the optional strategy filters the return values of the listeners. By default the strategy `hub.LAST` is used.
 
-### API of the scope object in listeners
+### this in listeners
 
-The API of the `this` object passed all listeners and callbacks:
+The API of the `this` object in all listeners and callbacks:
 
  - `hub` - the hub instance
  - `event` - the current event
