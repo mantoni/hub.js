@@ -10,7 +10,7 @@
     "node"          : ">=0.6"
   },
   "scripts"         : {
-    "test"          : "make test"
+    "test"          : "make"
   },
   "repository"      : {
     "type"          : "git",

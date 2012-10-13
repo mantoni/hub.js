@@ -1,11 +1,14 @@
 SHELL := /bin/bash
 
-test:
-	@node_modules/.bin/autolint --once
-	@node -e "require('urun')('test');"
+default: lint test
 
-compile: test
-	@nomo
-	@node_modules/.bin/uglifyjs hub.js > hub.min.js
+lint:
+	@node_modules/.bin/autolint --once
 
 .PHONY: test
+test:
+	@node -e "require('urun')('test');"
+
+compile: lint test
+	@nomo
+	@node_modules/.bin/uglifyjs hub.js > hub.min.js
