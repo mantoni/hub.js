@@ -132,50 +132,50 @@ These strategies are pre-defined:
 
 ## API
 
-`hub([listeners])`
+##### `hub([listeners])`
 The hub module exports a factory function which takes optional listeners and returns a hub instance. All functions in the given listeners object will be installed on the hub instance using `on`.
 
-`hub.on(event, function)`
+##### `hub.on(event, function)`
 Registers a listener for an event. The event may contain `*` or `**` to register a "matcher" (see below). If the listener function expects more arguments than are passed to `emit`, the last argument will be a callback function. The listener is expected to invoke the callback once completed with an error object or `null` and a single return value.
 
-`hub.before(event, function)`
+##### `hub.before(event, function)`
 Like on, but invoked before listeners registered with `on`.
 
-`hub.after(event, function)`
+##### `hub.after(event, function)`
 Like on, but invoked after listeners registered with `on` and gets invoked with the arguments `(err, value)`.
 
-`hub.un(event)`
+##### `hub.un(event)`
 Unregisters all listeners for the given event.
 
-`hub.un(event, function)`
+##### `hub.un(event, function)`
 Unregisters a single listener for an event.
 
-`hub.once(event, function)`
+##### `hub.once(event, function)`
 Registers a listerner for an event that will be automatically unregistered on the first invocation.
 
-`hub.emit(event[, arg1, arg2, ...][[, strategy], callback])`
+##### `hub.emit(event[, arg1, arg2, ...][[, strategy], callback])`
 Invokes all listeners for an event. The optional arguments are passed to each listener. The event may contain `*` or `**` to invoke all listeners registered for matching events (broadcasting). The optional callback will be invoked once all listeners returned. The first argument is an error if at least one of the listeners threw, the second argument is the return value. If a callback is given, the optional strategy filters the return values of the listeners. By default the strategy `hub.LAST` is used.
 
 ### this in listeners
 
 The API of the `this` object in all listeners and callbacks:
 
-`hub`
+##### `hub`
 The hub instance.
 
-`event`
+##### `event`
 The current event.
 
-`args()`
+##### `args()`
 Returns a copy of the arguments passed to emit following the event.
 
-`stop()`
+##### `stop()`
 Prevent listener invocation on the following event phases.
 
-`stopped()`
+##### `stopped()`
 Returns true if `stop()` was called.
 
-`callback()`
+##### `callback()`
 Returns a callback that has to be invoked for the operation to complete. Listeners may obtain mutliple callbacks.
 
 ## Run tests
