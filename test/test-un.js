@@ -63,20 +63,6 @@ test('hub.un', {
   },
 
 
-  'should unsubscribe all listeners': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.on('test', spy1);
-    this.hub.on('test', spy2);
-
-    this.hub.un('test');
-    this.hub.emit('test');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.notCalled(spy2);
-  },
-
-
   'should not unsubscribe different listener': function () {
     var spy = sinon.spy();
     this.hub.on('test', spy);
@@ -85,15 +71,6 @@ test('hub.un', {
     this.hub.emit('test');
 
     sinon.assert.calledOnce(spy);
-  },
-
-
-  'should not throw if listener does not exist': function () {
-    var self = this;
-
-    assert.doesNotThrow(function () {
-      self.hub.un('test', function () {});
-    });
   },
 
 

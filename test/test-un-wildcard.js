@@ -63,48 +63,6 @@ test('hub.un wildcard', {
   },
 
 
-  'should unsubscribe all on matchers': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.on('test.*', spy1);
-    this.hub.on('test.*', spy2);
-
-    this.hub.un('test.*');
-    this.hub.emit('test.a');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.notCalled(spy2);
-  },
-
-
-  'should unsubscribe all before matchers': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.before('test.*', spy1);
-    this.hub.before('test.*', spy2);
-
-    this.hub.un('test.*');
-    this.hub.emit('test.a');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.notCalled(spy2);
-  },
-
-
-  'should unsubscribe all after matchers': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.after('test.*', spy1);
-    this.hub.after('test.*', spy2);
-
-    this.hub.un('test.*');
-    this.hub.emit('test.a');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.notCalled(spy2);
-  },
-
-
   'should not unsubscribe different matcher': function () {
     var spy = sinon.spy();
     this.hub.on('test.*', spy);
@@ -113,15 +71,6 @@ test('hub.un wildcard', {
     this.hub.emit('test.a');
 
     sinon.assert.calledOnce(spy);
-  },
-
-
-  'should not throw if matcher does not exist': function () {
-    var self = this;
-
-    assert.doesNotThrow(function () {
-      self.hub.un('test.*');
-    });
   },
 
 
