@@ -26,6 +26,7 @@
     "uglify-js"     : "~1.2.6",
     "autolint"      : "~1.0.4"
   },
+  "files"           : ["lib", "README.md", "LICENSE"],
   "nomo"            : {
     "name"          : "hub.js",
     "require"       : "lib/hub",
