@@ -178,6 +178,10 @@ Returns true if `stop()` was called.
 ##### `callback()`
 Returns a callback that has to be invoked for the operation to complete. Listeners may obtain mutliple callbacks.
 
+### events
+
+Calling `on`, `before`, `after` or `once` triggers a `newListener` event passing the event name and the listener function as arguments. If the event gets stopped (`this.stop()`) the listener will not be registered.
+
 ## Run tests
 
 ```

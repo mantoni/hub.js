@@ -36,9 +36,10 @@ function matchingMatchers(method) {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     var spy3 = sinon.spy();
-    this.hub[method]('**',         spy1);
     this.hub[method]('foo.*',      spy2);
     this.hub[method]('foo.*.test', spy3);
+    // register ** last to avoid catching newLIsteners:
+    this.hub[method]('**',         spy1);
 
     this.hub.emit('foo.**');
 

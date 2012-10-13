@@ -51,12 +51,12 @@ test('this.stop', {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
-    this.hub.on('*', spy1);
-    this.hub.on('*', function () {
+    this.hub.on('test.*', spy1);
+    this.hub.on('test.*', function () {
       this.stop();
     });
-    this.hub.on('*', spy2);
-    this.hub.emit('test');
+    this.hub.on('test.*', spy2);
+    this.hub.emit('test.run');
 
     sinon.assert.calledOnce(spy1);
     sinon.assert.calledOnce(spy2);
@@ -104,12 +104,12 @@ test('this.stop', {
 
   'should stop emitted event in after(test)': function () {
     var spy = sinon.spy();
-    this.hub.after('*', spy);
+    this.hub.after('test.*', spy);
 
-    this.hub.after('test', function () {
+    this.hub.after('test.run', function () {
       this.stop();
     });
-    this.hub.emit('test');
+    this.hub.emit('test.run');
 
     sinon.assert.notCalled(spy);
   }

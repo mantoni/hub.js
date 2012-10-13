@@ -198,14 +198,14 @@ test('emit-callback', {
   'should invoke callback after all wildcard listeners returned': sinon.test(
     function () {
       var spy = sinon.spy();
-      this.hub.on('*', function (callback) {
+      this.hub.on('test.*', function (callback) {
         setTimeout(callback, 20);
       });
-      this.hub.on('*', function (callback) {
+      this.hub.on('test.*', function (callback) {
         setTimeout(callback, 10);
       });
 
-      this.hub.emit('test', spy);
+      this.hub.emit('test.run', spy);
 
       sinon.assert.notCalled(spy);
       this.clock.tick(10);

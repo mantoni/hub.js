@@ -90,8 +90,8 @@ test('emit-strategy', {
 
   'should use given strategy with callback values and wildcards':
     function () {
-      this.hub.on('**',     function (callback) { callback(null, 'a'); });
-      this.hub.on('test.*', function (callback) { callback(null, 'b'); });
+      this.hub.on('**.test',  function (callback) { callback(null, 'a'); });
+      this.hub.on('test.*',   function (callback) { callback(null, 'b'); });
       var spy = sinon.spy();
 
       this.hub.emit('test.test', hub.CONCAT, spy);
@@ -114,8 +114,8 @@ test('emit-strategy', {
 
   'should use given strategy with callback and return value and wildcards':
     function () {
-      this.hub.on('**',     invokeCallbackDelayed);
-      this.hub.on('*.test', sinon.stub().returns('b'));
+      this.hub.on('**.test',  invokeCallbackDelayed);
+      this.hub.on('*.test',   sinon.stub().returns('b'));
       var spy = sinon.spy();
 
       this.hub.emit('test.test', hub.CONCAT, spy);
