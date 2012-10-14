@@ -1,0 +1,72 @@
+/**
+ * hub.js
+ *
+ * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
+ *
+ * @license MIT
+ */
+'use strict';
+
+var test    = require('utest');
+var assert  = require('assert');
+var sinon   = require('sinon');
+
+var hub     = require('../lib/hub');
+
+
+test('hub.once', {
+
+  before: function () {
+    this.hub = hub();
+  },
+
+
+  'should unsubscribe after first emit': function () {
+    var spy = sinon.spy();
+
+    this.hub.once('test', spy);
+    this.hub.emit('test');
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should pass arguments': function () {
+    var spy = sinon.spy();
+
+    this.hub.once('test', spy);
+    this.hub.emit('test', 'abc', 123);
+
+    sinon.assert.calledWith(spy, 'abc', 123);
+  },
+
+
+  'should work with callbacks': function () {
+    var spy = sinon.spy();
+
+    this.hub.once('test', function (a, b, callback) {
+      callback(null, a + b);
+    });
+    this.hub.emit('test', 'a', 'b', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, 'ab');
+  },
+
+
+  'should not invoke listener again if it emits same event': function () {
+    var self  = this;
+    var spy   = sinon.spy(function () {
+      self.hub.emit('a');
+    });
+
+    this.hub.once('a', spy);
+    assert.doesNotThrow(function () {
+      self.hub.emit('a');
+    });
+
+    sinon.assert.calledOnce(spy);
+  }
+
+});
