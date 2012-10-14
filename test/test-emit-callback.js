@@ -43,6 +43,20 @@ test('emit-callback', {
   },
 
 
+  'should invoke callback with Error if async listener throws': function () {
+    var err = new Error();
+    var spy = sinon.spy();
+    this.hub.on('test', function (callback) {
+      throw err;
+    });
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, err);
+  },
+
+
   'should invoke callback with Error if wildcard listener throws':
     function () {
       var err = new Error();
@@ -90,6 +104,22 @@ test('emit-callback', {
     var caught;
     this.hub.on('test', function () {
       this.stop();
+      throw new Error('oups');
+    });
+
+    try {
+      this.hub.emit('test');
+    } catch (e) {
+      caught = e;
+    }
+
+    assert.equal(caught.message, 'oups');
+  },
+
+
+  'should throw if async listener threw': function () {
+    var caught;
+    this.hub.on('test', function (callback) {
       throw new Error('oups');
     });
 
