@@ -65,7 +65,7 @@ function listenerType(method, arg, actual) {
 }
 
 
-test('hub.errors', {
+test('errors', {
 
   before: function () {
     this.hub = hub();

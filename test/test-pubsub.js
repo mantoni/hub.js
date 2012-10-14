@@ -52,16 +52,6 @@ test('pubsub', {
     this.hub.emit('test', 1, 'x', arr);
 
     sinon.assert.calledWith(spy, 1, 'x', arr);
-  },
-
-
-  'should allow upper case in event names': function () {
-    var spy = sinon.spy();
-
-    this.hub.on('TEST', spy);
-    this.hub.emit('TEST');
-
-    sinon.assert.calledOnce(spy);
   }
 
 
