@@ -103,24 +103,28 @@ test('emit-wildcard', {
   'should invoke "before" listeners before "on" listeners': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
-    this.hub.before('test', spy1);
-    this.hub.on('test', spy2);
+    var spy3 = sinon.spy();
+    this.hub.before('test.*',   spy1);
+    this.hub.before('test.run', spy2);
+    this.hub.on('test.run',     spy3);
 
-    this.hub.emit('*');
+    this.hub.emit('test.*');
 
-    sinon.assert.callOrder(spy1, spy2);
+    sinon.assert.callOrder(spy1, spy2, spy3);
   },
 
 
   'should invoke "after" listeners after "on" listeners': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
-    this.hub.on('test', spy1);
-    this.hub.after('test', spy2);
+    var spy3 = sinon.spy();
+    this.hub.on('test.run',     spy1);
+    this.hub.after('test.run',  spy2);
+    this.hub.after('test.*',    spy3);
 
-    this.hub.emit('*');
+    this.hub.emit('test.*');
 
-    sinon.assert.callOrder(spy1, spy2);
+    sinon.assert.callOrder(spy1, spy2, spy3);
   },
 
 
@@ -135,33 +139,55 @@ test('emit-wildcard', {
   },
 
 
-  'should work with all lower case letters': function () {
-    var spy = sinon.spy();
+  'should invoke "before" listeners in parallel': function () {
+    var spy = sinon.spy(function (callback) {
+      throw new Error();
+    });
+    this.hub.before('test.a', spy);
+    this.hub.before('test.b', spy);
 
-    this.hub.on('*', spy);
-    this.hub.emit('abcdefghijklmnopqrstuvwxyz');
+    this.hub.emit('test.*', function () {});
 
-    sinon.assert.calledOnce(spy);
+    sinon.assert.calledTwice(spy);
   },
 
 
-  'should work with all upper case letters': function () {
-    var spy = sinon.spy();
+  'should invoke "after" listeners in parallel': function () {
+    var spy = sinon.spy(function (callback) {
+      throw new Error();
+    });
+    this.hub.after('test.a', spy);
+    this.hub.after('test.b', spy);
 
-    this.hub.on('*', spy);
-    this.hub.emit('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    this.hub.emit('test.*');
 
-    sinon.assert.calledOnce(spy);
+    sinon.assert.calledTwice(spy);
   },
 
 
-  'should allow underscores': function () {
-    var spy = sinon.spy();
+  'should invoke "before" matchers in parallel': function () {
+    var spy = sinon.spy(function (callback) {
+      throw new Error();
+    });
+    this.hub.before('test.a.*', spy);
+    this.hub.before('test.b.*', spy);
 
-    this.hub.on('*', spy);
-    this.hub.emit('Test_Me');
+    this.hub.emit('test.**', function () {});
 
-    sinon.assert.calledOnce(spy);
+    sinon.assert.calledTwice(spy);
+  },
+
+
+  'should invoke "after" matchers in parallel': function () {
+    var spy = sinon.spy(function (callback) {
+      throw new Error();
+    });
+    this.hub.after('test.a.*', spy);
+    this.hub.after('test.b.*', spy);
+
+    this.hub.emit('test.**');
+
+    sinon.assert.calledTwice(spy);
   }
 
 
