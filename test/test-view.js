@@ -54,6 +54,13 @@ test('hub.view', {
   },
 
 
+  'should have a nice toString implementation': function () {
+    var view = this.hub.view('test.me.*');
+
+    assert.equal(view.toString(), '[object hub.View(test.me.*)]');
+  },
+
+
   'should forward emit': function () {
     var stub      = sinon.stub(this.hub, 'emit');
     var view      = this.hub.view('test');
