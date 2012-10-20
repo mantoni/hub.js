@@ -290,12 +290,13 @@ test('emit-callback', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    var error = spy.firstCall.args[0];
-    assert.equal(error.toString(),
-      'ErrorList: Multiple callbacks err\'d:\n' +
-      '  - TypeError: a\n' +
-      '  - RangeError: b');
-    assert(error instanceof Error);
+    sinon.assert.calledWith(spy, sinon.match.instanceOf(Error));
+    sinon.assert.calledWithMatch(spy, {
+      name    : 'ErrorList',
+      message : 'Multiple callbacks err\'d:\n' +
+                '  - TypeError: a\n' +
+                '  - RangeError: b'
+    });
   },
 
 
@@ -309,7 +310,13 @@ test('emit-callback', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    assert(spy.firstCall.args[0] instanceof Error);
+    sinon.assert.calledWith(spy, sinon.match.instanceOf(Error));
+    sinon.assert.calledWithMatch(spy, {
+      name    : 'ErrorList',
+      message : 'Multiple callbacks err\'d:\n' +
+                '  - TypeError: a\n' +
+                '  - RangeError: b'
+    });
   },
 
 
@@ -321,7 +328,13 @@ test('emit-callback', {
     this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
-    assert(spy.firstCall.args[0] instanceof Error);
+    sinon.assert.calledWith(spy, sinon.match.instanceOf(Error));
+    sinon.assert.calledWithMatch(spy, {
+      name    : 'ErrorList',
+      message : 'Multiple callbacks err\'d:\n' +
+                '  - TypeError: a\n' +
+                '  - RangeError: b'
+    });
   },
 
 
