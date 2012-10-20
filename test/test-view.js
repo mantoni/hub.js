@@ -128,6 +128,17 @@ test('hub.view', {
   },
 
 
+  'should forward removeAllMatching': function () {
+    var stub  = sinon.stub(this.hub, 'removeAllMatching');
+    var view  = this.hub.view('test');
+
+    view.removeAllMatching('abc');
+
+    sinon.assert.calledOnce(stub);
+    sinon.assert.calledWith(stub, 'test.abc');
+  },
+
+
   'should expose hub': function () {
     var view = this.hub.view('test');
 
@@ -157,11 +168,39 @@ test('hub.view', {
   },
 
 
+  'should throw if event in view is undefined': function () {
+    var view = this.hub.view('test');
+
+    try {
+      view.view(undefined);
+      assert.fail('Exception expected');
+    } catch (e) {
+      assert.equal(e.name, 'TypeError');
+      assert.equal(e.message,
+        'Expected event to be string, but it was undefined');
+    }
+  },
+
+
   'should throw if event in removeAllListeners is undefined': function () {
     var view = this.hub.view('test');
 
     try {
       view.removeAllListeners(undefined);
+      assert.fail('Exception expected');
+    } catch (e) {
+      assert.equal(e.name, 'TypeError');
+      assert.equal(e.message,
+        'Expected event to be string, but it was undefined');
+    }
+  },
+
+
+  'should throw if event in removeAllMatching is undefined': function () {
+    var view = this.hub.view('test');
+
+    try {
+      view.removeAllMatching(undefined);
       assert.fail('Exception expected');
     } catch (e) {
       assert.equal(e.name, 'TypeError');
