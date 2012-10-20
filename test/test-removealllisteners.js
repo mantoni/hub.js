@@ -93,6 +93,18 @@ test('hub.removeAllListeners', {
     assert.doesNotThrow(function () {
       self.hub.removeAllListeners('test.*');
     });
+  },
+
+
+  'should throw if event is undefined': function () {
+    try {
+      this.hub.removeAllListeners(undefined);
+      assert.fail('Exception expected');
+    } catch (e) {
+      assert.equal(e.name, 'TypeError');
+      assert.equal(e.message,
+        'Expected event to be string, but it was undefined');
+    }
   }
 
 });

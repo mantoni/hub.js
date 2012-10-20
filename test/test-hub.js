@@ -66,7 +66,23 @@ test('hub', {
       instance.emit('d');
       instance.emit('e');
     });
+  },
 
+
+  'should expose View prototype': function () {
+    var view = hub().view('test');
+
+    assert.equal(typeof hub.View, 'function');
+    assert(view instanceof hub.View);
+  },
+
+
+  'should not use exposed View for view creation': function () {
+    hub.View = function () { throw new Error(); };
+
+    assert.doesNotThrow(function () {
+      hub().view('test');
+    });
   }
 
 
