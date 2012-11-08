@@ -73,11 +73,13 @@ test('hub.view', {
   },
 
 
-  'should forward once'   : testHandler('once'),
-  'should forward on'     : testHandler('on'),
-  'should forward un'     : testHandler('un'),
-  'should forward before' : testHandler('before'),
-  'should forward after'  : testHandler('after'),
+  'should forward on'         : testHandler('on'),
+  'should forward un'         : testHandler('un'),
+  'should forward before'     : testHandler('before'),
+  'should forward after'      : testHandler('after'),
+  'should forward once'       : testHandler('once'),
+  'should forward onceBefore' : testHandler('onceBefore'),
+  'should forward onceAfter'  : testHandler('onceAfter'),
 
 
   'should forward view': function () {
