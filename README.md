@@ -25,7 +25,7 @@ If you'd like to hack hub.js here is how to get started:
 
  - `npm install` will setup everything you need.
  - `make` lints the code with JSLint and runs all unit tests.
- - Use can also `make lint` or `make test` individually.
+ - You can also `make lint` or `make test` individually.
 
 Running the test cases in a browser instead of Node requires [nomo.js](https://github.com/mantoni/nomo.js).
 
