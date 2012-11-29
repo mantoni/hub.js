@@ -13,7 +13,7 @@ compile: lint test
 	@nomo
 	@node_modules/.bin/uglifyjs hub.js > hub.min.js
 
-version := $(shell node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
+version := $(shell node -e "console.log(require('./package.json').version)")
 folder := hubjs-${version}
 
 package: compile
