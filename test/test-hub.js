@@ -77,13 +77,13 @@ test('hub', {
   },
 
 
-  'should not use exposed View for view creation': function () {
-    hub.View = function () { throw new Error(); };
+  'should not use exposed View for view creation': sinon.test(function () {
+    this.stub(hub, 'View').throws(new Error());
 
     assert.doesNotThrow(function () {
       hub().view('test');
     });
-  }
+  })
 
 
 });
