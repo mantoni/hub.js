@@ -39,11 +39,13 @@ test('events', {
 
   'should emit newListener for on(**)': emitsNewListener('on', '**'),
 
-  'should emit newListener for before(test)': emitsNewListener('before', 'test'),
+  'should emit newListener for before(test)': emitsNewListener('before',
+    'test'),
 
   'should emit newListener for before(**)': emitsNewListener('before', '**'),
 
-  'should emit newListener for after(test)': emitsNewListener('after', 'test'),
+  'should emit newListener for after(test)': emitsNewListener('after',
+    'test'),
 
   'should emit newListener for after(**)': emitsNewListener('after', '**'),
 
