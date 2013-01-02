@@ -142,3 +142,69 @@ test('hub.once/before/after call order', {
   }
 
 });
+
+
+function testObject(method) {
+
+  return {
+
+    before: function () {
+      this.hub = hub();
+    },
+
+
+    'should register event-function pair': function () {
+      var listener1 = sinon.spy();
+      var listener2 = sinon.spy();
+
+      this.hub[method]({
+        'a' : listener1,
+        'b' : listener2
+      });
+      this.hub.emit('a');
+      this.hub.emit('b');
+
+      sinon.assert.called(listener1);
+      sinon.assert.called(listener2);
+    },
+
+
+    'should register function from prototype': function () {
+      function Type() {}
+      Type.prototype.test = sinon.spy();
+      var type = new Type();
+
+      this.hub[method](type);
+      this.hub.emit('test');
+
+      sinon.assert.called(type.test);
+    },
+
+
+    'should not throw if called with non function values': function () {
+      var hub = this.hub;
+
+      assert.doesNotThrow(function () {
+        hub[method]({
+          'a' : 'x',
+          'b' : 123,
+          'c' : true,
+          'd' : {},
+          'e' : new Date()
+        });
+        hub.emit('a');
+        hub.emit('b');
+        hub.emit('c');
+        hub.emit('d');
+        hub.emit('e');
+      });
+    }
+
+  };
+
+}
+
+test('hub.onceBefore object', testObject('onceBefore'));
+test('hub.once object', testObject('once'));
+test('hub.onceAfter object', testObject('onceAfter'));
+

@@ -28,6 +28,28 @@ function testHandler(method) {
 }
 
 
+function testMultiple(method) {
+  return function () {
+    var stub      = sinon.stub(this.hub, method);
+    var view      = this.hub.view('test');
+    var callback1 = function () {};
+    var callback2 = function () {};
+    var callback3 = function () {};
+
+    view[method]({
+      'a' : callback1,
+      'b' : callback2,
+      'c' : callback3
+    });
+
+    sinon.assert.calledThrice(stub);
+    sinon.assert.calledWith(stub, 'test.a', callback1);
+    sinon.assert.calledWith(stub, 'test.b', callback2);
+    sinon.assert.calledWith(stub, 'test.c', callback3);
+  };
+}
+
+
 test('hub.view', {
 
   before: function () {
@@ -80,6 +102,15 @@ test('hub.view', {
   'should forward once'       : testHandler('once'),
   'should forward onceBefore' : testHandler('onceBefore'),
   'should forward onceAfter'  : testHandler('onceAfter'),
+
+
+  'should forward multiple on'         : testMultiple('on'),
+  'should forward multiple un'         : testMultiple('un'),
+  'should forward multiple before'     : testMultiple('before'),
+  'should forward multiple after'      : testMultiple('after'),
+  'should forward multiple once'       : testMultiple('once'),
+  'should forward multiple onceBefore' : testMultiple('onceBefore'),
+  'should forward multiple onceAfter'  : testMultiple('onceAfter'),
 
 
   'should forward view': function () {

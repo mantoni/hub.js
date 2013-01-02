@@ -155,16 +155,7 @@ test('errors', {
   'emit throws if event is undefined'   : eventType('emit',   undefined,
     'undefined'),
 
-  'on throws if event is object'      : eventType('on',     {}, 'object'),
-  'before throws if event is object'  : eventType('before', {}, 'object'),
-  'after throws if event is object'   : eventType('after',  {}, 'object'),
-  'un throws if event is object'      : eventType('un',     {}, 'object'),
-  'once throws if event is object'    : eventType('once',   {}, 'object'),
-  'onceAfter throws if event is object'   : eventType('onceBefore', {},
-    'object'),
-  'onceBefore throws if event is object'  : eventType('onceAfter',  {},
-    'object'),
-  'emit throws if event is object'    : eventType('emit',   {}, 'object'),
+  'emit throws if event is object'    : eventType('emit', {}, 'object'),
 
   'on throws if event is array'       : eventType('on',         [], 'array'),
   'before throws if event is array'   : eventType('before',     [], 'array'),

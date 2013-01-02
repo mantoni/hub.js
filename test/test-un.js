@@ -85,6 +85,59 @@ test('hub.un', {
     assert.doesNotThrow(function () {
       self.hub.emit('test');
     });
+  },
+
+
+  'should register event-function pair': function () {
+    var listener1 = sinon.spy();
+    var listener2 = sinon.spy();
+
+    this.hub.on({
+      'a' : listener1,
+      'b' : listener2
+    });
+    this.hub.un({
+      'a' : listener1,
+      'b' : listener2
+    });
+    this.hub.emit('a');
+    this.hub.emit('b');
+
+    sinon.assert.notCalled(listener1);
+    sinon.assert.notCalled(listener2);
+  },
+
+
+  'should register function from prototype': function () {
+    function Type() {}
+    Type.prototype.test = sinon.spy();
+    var type = new Type();
+
+    this.hub.on(type);
+    this.hub.un(type);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(type.test);
+  },
+
+
+  'should not throw if called with non function values': function () {
+    var hub = this.hub;
+
+    assert.doesNotThrow(function () {
+      hub.un({
+        'a' : 'x',
+        'b' : 123,
+        'c' : true,
+        'd' : {},
+        'e' : new Date()
+      });
+      hub.emit('a');
+      hub.emit('b');
+      hub.emit('c');
+      hub.emit('d');
+      hub.emit('e');
+    });
   }
 
 
