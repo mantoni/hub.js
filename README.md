@@ -12,7 +12,7 @@ npm install hubjs
 
 ## Download for browsers
 
-Browser packages are here: https://github.com/mantoni/hub.js/downloads.
+Browser packages are here: http://maxantoni.de/hub.js/.
 
 
 ## Usage
