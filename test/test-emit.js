@@ -61,6 +61,16 @@ test('hub.emit', {
   },
 
 
+  'should allow colons': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('*', spy);
+    this.hub.emit('Test:Me');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
   'should allow numbers': function () {
     var spy = sinon.spy();
 
