@@ -36,17 +36,26 @@ test('hub.listeners', {
     this.hub = hub();
   },
 
-  'should remove only on(test.run)'     : testWithEvent('test.run', 'on'),
-  'should remove only on(test.*)'       : testWithEvent('test.*',   'on'),
-  'should remove only on(**)'           : testWithEvent('**',       'on'),
+  'should return only on(test.run)'     : testWithEvent('test.run', 'on'),
+  'should return only on(test.*)'       : testWithEvent('test.*',   'on'),
+  'should return only on(**)'           : testWithEvent('**',       'on'),
 
-  'should remove only before(test.run)' : testWithEvent('test.run', 'before'),
-  'should remove only before(test.*)'   : testWithEvent('test.*',   'before'),
-  'should remove only before(**)'       : testWithEvent('**',       'before'),
+  'should return only before(test.run)' : testWithEvent('test.run', 'before'),
+  'should return only before(test.*)'   : testWithEvent('test.*',   'before'),
+  'should return only before(**)'       : testWithEvent('**',       'before'),
 
-  'should remove only after(test.run)'  : testWithEvent('test.run', 'after'),
-  'should remove only after(test.*)'    : testWithEvent('test.*',   'after'),
-  'should remove only after(**)'        : testWithEvent('**',       'after'),
+  'should return only after(test.run)'  : testWithEvent('test.run', 'after'),
+  'should return only after(test.*)'    : testWithEvent('test.*',   'after'),
+  'should return only after(**)'        : testWithEvent('**',       'after'),
+
+
+  'should not throw if listener does not exist': function () {
+    var hub = this.hub;
+
+    assert.doesNotThrow(function () {
+      hub.listeners('test');
+    });
+  },
 
 
   'should not throw if matcher does not exist': function () {
