@@ -91,6 +91,7 @@ test('hub.view', {
     view.emit('abc', 123, 'xyz', callback);
 
     sinon.assert.calledOnce(stub);
+    sinon.assert.calledOn(stub, this.hub);
     sinon.assert.calledWith(stub, 'test.abc', 123, 'xyz', callback);
   },
 
