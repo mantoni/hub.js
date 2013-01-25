@@ -93,7 +93,26 @@ function testCases(event) {
         name    : 'ErrorList',
         errors  : [err1, err2]
       }));
-    }
+    },
+
+
+    'should time out after given timeout millis': sinon.test(function () {
+      this.hub.on('test', function () {
+        this.callback(123);
+      });
+      var spy = sinon.spy();
+      this.hub.emit('test', spy);
+      this.clock.tick(122);
+
+      sinon.assert.notCalled(spy);
+
+      this.clock.tick(1);
+
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWithMatch(spy, {
+        name : 'TimeoutError'
+      });
+    })
 
   };
 }
