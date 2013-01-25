@@ -401,7 +401,7 @@ test('emit-callback', {
   },
 
 
-  'should use the same scope in callbacks as in listeners on error':
+  'should use the same scope in callback as in listeners on error':
     function () {
       var stub  = sinon.stub().throws(new Error());
       var spy   = sinon.spy();
