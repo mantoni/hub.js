@@ -135,7 +135,7 @@ test('emit-callback', {
 
   'should not invoke listener if wildcard listener threw': function () {
     var spy = sinon.spy();
-    this.hub.on('*', sinon.stub().throws(new Error()));
+    this.hub.on('*', function () { throw new Error(); });
     this.hub.on('test', spy);
 
     try {
@@ -149,7 +149,7 @@ test('emit-callback', {
   'should not invoke listener if wildcard listener threw with callback':
     function () {
       var spy = sinon.spy();
-      this.hub.on('*', sinon.stub().throws(new Error()));
+      this.hub.on('*', function () { throw new Error(); });
       this.hub.on('test', spy);
 
       this.hub.emit('test', function () {});
@@ -159,22 +159,44 @@ test('emit-callback', {
 
 
   'should pass listener return value to callback': function () {
-    this.hub.on('test', sinon.stub().returns('test'));
+    this.hub.on('test', function () { return 'a'; });
     var spy = sinon.spy();
 
     this.hub.emit('test', spy);
 
-    sinon.assert.calledWith(spy, null, 'test');
+    sinon.assert.calledWith(spy, null, 'a');
+  },
+
+
+  'should pass last called listener return value to callback': function () {
+    this.hub.on('test', function () { return 'a'; });
+    this.hub.on('test', function () { return 'b'; });
+    var spy = sinon.spy();
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledWith(spy, null, 'b');
   },
 
 
   'should pass wildcard listener return value to callback': function () {
-    this.hub.on('*', sinon.stub().returns('test'));
+    this.hub.on('*', function () { return 'a'; });
     var spy = sinon.spy();
 
     this.hub.emit('test', spy);
 
-    sinon.assert.calledWith(spy, null, 'test');
+    sinon.assert.calledWith(spy, null, 'a');
+  },
+
+
+  'should pass last wildcard listener return value to callback': function () {
+    this.hub.on('*', function () { return 'a'; });
+    this.hub.on('*', function () { return 'b'; });
+    var spy = sinon.spy();
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledWith(spy, null, 'b');
   },
 
 
