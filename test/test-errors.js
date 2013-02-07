@@ -221,16 +221,6 @@ test('errors emitted', {
     sinon.assert.calledWith(spy, this.err);
   },
 
-  'wildcard error event with cause': function () {
-    var spy = sinon.spy();
-    this.hub.on('*.error', spy);
-
-    this.hub.emit('test.ouch');
-
-    sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, this.err);
-  },
-
   'does not invoke default handler if namespace handler is present':
     function () {
       var spy1 = sinon.spy();
@@ -262,6 +252,18 @@ test('errors emitted', {
 
     sinon.assert.calledOnce(errorSpy);
     sinon.assert.calledWith(errorSpy, this.err);
+  },
+
+
+  'does not invoke namespace.*': function () {
+    var spy = sinon.spy();
+    this.hub.on('test.*', spy);
+
+    try {
+      this.hub.emit('test.ouch');
+    } catch (expected) {}
+
+    sinon.assert.calledOnce(spy); // and not twice!
   }
 
 });
