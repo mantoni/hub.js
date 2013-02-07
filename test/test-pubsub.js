@@ -52,6 +52,30 @@ test('pubsub', {
     this.hub.emit('test', 1, 'x', arr);
 
     sinon.assert.calledWith(spy, 1, 'x', arr);
+  },
+
+
+  'should not modify argument length for second caller 1': function () {
+    var spy = sinon.spy(function (a, b) {});
+
+    this.hub.on('test', function (a, b, c) {}); // more args
+    this.hub.on('test', spy);
+    this.hub.emit('test', 42);
+
+    // Verify the second arg is not set to undefined:
+    sinon.assert.calledWith(spy, 42, sinon.match.func);
+  },
+
+
+  'should not modify argument length for second caller 2': function () {
+    var spy = sinon.spy(function (a, b) {});
+
+    this.hub.on('test', function (a, b, c) { return true; });
+    this.hub.on('test', spy);
+    this.hub.emit('test', 42);
+
+    // Verify the second arg is not set to undefined:
+    sinon.assert.calledWith(spy, 42, sinon.match.func);
   }
 
 
