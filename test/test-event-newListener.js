@@ -16,14 +16,14 @@ var hub     = require('../lib/hub');
 
 function emitsNewListener(method, event) {
   return function () {
-    var spy       = sinon.spy();
-    var listener  = function () {};
+    var spy      = sinon.spy();
+    var listener = function () {};
 
     this.hub.on('newListener', spy);
     this.hub[method](event, listener);
 
     sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, event, listener);
+    sinon.assert.calledWith(spy, event, sinon.match.func);
   };
 }
 

@@ -34,8 +34,8 @@ function unsubscribeTests(method) {
 
 
     'should not invoke listener again if it emits same event': function () {
-      var self  = this;
-      var spy   = sinon.spy(function () {
+      var self = this;
+      var spy  = sinon.spy(function () {
         self.hub.emit('a');
       });
 
@@ -45,6 +45,29 @@ function unsubscribeTests(method) {
       });
 
       sinon.assert.calledOnce(spy);
+    },
+
+
+    'should not invoke listener again if it emits same wildcard event':
+      function () {
+        var self = this;
+        var spy  = sinon.spy(function () {
+          self.hub.emit('a.b.c');
+        });
+
+        this.hub[method]('a.**', spy);
+        assert.doesNotThrow(function () {
+          self.hub.emit('a.b.c');
+        });
+
+        sinon.assert.calledOnce(spy);
+      },
+
+
+    'should not add additional listeners': function () {
+      this.hub[method]('test', function () {});
+
+      assert.equal(this.hub.listeners('test').length, 1);
     }
 
   };
