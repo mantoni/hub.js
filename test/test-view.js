@@ -141,13 +141,13 @@ test('hub.view', {
 
 
   'should forward removeAllListeners without event': function () {
-    var stub  = sinon.stub(this.hub, 'removeAllListeners');
+    var stub  = sinon.stub(this.hub, 'removeAllMatching');
     var view  = this.hub.view('test');
 
     view.removeAllListeners();
 
     sinon.assert.calledOnce(stub);
-    sinon.assert.calledWith(stub, 'test');
+    sinon.assert.calledWith(stub, 'test.**');
   },
 
 
