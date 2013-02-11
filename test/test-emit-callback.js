@@ -71,37 +71,32 @@ test('emit-callback', {
 
 
   'should throw if no callback was given and listener throws': function () {
-    var caught;
     this.hub.on('test', sinon.stub().throws(new Error('oups')));
 
     try {
       this.hub.emit('test');
+      assert.fail();
     } catch (e) {
-      caught = e;
+      assert.equal(e.message, 'oups');
     }
-
-    assert.equal(caught.message, 'oups');
   },
 
 
   'should throw if no callback was given and wildcard listener throws':
     function () {
       var thrown = new Error();
-      var caught;
       this.hub.on('*', sinon.stub().throws(thrown));
 
       try {
         this.hub.emit('test');
+        assert.fail();
       } catch (e) {
-        caught = e;
+        assert.strictEqual(e, thrown);
       }
-
-      assert.strictEqual(caught, thrown);
     },
 
 
   'should throw if listener threw and event was stopped': function () {
-    var caught;
     this.hub.on('test', function () {
       this.stop();
       throw new Error('oups');
@@ -109,27 +104,24 @@ test('emit-callback', {
 
     try {
       this.hub.emit('test');
+      assert.fail();
     } catch (e) {
-      caught = e;
+      assert.equal(e.message, 'oups');
     }
-
-    assert.equal(caught.message, 'oups');
   },
 
 
   'should throw if async listener threw': function () {
-    var caught;
     this.hub.on('test', function (callback) {
       throw new Error('oups');
     });
 
     try {
       this.hub.emit('test');
+      assert.fail();
     } catch (e) {
-      caught = e;
+      assert.equal(e.message, 'oups');
     }
-
-    assert.equal(caught.message, 'oups');
   },
 
 
