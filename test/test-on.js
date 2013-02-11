@@ -129,6 +129,45 @@ test('hub.on', {
       hub.emit('d');
       hub.emit('e');
     });
+  },
+
+
+  'does not invoke listener registered for "on" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('test', function () {
+      hub.on('test', spy);
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'invokes matcher registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('test', function () {
+      hub.after('*', spy);
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes listener registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('test', function () {
+      hub.after('test', spy);
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
   }
 
 });

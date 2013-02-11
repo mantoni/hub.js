@@ -123,6 +123,19 @@ test('hub.after', {
       hub.emit('d');
       hub.emit('e');
     });
+  },
+
+
+  'does not invoke listener registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.after('test', function () {
+      hub.after('test', spy);
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 });

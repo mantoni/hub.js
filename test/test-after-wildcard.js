@@ -87,7 +87,36 @@ test('hub.after wildcard', {
     this.hub.emit('greet', 'cjno', function () {});
 
     sinon.assert.calledWith(spy, err);
-  }
+  },
 
+
+  'does not invoke matcher registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.after('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'invokes listener registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.after('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  }
 
 });

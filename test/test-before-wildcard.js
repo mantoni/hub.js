@@ -62,6 +62,96 @@ test('hub.before wildcard', {
     this.hub.emit('test', 123, 'abc', [true, false]);
 
     sinon.assert.calledWith(spy, 123, 'abc', [true, false]);
+  },
+
+
+  'does not invoke matcher registrated for "before" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.before('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'invokes listener registered for "before" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.before('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes matcher registered for "on" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.on('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes listener registered for "on" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.on('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes matcher registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes listener registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.before('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
   }
 
 });

@@ -186,6 +186,66 @@ test('hub.on wildcard', {
     this.hub.emit('foo.bar.test');
 
     sinon.assert.callOrder(spy1, spy2);
+  },
+
+
+  'does not invoke matcher registrated for "on" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('*', function () {
+      if (this.event !== 'newListener') {
+        hub.on('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'invokes listener registered for "on" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('*', function () {
+      if (this.event !== 'newListener') {
+        hub.on('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes matcher registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('*', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes listener registered for "after" phase': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.on('*', function () {
+      if (this.event !== 'newListener') {
+        hub.after('test', spy);
+      }
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
   }
 
 
