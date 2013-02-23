@@ -22,7 +22,7 @@
   "devDependencies" : {
     "utest"         : "~0.0.6",
     "urun"          : "~0.0.6",
-    "sinon"         : "~1.5.2",
+    "sinon"         : "~1.6.0",
     "uglify-js"     : "~1.2.6",
     "autolint"      : "~1.0.4"
   },
