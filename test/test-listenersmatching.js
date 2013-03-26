@@ -105,15 +105,13 @@ test('hub.listenersMatching', {
   },
 
 
-  'should return wildcard listeners matching given event': function () {
+  'should return generic for more specific': function () {
     var listener = function () {};
     this.hub.on('**.a', listener);
-    this.hub.on('**.b', function () {});
 
     var result = this.hub.listenersMatching('test.a');
 
     assert.deepEqual(result, [listener]);
   }
-
 
 });

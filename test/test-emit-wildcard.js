@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function matchingListeners(method) {
@@ -36,30 +36,45 @@ function matchingMatchers(method) {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     var spy3 = sinon.spy();
-    this.hub[method]('foo.*',      spy2);
+    var spy4 = sinon.spy();
+    var spy5 = sinon.spy();
+    this.hub[method]('foo.*', spy2);
     this.hub[method]('foo.*.test', spy3);
-    // register ** last to avoid catching newLIsteners:
-    this.hub[method]('**',         spy1);
+    this.hub[method]('*.test', spy4);
+    this.hub[method]('**.test', spy5);
+    // register ** last to avoid catching newListener events:
+    this.hub[method]('**', spy1);
 
     this.hub.emit('foo.**');
 
     sinon.assert.calledOnce(spy1);
     sinon.assert.calledOnce(spy2);
     sinon.assert.calledOnce(spy3);
+    sinon.assert.calledOnce(spy4);
+    sinon.assert.calledOnce(spy5);
   };
 }
 
 function notMatchingMatchers(method) {
   return function () {
-    var spy = sinon.spy();
-    this.hub[method]('*.bar',    spy);
-    this.hub[method]('**.bar',   spy);
-    this.hub[method]('foo',      spy);
-    this.hub[method]('bar.foo',  spy);
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    var spy3 = sinon.spy();
+    var spy4 = sinon.spy();
+    var spy5 = sinon.spy();
+    this.hub[method]('foo.*', spy1);
+    this.hub[method]('*.bar', spy2);
+    this.hub[method]('foo', spy3);
+    this.hub[method]('bar.foo', spy4);
+    this.hub[method]('foo.bar', spy5);
 
-    this.hub.emit('foo.**');
+    this.hub.emit('foo.bar.**');
 
-    sinon.assert.notCalled(spy);
+    sinon.assert.notCalled(spy1);
+    sinon.assert.notCalled(spy2);
+    sinon.assert.notCalled(spy3);
+    sinon.assert.notCalled(spy4);
+    sinon.assert.notCalled(spy5);
   };
 }
 

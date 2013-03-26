@@ -31,6 +31,26 @@ test('hub.before wildcard', {
   },
 
 
+  'should be invoked on single star broadcast': function () {
+    var spy = sinon.spy();
+
+    this.hub.before('foo.*', spy);
+    this.hub.emit('*.bar');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should be invoked on double star broadcast': function () {
+    var spy = sinon.spy();
+
+    this.hub.before('foo.**', spy);
+    this.hub.emit('**.bar');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
   'should be invoked before on if registered before on': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();

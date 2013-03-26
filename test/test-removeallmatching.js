@@ -117,15 +117,14 @@ test('hub.removeAllMatching', {
   },
 
 
-  'should not remove generic with more specific': function () {
+  'should remove generic with more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);
 
     this.hub.removeAllMatching('test.a');
-    this.hub.emit('**');
+    this.hub.emit('test.a');
 
-    sinon.assert.calledOnce(spy);
+    sinon.assert.notCalled(spy);
   }
-
 
 });

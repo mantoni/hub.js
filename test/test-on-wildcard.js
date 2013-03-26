@@ -32,6 +32,26 @@ test('hub.on wildcard', {
   },
 
 
+  'should be invoked on single star broadcast': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('foo.*', spy);
+    this.hub.emit('*.bar');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
+  'should be invoked on double star broadcast': function () {
+    var spy = sinon.spy();
+
+    this.hub.on('foo.**', spy);
+    this.hub.emit('**.bar');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+
   'should not emit to not matching events': function () {
     var spy = sinon.spy();
 
