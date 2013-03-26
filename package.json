@@ -1,6 +1,6 @@
 {
   "name"            : "hubjs",
-  "version"         : "0.10.0",
+  "version"         : "0.11.0",
   "description"     : "Pub/Sub oriented JavaScript for Node and the browser",
   "keywords"        : ["hub", "event", "emitter", "pubsub", "node", "browser"],
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
