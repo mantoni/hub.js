@@ -264,6 +264,30 @@ test('errors emitted', {
     } catch (expected) {}
 
     sinon.assert.calledOnce(spy); // and not twice!
+  },
+
+
+  'invokes namespace error handlers with original scope object': function () {
+    var before = sinon.spy();
+    var spy    = sinon.spy();
+    this.hub.before('test.ouch', before);
+    this.hub.on('test.error', spy);
+
+    this.hub.emit('test.ouch');
+
+    assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
+  },
+
+
+  'invokes root error handlers with original scope object': function () {
+    var before = sinon.spy();
+    var spy    = sinon.spy();
+    this.hub.before('test.ouch', before);
+    this.hub.on('error', spy);
+
+    this.hub.emit('test.ouch');
+
+    assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
   }
 
 });
