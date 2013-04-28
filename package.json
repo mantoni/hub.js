@@ -1,6 +1,6 @@
 {
   "name"            : "hubjs",
-  "version"         : "0.11.0",
+  "version"         : "0.12.0",
   "description"     : "Pub/Sub oriented JavaScript for Node and the browser",
   "keywords"        : ["hub", "event", "emitter", "pubsub", "node", "browser"],
   "author"          : "Maximilian Antoni (http://maxantoni.de)",
@@ -10,7 +10,7 @@
     "node"          : ">=0.6"
   },
   "scripts"         : {
-    "test"          : "make"
+    "test"          : "make test"
   },
   "repository"      : {
     "type"          : "git",
@@ -20,17 +20,14 @@
     "listen"        : "~0.3.0"
   },
   "devDependencies" : {
-    "utest"         : "~0.0.6",
+    "utest"         : "~0.0.7",
     "urun"          : "~0.0.6",
     "sinon"         : "~1.6.0",
     "uglify-js"     : "~1.2.6",
-    "autolint"      : "~1.0.4"
+    "autolint"      : "~1.0.4",
+    "phantomic"     : "~0.2.0",
+    "browserify"    : ">=2.13 <3",
+    "consolify"     : "~0.1.0"
   },
-  "files"           : ["lib", "README.md", "LICENSE"],
-  "nomo"            : {
-    "name"          : "hub.js",
-    "require"       : "lib/hub",
-    "exportTarget"  : "window.hub",
-    "fileName"      : "hub.js"
-  }
+  "files"           : ["lib", "README.md", "CHANGES.md", "LICENSE"]
 }

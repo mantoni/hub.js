@@ -1,6 +1,15 @@
 SHELL := /bin/bash
 
-default: lint test
+default: lint test phantom browser
+
+name    = "hub"
+bin     = node_modules/.bin
+tests   = ./test/fixture/utest.js `ls ./test/test-*`
+html    = test/all.html
+main    = $(shell node -e "console.log(require('./package.json').main)")
+version = $(shell node -e "console.log(require('./package.json').version)")
+folder  = listen-${version}
+
 
 lint:
 	@node_modules/.bin/autolint --once
@@ -9,18 +18,24 @@ lint:
 test:
 	@node -e "require('urun')('test');"
 
-compile: lint test
-	@nomo
-	@node_modules/.bin/uglifyjs hub.js > hub.min.js
+phantom:
+	@echo "Browserify tests | phantomic"
+	@${bin}/browserify ./test/fixture/phantom.js ${tests} | ${bin}/phantomic
 
-version := $(shell node -e "console.log(require('./package.json').version)")
-folder := hubjs-${version}
+browser:
+	@echo "Consolify tests > file://`pwd`/${html}"
+	@${bin}/consolify ${tests} > ${html}
+
+compile: lint test phantom browser
+	@${bin}/browserify ${main} -s ${name} -o ${name}.js
+	@${bin}/uglifyjs ${name}.js > ${name}.min.js
 
 package: compile
 	@echo "Creating package ${folder}.tgz"
 	@mkdir ${folder}
-	@mv hub.js hub.min.js ${folder}
-	@cp LICENSE README.md ${folder}
+	@mv ${name}.js ${name}.min.js ${folder}
+	@cp LICENSE README.md CHANGES.md ${folder}
+	@cp test/all.html ${folder}/tests.html
 	@tar -czf ${folder}.tgz ${folder}
 	@rm -r ${folder}
 
