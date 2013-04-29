@@ -20,7 +20,7 @@
     "listen"        : "~0.3.0"
   },
   "devDependencies" : {
-    "utest"         : "~0.0.7",
+    "utest"         : "~0.0.8",
     "urun"          : "~0.0.6",
     "sinon"         : "~1.6.0",
     "uglify-js"     : "~1.2.6",

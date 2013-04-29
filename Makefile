@@ -4,7 +4,7 @@ default: lint test phantom browser
 
 name    = "hub"
 bin     = node_modules/.bin
-tests   = ./test/fixture/utest.js `ls ./test/test-*`
+tests   = `ls ./test/test-*`
 html    = test/all.html
 main    = $(shell node -e "console.log(require('./package.json').main)")
 version = $(shell node -e "console.log(require('./package.json').version)")
