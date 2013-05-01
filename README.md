@@ -1,12 +1,10 @@
-# hub.js
+# hub.js [![Build Status](https://secure.travis-ci.org/mantoni/hub.js.png?branch=master)](http://travis-ci.org/mantoni/hub.js)
 
 Pub/Sub oriented JavaScript
 
 Repository: https://github.com/mantoni/hub.js
 
-[![Build Status](https://secure.travis-ci.org/mantoni/hub.js.png?branch=master)](http://travis-ci.org/mantoni/hub.js)
-
-## Install on Node
+## Install with NPM
 
 ```
 npm install hubjs
@@ -23,17 +21,12 @@ See the [hub.js wiki](https://github.com/mantoni/hub.js/wiki) for examples and d
 
 ## Contributing
 
-If you'd like to contribute to hub.js here is how to get started:
+Here is what you need for development:
+ - `npm install` will install all the dev dependencies
+ - `make` does all of the following
+ - `make lint` lint the code with JSLint
+ - `make test` runs all unit tests in Node
+ - `make browser` generates a static web page at `test/all.html` to run the tests in a browser
+ - `make phantom` runs all tests in a [headless WebKit](http://phantomjs.org/). Make sure `phantomjs` is in your path.
 
- - Fork the project on GitHub.
- - `npm install` will setup everything you need.
- - `make` lints the code with JSLint and runs all unit tests.
- - You can also `make lint` or `make test` individually.
-
-Running the test cases in a browser instead of Node requires [nomo.js](https://github.com/mantoni/nomo.js).
-
- - Run `npm install -g nomo`
- - Run `nomo server` from within the project directory.
- - Open http://localhost:4444/test in your browser.
-
-To build a browser package containing the merged / minified scripts run `make package`.
+To build a standalone browserified package containing the merged / minified scripts run `make package`.
