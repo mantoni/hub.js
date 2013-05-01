@@ -27,7 +27,7 @@
     "autolint"      : "~1.0.4",
     "phantomic"     : "~0.2.0",
     "browserify"    : ">=2.13 <3",
-    "consolify"     : "~0.1.0"
+    "consolify"     : "~0.2.0"
   },
   "files"           : ["lib", "README.md", "CHANGES.md", "LICENSE"]
 }
