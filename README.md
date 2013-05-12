@@ -2,7 +2,11 @@
 
 Pub/Sub oriented JavaScript
 
-Repository: https://github.com/mantoni/hub.js
+Homepage: <http://maxantoni.de/projects/hub.js/>
+
+Repository: <https://github.com/mantoni/hub.js>
+
+---
 
 ## Install with NPM
 
@@ -12,16 +16,16 @@ npm install hubjs
 
 ## Download for browsers
 
-Browser packages are here: http://maxantoni.de/hub.js/
+Standalone browser packages are here: <http://maxantoni.de/hub.js/>
+
+You can also use npm and bundle it with your application using
+[Browserify](http://browserify.org).
 
 
-## Usage
+## Development
 
-See the [hub.js wiki](https://github.com/mantoni/hub.js/wiki) for examples and documentation.
+Here is what you need:
 
-## Contributing
-
-Here is what you need for development:
  - `npm install` will install all the dev dependencies
  - `make` does all of the following
  - `make lint` lint the code with JSLint
