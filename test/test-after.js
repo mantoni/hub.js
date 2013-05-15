@@ -94,6 +94,22 @@ test('hub.after', {
   },
 
 
+  'should register event-function pair with prefix': function () {
+    var listener1 = sinon.spy();
+    var listener2 = sinon.spy();
+
+    this.hub.after('test', {
+      'a' : listener1,
+      'b' : listener2
+    });
+    this.hub.emit('test.a');
+    this.hub.emit('test.b');
+
+    sinon.assert.called(listener1);
+    sinon.assert.called(listener2);
+  },
+
+
   'should register function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
@@ -101,6 +117,18 @@ test('hub.after', {
 
     this.hub.after(type);
     this.hub.emit('test');
+
+    sinon.assert.called(type.test);
+  },
+
+
+  'should register function from prototype with prefix': function () {
+    function Type() {}
+    Type.prototype.test = sinon.spy();
+    var type = new Type();
+
+    this.hub.after('a', type);
+    this.hub.emit('a.test');
 
     sinon.assert.called(type.test);
   },
@@ -124,6 +152,27 @@ test('hub.after', {
       hub.emit('e');
     });
   },
+
+
+  'should not throw if called with non function values with prefix':
+    function () {
+      var hub = this.hub;
+
+      assert.doesNotThrow(function () {
+        hub.after('test', {
+          'a' : 'x',
+          'b' : 123,
+          'c' : true,
+          'd' : {},
+          'e' : new Date()
+        });
+        hub.emit('test.a');
+        hub.emit('test.b');
+        hub.emit('test.c');
+        hub.emit('test.d');
+        hub.emit('test.e');
+      });
+    },
 
 
   'does not invoke listener registered for "after" phase': function () {

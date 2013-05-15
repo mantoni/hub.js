@@ -88,7 +88,7 @@ test('hub.un', {
   },
 
 
-  'should register event-function pair': function () {
+  'should unregister event-function pair': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -108,7 +108,27 @@ test('hub.un', {
   },
 
 
-  'should register function from prototype': function () {
+  'should unregister event-function pair with prefix': function () {
+    var listener1 = sinon.spy();
+    var listener2 = sinon.spy();
+
+    this.hub.on('test', {
+      'a' : listener1,
+      'b' : listener2
+    });
+    this.hub.un('test', {
+      'a' : listener1,
+      'b' : listener2
+    });
+    this.hub.emit('test.a');
+    this.hub.emit('test.b');
+
+    sinon.assert.notCalled(listener1);
+    sinon.assert.notCalled(listener2);
+  },
+
+
+  'should unregister function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -116,6 +136,19 @@ test('hub.un', {
     this.hub.on(type);
     this.hub.un(type);
     this.hub.emit('test');
+
+    sinon.assert.notCalled(type.test);
+  },
+
+
+  'should unregister function from prototype with prefix': function () {
+    function Type() {}
+    Type.prototype.test = sinon.spy();
+    var type = new Type();
+
+    this.hub.on('a', type);
+    this.hub.un('a', type);
+    this.hub.emit('a.test');
 
     sinon.assert.notCalled(type.test);
   },
@@ -138,7 +171,28 @@ test('hub.un', {
       hub.emit('d');
       hub.emit('e');
     });
-  }
+  },
+
+
+  'should not throw if called with non function values with prefix':
+    function () {
+      var hub = this.hub;
+
+      assert.doesNotThrow(function () {
+        hub.un('test', {
+          'a' : 'x',
+          'b' : 123,
+          'c' : true,
+          'd' : {},
+          'e' : new Date()
+        });
+        hub.emit('test.a');
+        hub.emit('test.b');
+        hub.emit('test.c');
+        hub.emit('test.d');
+        hub.emit('test.e');
+      });
+    }
 
 
 });
