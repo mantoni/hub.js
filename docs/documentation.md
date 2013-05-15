@@ -314,7 +314,18 @@ more arguments than are passed to `emit`, the last argument will be a callback
 function. The listener is expected to invoke the callback once completed with
 an error object or `null` and an optional return value.
 
-#### hub.addListener(event, function)
+#### hub.on(object)
+
+Calls `hub.on` for each event / function pair in object. Functions on the
+prototype of the object will be registered as well.
+
+#### hub.on(prefix, object)
+
+Calls `hub.on(event, function)` for each event / function pair in `object` with
+the given prefix. The prefix and the object properties are joined with a dot.
+Functions on the prototype of the object will be registered as well.
+
+#### hub.addListener(...)
 
 Is an alias for `hub.on`.
 
@@ -323,23 +334,54 @@ Is an alias for `hub.on`.
 Like `on`, but invoked before listeners registered with `on` (see "Special
 listeners" and "Event phases").
 
+#### hub.before(object)
+
+See `hub.before(event, function)` and `hub.on(object)`.
+
+#### hub.before(prefix, object)
+
+See `hub.before(event, function)` and `hub.on(prefix, object)`.
+
 #### hub.after(event, function)
 
 Like on, but invoked after listeners registered with on. The arguments passed
 to the given function are the same as passed to a callback to emit (see
 "Special listeners" and "Event phases").
 
+#### hub.after(object)
+
+See `hub.after(event, function)` and `hub.on(object)`.
+
+#### hub.after(prefix, object)
+
+See `hub.after(event, function)` and `hub.on(prefix, object)`.
+
 #### hub.un(event, function)
 
 Unregisters a single listener for an event.
 
-#### hub.removeListener(event, function)
+#### hub.un(object)
+
+Calls `hub.un(event, function)` for each event / function pair in `object` with
+the given prefix. The prefix and the object properties are joined with a dot.
+Functions on the prototype of the object will be registered as well.
+
+#### hub.removeListener(...)
 
 Is an alias for `hub.un`.
 
-#### hub.removeAllListeners(\[event\])
+#### hub.removeAllListeners()
 
-Unregisters all listeners, or all listeners for the given event.
+Unregisters all listeners.
+
+#### hub.removeAllListeners(event)
+
+Unregisters all listeners for the given event.
+
+#### hub.removeAllMatching(event)
+
+Unregisters all listeners that match the given event name. This removes all
+listeners that would be invoked if the given event would be emitted.
 
 #### hub.once(event, function)
 
@@ -361,6 +403,16 @@ listener. The event may contain `*` or `**` to invoke all listeners registered
 for matching events (see "Broadcasting"). The optional callback will be invoked
 once all listeners returned. The first argument is an error if at least one of
 the listeners threw, the second argument is the return value.
+
+#### hub.listeners(event)
+
+Returns an array of all listeners for the given event. This does not include
+matchers (see `hub.listenersMatching(event)`).
+
+#### hub.listenersMatching(event)
+
+Returns an array of all listeners that match the given event. This returns all
+listeners that would be invoked if the given event would be emitted.
 
 #### hub.view(namespace)
 
@@ -421,3 +473,7 @@ once all callbacks where invoked.
 
 The optional timeout specifies the time in milliseconds after which the
 callback will time out, resulting in a `TimeoutError`.
+
+#### options
+
+The options passed to `emit`, or the default options.
