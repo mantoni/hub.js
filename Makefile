@@ -3,12 +3,12 @@ SHELL := /bin/bash
 default: lint test phantom browser
 
 name    = "hub"
-bin     = node_modules/.bin
+path    = node_modules/.bin:${path}
 tests   = `ls ./test/test-*`
 html    = test/all.html
 main    = $(shell node -e "console.log(require('./package.json').main)")
 version = $(shell node -e "console.log(require('./package.json').version)")
-folder  = listen-${version}
+folder  = ${name}-${version}
 
 
 lint:
@@ -20,15 +20,15 @@ test:
 
 phantom:
 	@echo "Browserify tests | phantomic"
-	@${bin}/browserify ./test/fixture/phantom.js ${tests} | ${bin}/phantomic
+	@browserify ./test/fixture/phantom.js ${tests} | phantomic
 
 browser:
 	@echo "Consolify tests > file://`pwd`/${html}"
-	@${bin}/consolify --reload -o ${html} ${tests}
+	@consolify --reload -o ${html} ${tests}
 
 compile: lint test phantom browser
-	@${bin}/browserify ${main} -s ${name} -o ${name}.js
-	@${bin}/uglifyjs ${name}.js > ${name}.min.js
+	@browserify ${main} -s ${name} -o ${name}.js
+	@uglifyjs ${name}.js > ${name}.min.js
 
 package: compile
 	@echo "Creating package ${folder}.tgz"
