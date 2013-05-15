@@ -17,7 +17,7 @@
     "url"           : "https://github.com/mantoni/hub.js.git"
   },
   "dependencies"    : {
-    "listen"        : "~0.4.0"
+    "listen"        : ">=1.0 <2"
   },
   "devDependencies" : {
     "utest"         : "~0.0.8",
