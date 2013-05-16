@@ -185,6 +185,42 @@ test('hub.after', {
     hub.emit('test');
 
     sinon.assert.notCalled(spy);
+  },
+
+
+  'emits error thrown in after': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.after('test', function () {
+      throw 'e';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, 'e');
+  },
+
+
+  'combines error from on with error from after': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.on('test', function () {
+      throw '1';
+    });
+    hub.after('test', function () {
+      throw '2';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWithMatch(spy, {
+      name   : 'ErrorList',
+      errors : ['1', '2']
+    });
   }
 
 });

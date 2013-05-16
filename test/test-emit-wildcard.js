@@ -174,7 +174,7 @@ test('emit-wildcard', {
     this.hub.after('test.a', spy);
     this.hub.after('test.b', spy);
 
-    this.hub.emit('test.*');
+    this.hub.emit('test.*', function () {});
 
     sinon.assert.calledTwice(spy);
   },
@@ -200,7 +200,7 @@ test('emit-wildcard', {
     this.hub.after('test.a.*', spy);
     this.hub.after('test.b.*', spy);
 
-    this.hub.emit('test.**');
+    this.hub.emit('test.**', function () {});
 
     sinon.assert.calledTwice(spy);
   }

@@ -137,6 +137,127 @@ test('hub.after wildcard', {
     hub.emit('test');
 
     sinon.assert.notCalled(spy);
-  }
+  },
+
+
+  'emits error thrown in after': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.after('*', function () {
+      throw 'e';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, 'e');
+  },
+
+
+  'combines error from on with error from after': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.on('test', function () {
+      throw '1';
+    });
+    hub.after('*', function () {
+      throw '2';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWithMatch(spy, {
+      name   : 'ErrorList',
+      errors : ['1', '2']
+    });
+  },
+
+
+  'combines error from after listener with error from matcher': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.after('test', function () {
+      throw '1';
+    });
+    hub.after('*', function () {
+      throw '2';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWithMatch(spy, {
+      name   : 'ErrorList',
+      errors : ['1', '2']
+    });
+  },
+
+
+  'combines error from on and after with error from matcher': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('error', spy);
+
+    hub.on('test', function () {
+      throw '1';
+    });
+    hub.after('test', function () {
+      throw '2';
+    });
+    hub.after('*', function () {
+      throw '3';
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWithMatch(spy, {
+      name     : 'ErrorList',
+      errors   : [sinon.match({
+        name   : 'ErrorList',
+        errors : ['1', '2']
+      }), '3']
+    });
+  },
+
+
+  'passes error from after listener to after matcher': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.after('test', function () {
+      throw 'e';
+    });
+    hub.after('*', spy);
+    hub.emit('test', function () {});
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, 'e');
+  },
+
+
+  'passes combined error from on and after listener to after matcher':
+    function () {
+      var spy = sinon.spy();
+      var hub = this.hub;
+
+      hub.on('test', function () {
+        throw '1';
+      });
+      hub.after('test', function () {
+        throw '2';
+      });
+      hub.after('*', spy);
+      hub.emit('test', function () {});
+
+      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWithMatch(spy, {
+        name   : 'ErrorList',
+        errors : ['1', '2']
+      });
+    }
 
 });
