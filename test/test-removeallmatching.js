@@ -113,6 +113,34 @@ test('hub.removeAllMatching', {
     this.hub.emit('test.a');
 
     sinon.assert.notCalled(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 1': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.a', spy);
+    hub.emit('test.*');
+    spy.reset();
+
+    hub.removeAllMatching('test.a');
+    hub.emit('test.*');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 2': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.*', spy);
+    hub.emit('test.a');
+    spy.reset();
+
+    hub.removeAllMatching('test.a');
+    hub.emit('test.a');
+
+    sinon.assert.notCalled(spy);
   }
 
 });

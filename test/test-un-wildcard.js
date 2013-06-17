@@ -29,9 +29,10 @@ test('hub.un wildcard', {
 
     this.hub.un('test.*', spy1);
     this.hub.emit('test.a');
+    this.hub.emit('test.*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -43,9 +44,10 @@ test('hub.un wildcard', {
 
     this.hub.un('test.*', spy1);
     this.hub.emit('test.a');
+    this.hub.emit('test.*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -57,9 +59,10 @@ test('hub.un wildcard', {
 
     this.hub.un('test.*', spy1);
     this.hub.emit('test.a');
+    this.hub.emit('test.*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -85,7 +88,21 @@ test('hub.un wildcard', {
     assert.doesNotThrow(function () {
       self.hub.emit('test');
     });
-  }
+  },
 
+
+  'does not invoke listener unregistered after emit': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('a.*', spy);
+    hub.on('b.*', function () {});
+    hub.emit('*.*');
+    spy.reset();
+
+    hub.un('a.*', spy);
+    hub.emit('*.*');
+
+    sinon.assert.notCalled(spy);
+  }
 
 });

@@ -104,6 +104,65 @@ test('hub.removeAllListeners', {
     this.hub.emit('test.a');
 
     sinon.assert.calledOnce(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 1': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.a', spy);
+    hub.emit('test.*');
+    spy.reset();
+
+    hub.removeAllListeners('test.a');
+    hub.emit('test.*');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 2': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.*', spy);
+    hub.emit('test.a');
+    spy.reset();
+
+    hub.removeAllListeners('test.*');
+
+    hub.emit('test.a');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 3': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.*', spy);
+    hub.emit('test.a');
+    spy.reset();
+
+    hub.removeAllListeners();
+
+    hub.emit('test.a');
+
+    sinon.assert.notCalled(spy);
+  },
+
+
+  'does not invoke listener unregistered after emit 4': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.a', spy);
+    hub.emit('test.*');
+    spy.reset();
+
+    hub.removeAllListeners();
+
+    hub.emit('test.*');
+
+    sinon.assert.notCalled(spy);
   }
 
 });

@@ -217,6 +217,19 @@ test('hub.on', {
     hub.emit('test');
 
     sinon.assert.calledOnce(spy);
+  },
+
+
+  'invokes listener registered after emit': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.a', function () {});
+    hub.emit('test.*');
+
+    hub.on('test.b', spy);
+    hub.emit('test.*');
+
+    sinon.assert.calledOnce(spy);
   }
 
 });

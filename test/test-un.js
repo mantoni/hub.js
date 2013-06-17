@@ -29,9 +29,10 @@ test('hub.un', {
 
     this.hub.un('test', spy1);
     this.hub.emit('test');
+    this.hub.emit('*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -43,9 +44,10 @@ test('hub.un', {
 
     this.hub.un('test', spy1);
     this.hub.emit('test');
+    this.hub.emit('*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -57,9 +59,10 @@ test('hub.un', {
 
     this.hub.un('test', spy1);
     this.hub.emit('test');
+    this.hub.emit('*');
 
     sinon.assert.notCalled(spy1);
-    sinon.assert.calledOnce(spy2);
+    sinon.assert.calledTwice(spy2);
   },
 
 
@@ -69,8 +72,9 @@ test('hub.un', {
 
     this.hub.un('test', function () {});
     this.hub.emit('test');
+    this.hub.emit('*');
 
-    sinon.assert.calledOnce(spy);
+    sinon.assert.calledTwice(spy);
   },
 
 
@@ -192,7 +196,21 @@ test('hub.un', {
         hub.emit('test.d');
         hub.emit('test.e');
       });
-    }
+    },
 
+
+  'does not invoke listener unregistered after emit': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test.a', spy);
+    hub.on('test.b', function () {});
+    hub.emit('test.*');
+    spy.reset();
+
+    hub.un('test.a', spy);
+    hub.emit('test.*');
+
+    sinon.assert.notCalled(spy);
+  }
 
 });

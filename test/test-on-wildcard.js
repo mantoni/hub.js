@@ -266,7 +266,19 @@ test('hub.on wildcard', {
     hub.emit('test');
 
     sinon.assert.calledOnce(spy);
-  }
+  },
 
+
+  'invokes listener registered after emit': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('a.*', function () {});
+    hub.emit('*.*');
+
+    hub.on('b.*', spy);
+    hub.emit('*.*');
+
+    sinon.assert.calledOnce(spy);
+  }
 
 });
