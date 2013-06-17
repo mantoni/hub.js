@@ -21,18 +21,6 @@ test('hub.removeAllMatching', {
   },
 
 
-  'should throw if event is undefined': function () {
-    try {
-      this.hub.removeAllMatching(undefined);
-      assert.fail('Exception expected');
-    } catch (e) {
-      assert.equal(e.name, 'TypeError');
-      assert.equal(e.message,
-        'Expected event to be string, but it was undefined');
-    }
-  },
-
-
   'should remove exact match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();

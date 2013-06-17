@@ -96,18 +96,6 @@ test('hub.removeAllListeners', {
   },
 
 
-  'should throw if event is undefined': function () {
-    try {
-      this.hub.removeAllListeners(undefined);
-      assert.fail('Exception expected');
-    } catch (e) {
-      assert.equal(e.name, 'TypeError');
-      assert.equal(e.message,
-        'Expected event to be string, but it was undefined');
-    }
-  },
-
-
   'should not remove gneric for more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);

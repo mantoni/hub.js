@@ -21,18 +21,6 @@ test('hub.listenersMatching', {
   },
 
 
-  'should throw if event is undefined': function () {
-    try {
-      this.hub.listenersMatching(undefined);
-      assert.fail('Exception expected');
-    } catch (e) {
-      assert.equal(e.name, 'TypeError');
-      assert.equal(e.message,
-        'Expected event to be string, but it was undefined');
-    }
-  },
-
-
   'should return exact match': function () {
     var listener1 = function () {};
     var listener2 = function () {};

@@ -64,30 +64,6 @@ test('hub.listeners', {
     assert.doesNotThrow(function () {
       hub.listeners('test.*');
     });
-  },
-
-
-  'should throw if event is not given': function () {
-    try {
-      this.hub.listeners();
-      assert.fail('Exception expected');
-    } catch (e) {
-      assert.equal(e.name, 'TypeError');
-      assert.equal(e.message,
-        'Expected event to be string, but it was undefined');
-    }
-  },
-
-
-  'should throw if event is null': function () {
-    try {
-      this.hub.listeners(null);
-      assert.fail('Exception expected');
-    } catch (e) {
-      assert.equal(e.name, 'TypeError');
-      assert.equal(e.message,
-        'Expected event to be string, but it was null');
-    }
   }
 
 });

@@ -84,13 +84,6 @@ test('emit-options', {
   },
 
 
-  'throws if allResults is string': function () {
-    assert.throws(function () {
-      hub.options({ allResults : 'true' });
-    }, /^TypeError: Expected allResults to be boolean, but it was string$/);
-  },
-
-
   'does not expose random config properties': function () {
     var options = hub.options({
       foo : 'foo',
