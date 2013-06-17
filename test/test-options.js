@@ -55,8 +55,8 @@ test('emit-options', {
     var optionsWithTrue  = hub.options({ allResults : true });
     var optionsWithFalse = hub.options({ allResults : false });
 
-    assert.strictEqual(optionsWithTrue.allResults(), true);
-    assert.strictEqual(optionsWithFalse.allResults(), false);
+    assert.strictEqual(optionsWithTrue.allResults, true);
+    assert.strictEqual(optionsWithFalse.allResults, false);
   },
 
 

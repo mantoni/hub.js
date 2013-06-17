@@ -2,6 +2,14 @@
 
 ## v0.12.0
 
+__NOTE: This release introduces breaking changes to the API!__
+
+- `this.args` is now an array instead of function returning a copy of the
+  emitted arguments
+- `this.stopped` is now a boolean instead of a function returning a boolean
+- `this.options.allResults` is now a boolean instead of a function returning
+  a boolean
+- Performance improvements and reduced call stack depth
 - Using Browserify to create standalone browser module
 - Run tests in Phantom.JS using Browserify and Phantomic
 - Run tests in browsers with a standalone test HTML file generated with Consolify
