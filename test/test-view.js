@@ -95,6 +95,20 @@ test('hub.view', {
   },
 
 
+  'should forward emit object': function () {
+    var stub      = sinon.stub(this.hub, 'emit');
+    var view      = this.hub.view('test');
+    var callback  = function () {};
+
+    view.emit({ event : 'abc', allResults : true }, 123, 'xyz', callback);
+
+    sinon.assert.calledOnce(stub);
+    sinon.assert.calledOn(stub, this.hub);
+    sinon.assert.calledWith(stub, { event : 'test.abc', allResults : true },
+        123, 'xyz', callback);
+  },
+
+
   'should forward on'         : testHandler('on'),
   'should forward un'         : testHandler('un'),
   'should forward before'     : testHandler('before'),

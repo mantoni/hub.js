@@ -70,7 +70,7 @@ function testCases(event) {
         this.callback.push('a');
         this.callback.push('b');
       });
-      this.hub.emit('test', hub.options({ allResults : true }), spy);
+      this.hub.emit({ event : 'test', allResults : true }, spy);
 
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWith(spy, null, ['a', 'b']);
