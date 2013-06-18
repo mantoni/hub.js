@@ -396,13 +396,28 @@ Like `once`, but registers the listener with `hub.before`.
 
 Like `once`, but registers the listener with `hub.after`.
 
-#### hub.emit(event\[, arg1, arg2, ...\]\[\[, options\], callback\])
+#### hub.emit(event\[, arg1, arg2, ...\]\[, callback\])
 
 Invokes all listeners for an event. The optional arguments are passed to each
 listener. The event may contain `*` or `**` to invoke all listeners registered
 for matching events (see "Broadcasting"). The optional callback will be invoked
 once all listeners returned. The first argument is an error if at least one of
 the listeners threw, the second argument is the return value.
+
+The given event can alternatively be an object containing at least an event
+property. Optional properties can be:
+
+- `allResults` _[Boolean]_: set to `true` to collect all listener return
+  values and pass them to the given callback as an array. Default is `false`
+  in which case only the last return value is passed.
+
+Example:
+
+```js
+hub.emit({ event : 'some.event', allResults : true }, function (err, values) {
+  // ...
+});
+```
 
 #### hub.listeners(event)
 
@@ -419,31 +434,12 @@ listeners that would be invoked if the given event would be emitted.
 Creates a view object (instanceof `hub.View`) that implements the full hub API,
 but maps all events relatively to the specified namespace (see "Views").
 
-#### hub.options({ key : value })
-
-Create an options object (instanceof `hub.Options`) that can be used with
-`emit` with the following properties:
-
-- `allResults` _[Boolean]_: set to `true` to collect all listener return
-  values and pass them to the given callback as an array. Default is `false`
-  in which case only the last return value is passed.
-
-Example:
-
-```js
-hub.emit('some.event', hub.options({ allResults : true }), function (err, values) {
-  // ...
-});
-```
-
 -----
 
 ### API of 'this' in listeners
 
 Listeners and callbacks are always called with a special scope object (`this`).
-
-The API of the `this` object exposes the complete hub API via a "view", plus
-these additional properties and functions:
+The exposed properties are not supposed to be modified.
 
 #### hub
 
@@ -453,17 +449,21 @@ The hub instance.
 
 The current event.
 
-#### args()
+#### args
 
-Returns a copy of the arguments passed to emit without the event.
+The arguments passed to emit without the event.
 
 #### stop()
 
 Prevent listener invocation on the following event phases.
 
-#### stopped()
+#### stopped
 
-Returns true if stop() was called.
+true if stop() was called, otherwise false.
+
+#### allResults
+
+true if `emit` was call with `allResults` set to true, otherwise false.
 
 #### callback([timeout])
 
@@ -473,7 +473,3 @@ once all callbacks where invoked.
 
 The optional timeout specifies the time in milliseconds after which the
 callback will time out, resulting in a `TimeoutError`.
-
-#### options
-
-The options passed to `emit`, or the default options.
