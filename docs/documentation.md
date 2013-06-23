@@ -39,6 +39,7 @@ hub.on({
 });
 ```
 
+
 #### Call order
 
 One of the design goals of hub.js is to guarantee a predictable call order of
@@ -50,7 +51,6 @@ listeners.
 
 Wildcard subscriptions are explained further down on this page.
 
------
 
 ### Return values
 
@@ -82,7 +82,6 @@ hub.emit('answer', function (err, value) {
 This makes it possible to change listener implementations from synchronous to
 asynchronous without changing the publishers.
 
------
 
 ### Error handling
 
@@ -155,7 +154,6 @@ try {
 }
 ```
 
------
 
 ### Special listeners
 
@@ -182,7 +180,6 @@ which is the same that is passed to an `emit` callback.
 The arguments passed along with `emit` are still accessible through
 `this.args()`.
 
------
 
 ### Wildcard subscriptions
 
@@ -208,7 +205,6 @@ Unless listeners, matchers do not get invoked in registration order. The more
 generic matchers are invoked before the more specific ones, e.g. if `a.b.c` is
 emitted, a listener on `a.\*\*` is invoked before a listener on `a.b.\*`.
 
------
 
 ### Broadcasting
 
@@ -220,7 +216,6 @@ listeners matching the given event will be invoked. This also applies for
 hub.emit('**.destroy');
 ```
 
------
 
 ### Events emitted by hub.js
 
@@ -239,7 +234,6 @@ Calling `un` triggers a `removeListener` event passing the event name and the
 listener function as arguments. If the event gets stopped (`this.stop()`), the
 listener will not be removed.
 
------
 
 ### Views
 
@@ -269,7 +263,6 @@ hub.on('ajax.post', function (data) {
 });
 ```
 
------
 
 ### Event phases
 
@@ -434,7 +427,6 @@ listeners that would be invoked if the given event would be emitted.
 Creates a view object (instanceof `hub.View`) that implements the full hub API,
 but maps all events relatively to the specified namespace (see "Views").
 
------
 
 ### API of 'this' in listeners
 
