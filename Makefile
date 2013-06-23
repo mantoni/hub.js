@@ -19,8 +19,7 @@ test:
 	@node -e "require('urun')('test');"
 
 phantom:
-	@echo "Browserify tests | phantomic"
-	@browserify ./test/fixture/phantom.js ${tests} | phantomic
+	browserify ./test/fixture/phantom.js ${tests} | phantomic
 
 browser:
 	@echo "Consolify tests > file://`pwd`/${html}"
@@ -48,5 +47,5 @@ endif
 	@echo "Creating tag v${version}"
 	@git tag -a -m "Release ${version}" v${version}
 	@git push --tags
-	@echo "Publishing to NPM"
+	@echo "Publishing to npm"
 	@npm publish
