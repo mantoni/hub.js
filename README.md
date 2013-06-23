@@ -8,7 +8,9 @@ Repository: <https://github.com/mantoni/hub.js>
 
 ---
 
-## Install with NPM
+## Installation
+
+Install with npm:
 
 ```
 npm install hubjs
