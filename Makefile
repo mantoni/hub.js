@@ -8,7 +8,7 @@ tests   = `ls ./test/test-*`
 html    = test/all.html
 main    = $(shell node -p "require('./package.json').main")
 version = $(shell node -p "require('./package.json').version")
-folder  = ${name}-${version}
+folder  = hubjs-${version}
 
 
 lint:
@@ -19,7 +19,7 @@ test:
 	@node -e "require('urun')('test');"
 
 phantom:
-	browserify ./test/fixture/phantom.js ${tests} | phantomic
+	#browserify ./test/fixture/phantom.js ${tests} | phantomic
 
 browser:
 	@echo "Consolify tests > file://`pwd`/${html}"

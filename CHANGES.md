@@ -1,11 +1,16 @@
 # Changes
 
+## v0.14.0
+
+- Fix: Unsubscribing listeners registered with `once`, `onceBefore` or
+  `onceAfter` did nothing.
+
 ## v0.13.0
 
 __NOTE: This release introduces breaking changes to the API!__
 
 - `hub.options` and `hub.Options` have been removed. Pass an object with the
-  event name and the `allResults` flag as the first argument to emit instead.
+  event name and the `allResults` flag as the first argument to `emit` instead.
 - `this.options` does no longer exist. `this.allResults` is exposed directlry
   instead.
 

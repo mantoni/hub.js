@@ -36,6 +36,21 @@ test('hub.un', {
   },
 
 
+  'should unsubscribe given once listener only': function () {
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    this.hub.once('test', spy1);
+    this.hub.once('test', spy2);
+
+    this.hub.un('test', spy1);
+    this.hub.emit('test');
+    this.hub.emit('*');
+
+    sinon.assert.notCalled(spy1);
+    sinon.assert.calledOnce(spy2);
+  },
+
+
   'should unsubscribe given before listener only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
