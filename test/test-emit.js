@@ -20,7 +20,7 @@ test('hub.emit', {
     this.hub = hub();
   },
 
-  'should work with all lower case letters': function () {
+  'supports all lower case letters': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
@@ -29,7 +29,7 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should work with all upper case letters': function () {
+  'supports all upper case letters': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
@@ -38,7 +38,7 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow underscores': function () {
+  'supports underscores': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
@@ -47,7 +47,7 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow dashes': function () {
+  'supports dashes': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
@@ -56,7 +56,7 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow colons': function () {
+  'supports colons': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
@@ -65,13 +65,42 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow numbers': function () {
+  'supports numbers': function () {
     var spy = sinon.spy();
 
     this.hub.on('*', spy);
     this.hub.emit('1234567890');
 
     sinon.assert.calledOnce(spy);
+  },
+
+  'uses event name from hub.event': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.emit({ event : 'test' }, 42);
+
+    sinon.assert.calledWithExactly(spy, 42);
+  },
+
+  'uses callback followed by event': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', function () { return 42; });
+
+    this.hub.emit({ event : 'test' }, spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, 42);
+  },
+
+  'passes all listener results to callback': function () {
+    this.hub.on('test', function () { return 'a'; });
+    this.hub.on('test', function () { return 'b'; });
+    var spy = sinon.spy();
+
+    this.hub.emit({ event : 'test', allResults : true }, spy);
+
+    sinon.assert.calledWith(spy, null, ['a', 'b']);
   }
 
 });

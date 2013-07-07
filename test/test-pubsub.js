@@ -20,7 +20,7 @@ test('pubsub', {
     this.hub = hub();
   },
 
-  'should pass message to registered listeners': function () {
+  'passes message to registered listeners': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -32,7 +32,7 @@ test('pubsub', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should not pass message to listeners with different name': function () {
+  'does not pass message to listeners with different name': function () {
     var spy = sinon.spy();
 
     this.hub.on('foo', spy);
@@ -41,7 +41,7 @@ test('pubsub', {
     sinon.assert.notCalled(spy);
   },
 
-  'should pass arguments to listener': function () {
+  'passes arguments to listener': function () {
     var spy = sinon.spy();
     var arr = ['a', 'b'];
 
@@ -51,7 +51,7 @@ test('pubsub', {
     sinon.assert.calledWith(spy, 1, 'x', arr);
   },
 
-  'should not modify argument length for second caller 1': function () {
+  'does not modify argument length for second caller 1': function () {
     var spy = sinon.spy(function (a, b) {});
 
     this.hub.on('test', function (a, b, c) {}); // more args
@@ -62,7 +62,7 @@ test('pubsub', {
     sinon.assert.calledWith(spy, 42, sinon.match.func);
   },
 
-  'should not modify argument length for second caller 2': function () {
+  'does not modify argument length for second caller 2': function () {
     var spy = sinon.spy(function (a, b) {});
 
     this.hub.on('test', function (a, b, c) { return true; });

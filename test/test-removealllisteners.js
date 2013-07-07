@@ -61,15 +61,15 @@ test('hub.removeAllListeners', {
   },
 
 
-  'should remove on(test.run)' : testWithoutEvent('test.run', 'on'),
-  'should remove on(test.*)'   : testWithoutEvent('test.*', 'on'),
-  'should remove on(**)'       : testWithoutEvent('**', 'on'),
+  'removes on(test.run)' : testWithoutEvent('test.run', 'on'),
+  'removes on(test.*)'   : testWithoutEvent('test.*', 'on'),
+  'removes on(**)'       : testWithoutEvent('**', 'on'),
 
-  'should remove only on(test.run)' : testWithEvent('test.run', 'on'),
-  'should remove only on(test.*)'   : testWithEvent('test.*', 'on'),
-  'should remove only on(**)'       : testWithEvent('**', 'on'),
+  'removes only on(test.run)' : testWithEvent('test.run', 'on'),
+  'removes only on(test.*)'   : testWithEvent('test.*', 'on'),
+  'removes only on(**)'       : testWithEvent('**', 'on'),
 
-  'should not throw if matcher does not exist': function () {
+  'does not throw if matcher does not exist': function () {
     var self = this;
 
     assert.doesNotThrow(function () {
@@ -77,7 +77,7 @@ test('hub.removeAllListeners', {
     });
   },
 
-  'should not remove gneric for more specific': function () {
+  'does not remove gneric for more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);
 

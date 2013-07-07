@@ -19,7 +19,7 @@ test('this.allResults', {
     this.hub = hub();
   },
 
-  'should be false by default': function () {
+  'is false by default': function () {
     var allResults;
 
     this.hub.on('test', function () {
@@ -30,7 +30,7 @@ test('this.allResults', {
     assert.strictEqual(allResults, false);
   },
 
-  'should be false if not configured': function () {
+  'is false if not configured': function () {
     var allResults;
 
     this.hub.on('test', function () {
@@ -41,7 +41,7 @@ test('this.allResults', {
     assert.strictEqual(allResults, false);
   },
 
-  'should be false if configured': function () {
+  'is false if configured': function () {
     var allResults;
 
     this.hub.on('test', function () {
@@ -52,7 +52,7 @@ test('this.allResults', {
     assert.strictEqual(allResults, false);
   },
 
-  'should be true if configured': function () {
+  'is true if configured': function () {
     var allResults;
 
     this.hub.on('test', function () {

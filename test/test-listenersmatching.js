@@ -20,7 +20,7 @@ test('hub.listenersMatching', {
     this.hub = hub();
   },
 
-  'should return exact match': function () {
+  'returns exact match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('test.1', listener1);
@@ -31,7 +31,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return exact wildcard match': function () {
+  'returns exact wildcard match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('test.*', listener1);
@@ -42,7 +42,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return single wildcard match': function () {
+  'returns single wildcard match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('test.1', listener1);
@@ -53,7 +53,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return double wildcard match': function () {
+  'returns double wildcard match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('test.1.a', listener1);
@@ -64,7 +64,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return single wildcard event': function () {
+  'returns single wildcard event': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('test.a.*', listener1);
@@ -75,7 +75,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return double wildcard event': function () {
+  'returns double wildcard event': function () {
     var listener1 = function () {};
     var listener2 = function () {};
     this.hub.on('**.a.test.foo', listener1);
@@ -86,7 +86,7 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-  'should return generic for more specific': function () {
+  'returns generic for more specific': function () {
     var listener = function () {};
     this.hub.on('**.a', listener);
 

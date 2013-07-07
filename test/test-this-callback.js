@@ -21,7 +21,7 @@ function testCases(event) {
       this.hub = hub();
     },
 
-    'should return function': function () {
+    'returns function': function () {
       var result;
 
       this.hub.on(event, function () {
@@ -32,7 +32,7 @@ function testCases(event) {
       assert.equal(typeof result, 'function');
     },
 
-    'should resolve with value': function () {
+    'resolves with value': function () {
       var spy = sinon.spy();
 
       this.hub.on(event, function () {
@@ -45,7 +45,7 @@ function testCases(event) {
       sinon.assert.calledWith(spy, null, 'value');
     },
 
-    'should resolve with error': function () {
+    'resolves with error': function () {
       var spy = sinon.spy();
       var err = new Error();
 
@@ -59,7 +59,7 @@ function testCases(event) {
       sinon.assert.calledWith(spy, err);
     },
 
-    'should add value with callback.push': function () {
+    'adds value with callback.push': function () {
       var spy = sinon.spy();
 
       this.hub.on(event, function () {
@@ -72,7 +72,7 @@ function testCases(event) {
       sinon.assert.calledWith(spy, null, ['a', 'b']);
     },
 
-    'should add error with callback.err': function () {
+    'adds error with callback.err': function () {
       var spy = sinon.spy();
       var err1 = new Error();
       var err2 = new Error();
@@ -90,7 +90,7 @@ function testCases(event) {
       }));
     },
 
-    'should time out after given timeout millis': sinon.test(function () {
+    'times out after given timeout millis': sinon.test(function () {
       this.hub.on('test', function () {
         this.callback(123);
       });

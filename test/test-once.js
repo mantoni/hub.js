@@ -21,7 +21,7 @@ function unsubscribeTests(method) {
       this.hub = hub();
     },
 
-    'should unsubscribe after first emit': function () {
+    'unsubscribes after first emit': function () {
       var spy = sinon.spy();
 
       this.hub[method]('test', spy);
@@ -31,7 +31,7 @@ function unsubscribeTests(method) {
       sinon.assert.calledOnce(spy);
     },
 
-    'should not invoke listener again if it emits same event': function () {
+    'does not invoke listener again if it emits same event': function () {
       var self = this;
       var spy  = sinon.spy(function () {
         self.hub.emit('a');
@@ -45,7 +45,7 @@ function unsubscribeTests(method) {
       sinon.assert.calledOnce(spy);
     },
 
-    'should not invoke listener again if it emits same wildcard event':
+    'does not invoke listener again if it emits same wildcard event':
       function () {
         var self = this;
         var spy  = sinon.spy(function () {
@@ -60,7 +60,7 @@ function unsubscribeTests(method) {
         sinon.assert.calledOnce(spy);
       },
 
-    'should not add additional listeners': function () {
+    'does not add additional listeners': function () {
       this.hub[method]('test', function () {});
 
       assert.equal(this.hub.listeners('test').length, 1);
@@ -76,7 +76,7 @@ function argumentsTests(method) {
       this.hub = hub();
     },
 
-    'should pass arguments': function () {
+    'passes arguments': function () {
       var spy = sinon.spy();
 
       this.hub[method]('test', spy);
@@ -85,7 +85,7 @@ function argumentsTests(method) {
       sinon.assert.calledWith(spy, 'abc', 123);
     },
 
-    'should work with callbacks': function () {
+    'works with callbacks': function () {
       var spy = sinon.spy();
 
       this.hub[method]('test', function (a, b, callback) {
@@ -113,7 +113,7 @@ function testObject(method) {
       this.hub = hub();
     },
 
-    'should register event-function pair': function () {
+    'registers event-function pair': function () {
       var listener1 = sinon.spy();
       var listener2 = sinon.spy();
 
@@ -128,7 +128,7 @@ function testObject(method) {
       sinon.assert.called(listener2);
     },
 
-    'should register event-function pair with prefix': function () {
+    'registers event-function pair with prefix': function () {
       var listener1 = sinon.spy();
       var listener2 = sinon.spy();
 
@@ -143,7 +143,7 @@ function testObject(method) {
       sinon.assert.called(listener2);
     },
 
-    'should register function from prototype': function () {
+    'registers function from prototype': function () {
       function Type() {}
       Type.prototype.test = sinon.spy();
       var type = new Type();
@@ -154,7 +154,7 @@ function testObject(method) {
       sinon.assert.called(type.test);
     },
 
-    'should register function from prototype with prefix': function () {
+    'registers function from prototype with prefix': function () {
       function Type() {}
       Type.prototype.test = sinon.spy();
       var type = new Type();
@@ -165,7 +165,7 @@ function testObject(method) {
       sinon.assert.called(type.test);
     },
 
-    'should not throw if called with non function values': function () {
+    'does not throw if called with non function values': function () {
       var hub = this.hub;
 
       assert.doesNotThrow(function () {
@@ -184,7 +184,7 @@ function testObject(method) {
       });
     },
 
-    'should not throw if called with non function values with prefix':
+    'does not throw if called with non function values with prefix':
       function () {
         var hub = this.hub;
 

@@ -85,10 +85,10 @@ test('emit-wildcard', {
     this.hub = hub();
   },
 
-  'should invoke matching "on" listeners': matchingListeners("on"),
+  'invokes matching "on" listeners': matchingListeners("on"),
 
-  'should invoke matching "on" matchers': matchingMatchers("on"),
+  'invokes matching "on" matchers': matchingMatchers("on"),
 
-  'should not invoke not matching "on" matchers': notMatchingMatchers("on")
+  'does not invoke not matching "on" matchers': notMatchingMatchers("on")
 
 });

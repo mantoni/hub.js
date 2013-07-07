@@ -20,7 +20,7 @@ test('emit-callback', {
     this.hub = hub();
   },
 
-  'should invoke callback with null': function () {
+  'invokes callback with null': function () {
     var spy = sinon.spy();
 
     this.hub.emit('test', spy);
@@ -29,7 +29,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null);
   },
 
-  'should invoke callback with Error if listener throws': function () {
+  'invokes callback with Error if listener throws': function () {
     var err = new Error();
     var spy = sinon.spy();
     this.hub.on('test', sinon.stub().throws(err));
@@ -40,7 +40,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, err);
   },
 
-  'should invoke callback with Error if async listener throws': function () {
+  'invokes callback with Error if async listener throws': function () {
     var err = new Error();
     var spy = sinon.spy();
     this.hub.on('test', function (callback) {
@@ -53,7 +53,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, err);
   },
 
-  'should invoke callback with Error if wildcard listener throws':
+  'invokes callback with Error if wildcard listener throws':
     function () {
       var err = new Error();
       var spy = sinon.spy();
@@ -65,7 +65,7 @@ test('emit-callback', {
       sinon.assert.calledWith(spy, err);
     },
 
-  'should throw if no callback was given and listener throws': function () {
+  'throws if no callback was given and listener throws': function () {
     this.hub.on('test', sinon.stub().throws(new Error('oups')));
 
     try {
@@ -76,7 +76,7 @@ test('emit-callback', {
     }
   },
 
-  'should throw if no callback was given and wildcard listener throws':
+  'throws if no callback was given and wildcard listener throws':
     function () {
       var thrown = new Error();
       this.hub.on('*', sinon.stub().throws(thrown));
@@ -89,7 +89,7 @@ test('emit-callback', {
       }
     },
 
-  'should throw if async listener threw': function () {
+  'throws if async listener threw': function () {
     this.hub.on('test', function (callback) {
       throw new Error('oups');
     });
@@ -102,7 +102,7 @@ test('emit-callback', {
     }
   },
 
-  'should pass listener return value to callback': function () {
+  'passes listener return value to callback': function () {
     this.hub.on('test', function () { return 'a'; });
     var spy = sinon.spy();
 
@@ -111,7 +111,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'a');
   },
 
-  'should pass last called listener return value to callback': function () {
+  'passes last called listener return value to callback': function () {
     this.hub.on('test', function () { return 'a'; });
     this.hub.on('test', function () { return 'b'; });
     var spy = sinon.spy();
@@ -121,7 +121,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'b');
   },
 
-  'should pass wildcard listener return value to callback': function () {
+  'passes wildcard listener return value to callback': function () {
     this.hub.on('*', function () { return 'a'; });
     var spy = sinon.spy();
 
@@ -130,7 +130,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'a');
   },
 
-  'should pass last wildcard listener return value to callback': function () {
+  'passes last wildcard listener return value to callback': function () {
     this.hub.on('*', function () { return 'a'; });
     this.hub.on('*', function () { return 'b'; });
     var spy = sinon.spy();
@@ -140,7 +140,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'b');
   },
 
-  'should pass listener callback value to callback': function () {
+  'passes listener callback value to callback': function () {
     var spy = sinon.spy();
     this.hub.on('test', function (callback) {
       callback(null, 'test');
@@ -152,7 +152,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'test');
   },
 
-  'should pass wildcard listener callback value to callback': function () {
+  'passes wildcard listener callback value to callback': function () {
     var spy = sinon.spy();
     this.hub.on('*', function (callback) {
       callback(null, 'test');
@@ -164,7 +164,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null, 'test');
   },
 
-  'should invoke callback after all listeners returned': sinon.test(
+  'invokes callback after all listeners returned': sinon.test(
     function () {
       var spy = sinon.spy();
       this.hub.on('test', function (callback) {
@@ -184,7 +184,7 @@ test('emit-callback', {
     }
   ),
 
-  'should invoke callback after all wildcard listeners returned': sinon.test(
+  'invokes callback after all wildcard listeners returned': sinon.test(
     function () {
       var spy = sinon.spy();
       this.hub.on('test.*', function (callback) {
@@ -204,7 +204,7 @@ test('emit-callback', {
     }
   ),
 
-  'should allow arguments to be expected before callback': function () {
+  'allows arguments to be expected before callback': function () {
     var spy = sinon.spy();
     this.hub.on('test', function (some, args, callback) {
       callback();
@@ -215,7 +215,7 @@ test('emit-callback', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should invoke callback with err from first after second returned':
+  'invokes callback with err from first after second returned':
     sinon.test(function () {
       var spy = sinon.spy();
       var err = new Error();
@@ -234,7 +234,7 @@ test('emit-callback', {
       sinon.assert.calledWith(spy, err);
     }),
 
-  'should err ErrorList with all errors as cause': function () {
+  'errs ErrorList with all errors as cause': function () {
     var spy   = sinon.spy();
     this.hub.on('test', function (callback) {
       callback(new TypeError('a'));
@@ -255,7 +255,7 @@ test('emit-callback', {
     });
   },
 
-  'should err ErrorList for callback err and exception': function () {
+  'errs ErrorList for callback err and exception': function () {
     var spy   = sinon.spy();
     this.hub.on('test', function (callback) {
       callback(new TypeError('a'));
@@ -274,7 +274,7 @@ test('emit-callback', {
     });
   },
 
-  'should err ErrorList if all listeners throw': function () {
+  'errs ErrorList if all listeners throw': function () {
     var spy   = sinon.spy();
     this.hub.on('test', sinon.stub().throws(new TypeError('a')));
     this.hub.on('test', sinon.stub().throws(new RangeError('b')));
@@ -291,7 +291,7 @@ test('emit-callback', {
     });
   },
 
-  'should throw ErrorList if all listeners throw': function () {
+  'throws ErrorList if all listeners throw': function () {
     var self  = this;
     this.hub.on('test', sinon.stub().throws(new TypeError('a')));
     this.hub.on('test', sinon.stub().throws(new RangeError('b')));
@@ -301,7 +301,7 @@ test('emit-callback', {
     }, /^ErrorList/);
   },
 
-  'should pass callback as last arg if fewer args are emitted': function () {
+  'passes callback as last arg if fewer args are emitted': function () {
     this.hub.on('test', function (a, b, callback) {
       callback("value");
     });
@@ -313,7 +313,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, "value");
   },
 
-  'should use null return value if fewer args are emitter': function () {
+  'uses null return value if fewer args are emitter': function () {
     this.hub.on('test', function (a, b) {
       return null;
     });
@@ -325,7 +325,7 @@ test('emit-callback', {
     sinon.assert.calledWith(spy, null);
   },
 
-  'should use the same scope in callbacks as in listeners': function () {
+  'uses the same scope in callbacks as in listeners': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -335,15 +335,14 @@ test('emit-callback', {
     assert.strictEqual(spy2.thisValues[0], spy1.thisValues[0]);
   },
 
-  'should use the same scope in callback as in listeners on error':
-    function () {
-      var stub  = sinon.stub().throws(new Error());
-      var spy   = sinon.spy();
+  'uses the same scope in callback as in listeners on error': function () {
+    var stub  = sinon.stub().throws(new Error());
+    var spy   = sinon.spy();
 
-      this.hub.on('test', stub);
-      this.hub.emit('test', spy);
+    this.hub.on('test', stub);
+    this.hub.emit('test', spy);
 
-      assert.strictEqual(spy.thisValues[0], stub.thisValues[0]);
-    }
+    assert.strictEqual(spy.thisValues[0], stub.thisValues[0]);
+  }
 
 });

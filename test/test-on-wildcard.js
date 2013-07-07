@@ -20,7 +20,7 @@ test('hub.on wildcard', {
     this.hub = hub();
   },
 
-  'should subscribe to matching events': function () {
+  'subscribes to matching events': function () {
     var spy = sinon.spy();
 
     this.hub.on('test.*', spy);
@@ -30,7 +30,7 @@ test('hub.on wildcard', {
     sinon.assert.calledTwice(spy);
   },
 
-  'should be invoked on single star broadcast': function () {
+  'is be invoked on single star broadcast': function () {
     var spy = sinon.spy();
 
     this.hub.on('foo.*', spy);
@@ -39,7 +39,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should be invoked on double star broadcast': function () {
+  'is be invoked on double star broadcast': function () {
     var spy = sinon.spy();
 
     this.hub.on('foo.**', spy);
@@ -48,7 +48,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should not emit to not matching events': function () {
+  'does not emit to not matching events': function () {
     var spy = sinon.spy();
 
     this.hub.on('foo.*', spy);
@@ -57,7 +57,7 @@ test('hub.on wildcard', {
     sinon.assert.notCalled(spy);
   },
 
-  'should emit to matcher and exact match': function () {
+  'emits to matcher and exact match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -69,7 +69,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should subscribe twice to same matcher': function () {
+  'subscribes twice to same matcher': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -81,7 +81,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should receive arguments from emit': function () {
+  'receives arguments from emit': function () {
     var spy = sinon.spy();
     var arr = ['a', 'b'];
 
@@ -91,7 +91,7 @@ test('hub.on wildcard', {
     sinon.assert.calledWith(spy, 1, 'x', arr);
   },
 
-  'should stop at dot at end': function () {
+  'stops at dot at end': function () {
     var spy = sinon.spy();
 
     this.hub.on('test.*', spy);
@@ -100,7 +100,7 @@ test('hub.on wildcard', {
     sinon.assert.notCalled(spy);
   },
 
-  'should stop at dot at start': function () {
+  'stops at dot at start': function () {
     var spy = sinon.spy();
 
     this.hub.on('*.test', spy);
@@ -109,7 +109,7 @@ test('hub.on wildcard', {
     sinon.assert.notCalled(spy);
   },
 
-  'should work with multiple wildcards': function () {
+  'supports multiple wildcards': function () {
     var spy = sinon.spy();
 
     this.hub.on('a.*.c.*.e', spy);
@@ -118,7 +118,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should not stop at dot': function () {
+  'does not stop at dot': function () {
     var spy = sinon.spy();
 
     this.hub.on('test.**', spy);
@@ -127,7 +127,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should work with multiple double wildcards': function () {
+  'supports multiple double wildcards': function () {
     var spy = sinon.spy();
 
     this.hub.on('**.test.**', spy);
@@ -136,7 +136,7 @@ test('hub.on wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should invoke **.bar.test before *.bar.*': function () {
+  'invokes **.bar.test before *.bar.*': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -147,7 +147,7 @@ test('hub.on wildcard', {
     sinon.assert.callOrder(spy1, spy2);
   },
 
-  'should invoke *.bar.* before *.bar.test': function () {
+  'invokes *.bar.* before *.bar.test': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -158,7 +158,7 @@ test('hub.on wildcard', {
     sinon.assert.callOrder(spy1, spy2);
   },
 
-  'should invoke *.bar.test before foo.**': function () {
+  'invokes *.bar.test before foo.**': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -169,7 +169,7 @@ test('hub.on wildcard', {
     sinon.assert.callOrder(spy1, spy2);
   },
 
-  'should invoke foo.** before foo.*.test': function () {
+  'invokes foo.** before foo.*.test': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -180,7 +180,7 @@ test('hub.on wildcard', {
     sinon.assert.callOrder(spy1, spy2);
   },
 
-  'should invoke foo.*.test before foo.bar.*': function () {
+  'invokes foo.*.test before foo.bar.*': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 

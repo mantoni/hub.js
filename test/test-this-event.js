@@ -20,7 +20,7 @@ test('this.event', {
     this.hub = hub();
   },
 
-  'should be emitted event in on(*)': function () {
+  'is emitted event in on(*)': function () {
     var spy = sinon.spy();
     this.hub.on('*', spy);
 
@@ -29,7 +29,7 @@ test('this.event', {
     assert.equal(spy.thisValues[0].event, 'test');
   },
 
-  'should be emitted event in on(test)': function () {
+  'is emitted event in on(test)': function () {
     var spy = sinon.spy();
     this.hub.on('test', spy);
 

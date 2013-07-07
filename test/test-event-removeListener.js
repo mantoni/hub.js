@@ -35,18 +35,15 @@ test('events', {
     this.hub = hub();
   },
 
-  'should emit removeListener for on(test)': emitsRemoveListener('on',
-    'test'),
+  'emits removeListener for on(test)': emitsRemoveListener('on', 'test'),
 
-  'should emit removeListener for on(**)': emitsRemoveListener('on', '**'),
+  'emits removeListener for on(**)': emitsRemoveListener('on', '**'),
 
-  'should emit removeListener for once(test)': emitsRemoveListener('once',
-    'test'),
+  'emits removeListener for once(test)': emitsRemoveListener('once', 'test'),
 
-  'should emit removeListener for once(**)': emitsRemoveListener('once',
-    '**'),
+  'emits removeListener for once(**)': emitsRemoveListener('once', '**'),
 
-  'should emit removeListener to matchers': function () {
+  'emits removeListener to matchers': function () {
     var spy = sinon.spy();
     var listener = function () {};
 
@@ -59,7 +56,7 @@ test('events', {
   },
 
   /*
-  'should not remove listener if removeListener event was stopped':
+  'does not remove listener if removeListener event was stopped':
     function () {
       this.hub.on('removeListener', function () {
         this.stop();
@@ -73,7 +70,7 @@ test('events', {
       sinon.assert.calledOnce(spy);
     },
 
-  'should not remove matcher if removeListener event was stopped':
+  'does not remove matcher if removeListener event was stopped':
     function () {
       this.hub.on('removeListener', function () {
         this.stop();
@@ -88,7 +85,7 @@ test('events', {
     },
   */
 
-  'should remove listeners regardless of removeListener emit errors':
+  'removes listeners regardless of removeListener emit errors':
     function () {
       this.hub.on('removeListener', function () {
         throw new Error();
@@ -102,7 +99,7 @@ test('events', {
       sinon.assert.notCalled(spy);
     },
 
-  'should not emit event for removeAllListeners': function () {
+  'does not emit event for removeAllListeners': function () {
     var spy = sinon.spy();
     this.hub.on('removeListener', spy);
     this.hub.on('test', function () {});
@@ -112,7 +109,7 @@ test('events', {
     sinon.assert.notCalled(spy);
   },
 
-  'should not emit event for removeAllListeners with event': function () {
+  'does not emit event for removeAllListeners with event': function () {
     var spy = sinon.spy();
     this.hub.on('removeListener', spy);
     this.hub.on('test', function () {});
@@ -122,7 +119,7 @@ test('events', {
     sinon.assert.notCalled(spy);
   },
 
-  'should not emit event for removeAllMatching': function () {
+  'does not emit event for removeAllMatching': function () {
     var spy = sinon.spy();
     this.hub.on('removeListener', spy);
     this.hub.on('test', function () {});

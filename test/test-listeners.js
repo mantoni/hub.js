@@ -36,11 +36,11 @@ test('hub.listeners', {
     this.hub = hub();
   },
 
-  'should return only on(test.run)' : testWithEvent('test.run', 'on'),
-  'should return only on(test.*)'   : testWithEvent('test.*', 'on'),
-  'should return only on(**)'       : testWithEvent('**', 'on'),
+  'returns only on(test.run)' : testWithEvent('test.run', 'on'),
+  'returns only on(test.*)'   : testWithEvent('test.*', 'on'),
+  'returns only on(**)'       : testWithEvent('**', 'on'),
 
-  'should not throw if listener does not exist': function () {
+  'does not throw if listener does not exist': function () {
     var hub = this.hub;
 
     assert.doesNotThrow(function () {
@@ -48,7 +48,7 @@ test('hub.listeners', {
     });
   },
 
-  'should not throw if matcher does not exist': function () {
+  'does not throw if matcher does not exist': function () {
     var hub = this.hub;
 
     assert.doesNotThrow(function () {

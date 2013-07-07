@@ -20,7 +20,7 @@ test('hub.removeAllMatching', {
     this.hub = hub();
   },
 
-  'should remove exact match': function () {
+  'removes exact match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.1', spy1);
@@ -33,7 +33,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove exact wildcard match': function () {
+  'removes exact wildcard match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.*', spy1);
@@ -46,7 +46,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove single wildcard match': function () {
+  'removes single wildcard match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.1', spy1);
@@ -59,7 +59,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove double wildcard match': function () {
+  'removes double wildcard match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.1.a', spy1);
@@ -72,7 +72,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove single wildcard event': function () {
+  'removes single wildcard event': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.a.*', spy1);
@@ -85,7 +85,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove double wildcard event': function () {
+  'removes double wildcard event': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('**.a.test.foo', spy1);
@@ -98,7 +98,7 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should remove generic with more specific': function () {
+  'removes generic with more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);
 

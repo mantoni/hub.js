@@ -19,7 +19,7 @@ test('hub.removeListener', {
     this.hub = hub();
   },
 
-  'should be alias for hub.un': function () {
+  'is alias for hub.un': function () {
     assert.strictEqual(this.hub.removeListener, this.hub.un);
   }
 

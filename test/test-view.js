@@ -56,7 +56,7 @@ test('hub.view', {
     this.hub = hub();
   },
 
-  'should require a namespace': function () {
+  'requires a namespace': function () {
     try {
       this.hub.view();
       assert.fail('Exception expected');
@@ -66,19 +66,19 @@ test('hub.view', {
     }
   },
 
-  'should return object': function () {
+  'returns object': function () {
     var view = this.hub.view('test');
 
     assert.equal(Object.prototype.toString.call(view), '[object Object]');
   },
 
-  'should have a nice toString implementation': function () {
+  'has a nice toString implementation': function () {
     var view = this.hub.view('test.me.*');
 
     assert.equal(view.toString(), '[object hub.View(test.me.*)]');
   },
 
-  'should forward emit': function () {
+  'forwards emit': function () {
     var stub      = sinon.stub(this.hub, 'emit');
     var view      = this.hub.view('test');
     var callback  = function () {};
@@ -90,7 +90,7 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.abc', 123, 'xyz', callback);
   },
 
-  'should forward emit object': function () {
+  'forwards emit object': function () {
     var stub      = sinon.stub(this.hub, 'emit');
     var view      = this.hub.view('test');
     var callback  = function () {};
@@ -103,15 +103,15 @@ test('hub.view', {
         123, 'xyz', callback);
   },
 
-  'should forward on'   : testHandler('on'),
-  'should forward un'   : testHandler('un'),
-  'should forward once' : testHandler('once'),
+  'forwards on'   : testHandler('on'),
+  'forwards un'   : testHandler('un'),
+  'forwards once' : testHandler('once'),
 
-  'should forward multiple on'   : testMultiple('on'),
-  'should forward multiple un'   : testMultiple('un'),
-  'should forward multiple once' : testMultiple('once'),
+  'forwards multiple on'   : testMultiple('on'),
+  'forwards multiple un'   : testMultiple('un'),
+  'forwards multiple once' : testMultiple('once'),
 
-  'should forward view': function () {
+  'forwards view': function () {
     var view      = this.hub.view('test');
     var spy       = sinon.spy(this.hub, 'view');
 
@@ -122,19 +122,19 @@ test('hub.view', {
     assert.strictEqual(result, spy.firstCall.returnValue);
   },
 
-  'should provide addListener as an alias for on': function () {
+  'provides addListener as an alias for on': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.addListener, view.on);
   },
 
-  'should provide removeListener as an alias for un': function () {
+  'provides removeListener as an alias for un': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.removeListener, view.un);
   },
 
-  'should forward removeAllListeners without event': function () {
+  'forwards removeAllListeners without event': function () {
     var stub  = sinon.stub(this.hub, 'removeAllMatching');
     var view  = this.hub.view('test');
 
@@ -144,7 +144,7 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.**');
   },
 
-  'should forward removeAllListeners with event': function () {
+  'forwards removeAllListeners with event': function () {
     var stub  = sinon.stub(this.hub, 'removeAllListeners');
     var view  = this.hub.view('test');
 
@@ -154,7 +154,7 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.abc');
   },
 
-  'should forward removeAllMatching': function () {
+  'forwards removeAllMatching': function () {
     var stub  = sinon.stub(this.hub, 'removeAllMatching');
     var view  = this.hub.view('test');
 
@@ -164,19 +164,19 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.abc');
   },
 
-  'should expose hub': function () {
+  'exposes hub': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.hub, this.hub);
   },
 
-  'should expose namespace': function () {
+  'exposes namespace': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.namespace, 'test');
   },
 
-  'should not create new functions for each view': function () {
+  'does not create new functions for each view': function () {
     var viewA = this.hub.view('a');
     var viewB = this.hub.view('b');
 

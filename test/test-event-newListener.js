@@ -34,15 +34,15 @@ test('events', {
     this.hub = hub();
   },
 
-  'should emit newListener for on(test)': emitsNewListener('on', 'test'),
+  'emits newListener for on(test)': emitsNewListener('on', 'test'),
 
-  'should emit newListener for on(**)': emitsNewListener('on', '**'),
+  'emits newListener for on(**)': emitsNewListener('on', '**'),
 
-  'should emit newListener for once(test)': emitsNewListener('once', 'test'),
+  'emits newListener for once(test)': emitsNewListener('once', 'test'),
 
-  'should emit newListener for once(**)': emitsNewListener('once', '**'),
+  'emits newListener for once(**)': emitsNewListener('once', '**'),
 
-  'should emit newListener to matchers': function () {
+  'emits newListener to matchers': function () {
     var spy = sinon.spy();
     var listener  = function () {};
 
@@ -54,7 +54,7 @@ test('events', {
   },
 
   /*
-  'should not add listener if newListener event was stopped': function () {
+  'does not add listener if newListener event was stopped': function () {
     this.hub.on('newListener', function () {
       this.stop();
     });
@@ -66,7 +66,7 @@ test('events', {
     sinon.assert.notCalled(spy);
   },
 
-  'should not add matcher if newListener event was stopped': function () {
+  'does not add matcher if newListener event was stopped': function () {
     this.hub.on('newListener', function () {
       this.stop();
     });
@@ -79,7 +79,7 @@ test('events', {
   },
   */
 
-  'should add listeners regardless of newListener emit errors': function () {
+  'adds listeners regardless of newListener emit errors': function () {
     this.hub.on('newListener', function () {
       throw new Error();
     });

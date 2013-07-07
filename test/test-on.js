@@ -20,7 +20,7 @@ test('hub.on', {
     this.hub = hub();
   },
 
-  'should work with all lower case letters': function () {
+  'works with all lower case letters': function () {
     var spy = sinon.spy();
 
     this.hub.on('abcdefghijklmnopqrstuvwxyz', spy);
@@ -29,7 +29,7 @@ test('hub.on', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should work with all upper case letters': function () {
+  'works with all upper case letters': function () {
     var spy = sinon.spy();
 
     this.hub.on('ABCDEFGHIJKLMNOPQRSTUVWXYZ', spy);
@@ -38,7 +38,7 @@ test('hub.on', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow underscores': function () {
+  'supports underscores': function () {
     var spy = sinon.spy();
 
     this.hub.on('Test_Me', spy);
@@ -47,7 +47,7 @@ test('hub.on', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow dashes': function () {
+  'supports dashes': function () {
     var spy = sinon.spy();
 
     this.hub.on('Test-Me', spy);
@@ -56,7 +56,7 @@ test('hub.on', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should allow numbers': function () {
+  'supports numbers': function () {
     var spy = sinon.spy();
 
     this.hub.on('1234567890', spy);
@@ -65,7 +65,7 @@ test('hub.on', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should not confuse call order if numbers are used': function () {
+  'does not confuse call order if numbers are used': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
 
@@ -77,7 +77,7 @@ test('hub.on', {
     sinon.assert.callOrder(spy1, spy2);
   },
 
-  'should register event-function pair': function () {
+  'registers event-function pair': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -92,7 +92,7 @@ test('hub.on', {
     sinon.assert.called(listener2);
   },
 
-  'should register event-function pair with prefix': function () {
+  'registers event-function pair with prefix': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -107,7 +107,7 @@ test('hub.on', {
     sinon.assert.called(listener2);
   },
 
-  'should register function from prototype': function () {
+  'registers function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -118,7 +118,7 @@ test('hub.on', {
     sinon.assert.called(type.test);
   },
 
-  'should register function from prototype with prefix': function () {
+  'registers function from prototype with prefix': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -129,7 +129,7 @@ test('hub.on', {
     sinon.assert.called(type.test);
   },
 
-  'should not throw if called with non function values': function () {
+  'does not throw if called with non function values': function () {
     var hub = this.hub;
 
     assert.doesNotThrow(function () {
@@ -148,7 +148,7 @@ test('hub.on', {
     });
   },
 
-  'should not throw if called with non function values with prefix':
+  'does not throw if called with non function values with prefix':
     function () {
       var hub = this.hub;
 

@@ -30,7 +30,7 @@ function run(method, event) {
 
 test('this.args', {
 
-  'should return emitted arguments in on(*)'    : run('on', '*'),
-  'should return emitted arguments in on(test)' : run('on', 'test')
+  'returns emitted arguments in on(*)'    : run('on', '*'),
+  'returns emitted arguments in on(test)' : run('on', 'test')
 
 });

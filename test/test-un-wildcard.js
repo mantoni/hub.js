@@ -20,7 +20,7 @@ test('hub.un wildcard', {
     this.hub = hub();
   },
 
-  'should unsubscribe given on matcher only': function () {
+  'unsubscribes given on matcher only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test.*', spy1);
@@ -34,7 +34,7 @@ test('hub.un wildcard', {
     sinon.assert.calledTwice(spy2);
   },
 
-  'should not unsubscribe different matcher': function () {
+  'does not unsubscribe different matcher': function () {
     var spy = sinon.spy();
     this.hub.on('test.*', spy);
 
@@ -44,7 +44,7 @@ test('hub.un wildcard', {
     sinon.assert.calledOnce(spy);
   },
 
-  'should not fail if un is called in emit': function () {
+  'does not fail if un is called in emit': function () {
     var self  = this;
     var fn    = function () {};
     this.hub.on('*', function () {

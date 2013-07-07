@@ -29,8 +29,8 @@ function run(method, event) {
 
 test('this.hub', {
 
-  'should be hub instance in on(*)'    : run('on', '*'),
+  'is hub instance in on(*)'    : run('on', '*'),
 
-  'should be hub instance in on(test)' : run('on', 'test')
+  'is hub instance in on(test)' : run('on', 'test')
 
 });

@@ -20,7 +20,7 @@ test('hub.un', {
     this.hub = hub();
   },
 
-  'should unsubscribe given on listener only': function () {
+  'unsubscribes given given listener only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.on('test', spy1);
@@ -34,7 +34,7 @@ test('hub.un', {
     sinon.assert.calledTwice(spy2);
   },
 
-  'should unsubscribe given once listener only': function () {
+  'unsubscribes given once listener only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
     this.hub.once('test', spy1);
@@ -48,18 +48,7 @@ test('hub.un', {
     sinon.assert.calledOnce(spy2);
   },
 
-  'should not unsubscribe different listener': function () {
-    var spy = sinon.spy();
-    this.hub.on('test', spy);
-
-    this.hub.un('test', function () {});
-    this.hub.emit('test');
-    this.hub.emit('*');
-
-    sinon.assert.calledTwice(spy);
-  },
-
-  'should not fail if un is called in emit': function () {
+  'does not fail if un is called in emit': function () {
     var self  = this;
     var fn    = function () {};
     this.hub.on('test', function () {
@@ -72,7 +61,7 @@ test('hub.un', {
     });
   },
 
-  'should unregister event-function pair': function () {
+  'unregisters event-function pair': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -91,7 +80,7 @@ test('hub.un', {
     sinon.assert.notCalled(listener2);
   },
 
-  'should unregister event-function pair with prefix': function () {
+  'unregisters event-function pair with prefix': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -110,7 +99,7 @@ test('hub.un', {
     sinon.assert.notCalled(listener2);
   },
 
-  'should unregister function from prototype': function () {
+  'unregisters function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -122,7 +111,7 @@ test('hub.un', {
     sinon.assert.notCalled(type.test);
   },
 
-  'should unregister function from prototype with prefix': function () {
+  'unregisters function from prototype with prefix': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -134,7 +123,7 @@ test('hub.un', {
     sinon.assert.notCalled(type.test);
   },
 
-  'should not throw if called with non function values': function () {
+  'does not throw if called with non function values': function () {
     var hub = this.hub;
 
     assert.doesNotThrow(function () {
@@ -153,7 +142,7 @@ test('hub.un', {
     });
   },
 
-  'should not throw if called with non function values with prefix':
+  'does not throw if called with non function values with prefix':
     function () {
       var hub = this.hub;
 

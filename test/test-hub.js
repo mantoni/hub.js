@@ -17,12 +17,12 @@ var listen = require('listen');
 
 test('hub', {
 
-  'should expose listen': function () {
+  'exposes listen': function () {
     assert.strictEqual(hub.listen, listen);
   },
 
 
-  'should register event-function pair': function () {
+  'registers event-function pair': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
 
@@ -37,7 +37,7 @@ test('hub', {
     sinon.assert.called(listener2);
   },
 
-  'should register function from prototype': function () {
+  'registers function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
     var type = new Type();
@@ -48,7 +48,7 @@ test('hub', {
     sinon.assert.called(type.test);
   },
 
-  'should not throw if called with non function values': function () {
+  'does not throw if called with non function values': function () {
     assert.doesNotThrow(function () {
       var instance = hub({
         'a' : 'x',
@@ -65,14 +65,14 @@ test('hub', {
     });
   },
 
-  'should expose View prototype': function () {
+  'exposes View prototype': function () {
     var view = hub().view('test');
 
     assert.equal(typeof hub.View, 'function');
     assert(view instanceof hub.View);
   },
 
-  'should not use exposed View for view creation': sinon.test(function () {
+  'does not use exposed View for view creation': sinon.test(function () {
     this.stub(hub, 'View').throws(new Error());
 
     assert.doesNotThrow(function () {
