@@ -2,8 +2,17 @@
 
 ## v0.14.0
 
-- Fix: Unsubscribing listeners registered with `once`, `onceBefore` or
-  `onceAfter` did nothing.
+__NOTE: This release introduces breaking changes to the API!__
+
+- Removed `before`, `after`, `onceBefore` and `onceAfter`.
+- Removed `this.stop()` and `this.stopped`.
+- Matchers and listeners are not executed in separate phases anymore. Throwing
+  in a matcher will still invoke the listeners.
+- Adding a listener in a matcher will no longer execute the listener in the
+  current emit call.
+- Removed namespaced error events. Errors are only emitted to 'error' listeners
+  if present.
+- Fix: Unsubscribing listeners registered with `once` did nothing.
 
 ## v0.13.0
 
