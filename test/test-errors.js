@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('errors emitted', {
@@ -36,29 +36,6 @@ test('errors emitted', {
     sinon.assert.calledWith(spy2, this.err);
   },
 
-  'namespace error event with cause': function () {
-    var spy = sinon.spy();
-    this.hub.on('test.error', spy);
-
-    this.hub.emit('test.ouch');
-
-    sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, this.err);
-  },
-
-  'does not invoke default handler if namespace handler is present':
-    function () {
-      var spy1 = sinon.spy();
-      var spy2 = sinon.spy();
-      this.hub.on('test.error', spy1);
-      this.hub.on('error', spy2);
-
-      this.hub.emit('test.ouch');
-
-      sinon.assert.calledOnce(spy1);
-      sinon.assert.notCalled(spy2);
-    },
-
   'invokes second error handler if first throws and then errs': function () {
     var errorSpy   = sinon.spy();
     var errorError = new Error('uh oh');
@@ -79,7 +56,6 @@ test('errors emitted', {
     sinon.assert.calledWith(errorSpy, this.err);
   },
 
-
   'does not invoke namespace.*': function () {
     var spy = sinon.spy();
     this.hub.on('test.*', spy);
@@ -89,9 +65,9 @@ test('errors emitted', {
     } catch (expected) {}
 
     sinon.assert.calledOnce(spy); // and not twice!
-  },
+  }
 
-
+  /*
   'invokes namespace error handlers with original scope object': function () {
     var before = sinon.spy();
     var spy    = sinon.spy();
@@ -103,7 +79,6 @@ test('errors emitted', {
     assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
   },
 
-
   'invokes root error handlers with original scope object': function () {
     var before = sinon.spy();
     var spy    = sinon.spy();
@@ -114,5 +89,6 @@ test('errors emitted', {
 
     assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
   }
+  */
 
 });

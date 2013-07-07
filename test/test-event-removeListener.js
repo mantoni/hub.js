@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function emitsRemoveListener(method, event) {
@@ -35,30 +35,16 @@ test('events', {
     this.hub = hub();
   },
 
-
   'should emit removeListener for on(test)': emitsRemoveListener('on',
     'test'),
 
   'should emit removeListener for on(**)': emitsRemoveListener('on', '**'),
-
-  'should emit removeListener for before(test)': emitsRemoveListener('before',
-    'test'),
-
-  'should emit removeListener for before(**)': emitsRemoveListener('before',
-    '**'),
-
-  'should emit removeListener for after(test)': emitsRemoveListener('after',
-    'test'),
-
-  'should emit removeListener for after(**)': emitsRemoveListener('after',
-    '**'),
 
   'should emit removeListener for once(test)': emitsRemoveListener('once',
     'test'),
 
   'should emit removeListener for once(**)': emitsRemoveListener('once',
     '**'),
-
 
   'should emit removeListener to matchers': function () {
     var spy = sinon.spy();
@@ -72,7 +58,7 @@ test('events', {
     sinon.assert.calledWith(spy, 'some.test', listener);
   },
 
-
+  /*
   'should not remove listener if removeListener event was stopped':
     function () {
       this.hub.on('removeListener', function () {
@@ -87,7 +73,6 @@ test('events', {
       sinon.assert.calledOnce(spy);
     },
 
-
   'should not remove matcher if removeListener event was stopped':
     function () {
       this.hub.on('removeListener', function () {
@@ -101,7 +86,7 @@ test('events', {
 
       sinon.assert.calledOnce(spy);
     },
-
+  */
 
   'should remove listeners regardless of removeListener emit errors':
     function () {

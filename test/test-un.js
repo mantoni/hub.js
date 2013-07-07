@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.un', {
@@ -19,7 +19,6 @@ test('hub.un', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should unsubscribe given on listener only': function () {
     var spy1 = sinon.spy();
@@ -35,7 +34,6 @@ test('hub.un', {
     sinon.assert.calledTwice(spy2);
   },
 
-
   'should unsubscribe given once listener only': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
@@ -50,37 +48,6 @@ test('hub.un', {
     sinon.assert.calledOnce(spy2);
   },
 
-
-  'should unsubscribe given before listener only': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.before('test', spy1);
-    this.hub.before('test', spy2);
-
-    this.hub.un('test', spy1);
-    this.hub.emit('test');
-    this.hub.emit('*');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.calledTwice(spy2);
-  },
-
-
-  'should unsubscribe given after listener only': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.after('test', spy1);
-    this.hub.after('test', spy2);
-
-    this.hub.un('test', spy1);
-    this.hub.emit('test');
-    this.hub.emit('*');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.calledTwice(spy2);
-  },
-
-
   'should not unsubscribe different listener': function () {
     var spy = sinon.spy();
     this.hub.on('test', spy);
@@ -91,7 +58,6 @@ test('hub.un', {
 
     sinon.assert.calledTwice(spy);
   },
-
 
   'should not fail if un is called in emit': function () {
     var self  = this;
@@ -105,7 +71,6 @@ test('hub.un', {
       self.hub.emit('test');
     });
   },
-
 
   'should unregister event-function pair': function () {
     var listener1 = sinon.spy();
@@ -126,7 +91,6 @@ test('hub.un', {
     sinon.assert.notCalled(listener2);
   },
 
-
   'should unregister event-function pair with prefix': function () {
     var listener1 = sinon.spy();
     var listener2 = sinon.spy();
@@ -146,7 +110,6 @@ test('hub.un', {
     sinon.assert.notCalled(listener2);
   },
 
-
   'should unregister function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
@@ -159,7 +122,6 @@ test('hub.un', {
     sinon.assert.notCalled(type.test);
   },
 
-
   'should unregister function from prototype with prefix': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
@@ -171,7 +133,6 @@ test('hub.un', {
 
     sinon.assert.notCalled(type.test);
   },
-
 
   'should not throw if called with non function values': function () {
     var hub = this.hub;
@@ -192,7 +153,6 @@ test('hub.un', {
     });
   },
 
-
   'should not throw if called with non function values with prefix':
     function () {
       var hub = this.hub;
@@ -212,7 +172,6 @@ test('hub.un', {
         hub.emit('test.e');
       });
     },
-
 
   'does not invoke listener unregistered after emit': function () {
     var spy = sinon.spy();

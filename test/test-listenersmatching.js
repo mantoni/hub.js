@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.listenersMatching', {
@@ -19,7 +19,6 @@ test('hub.listenersMatching', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should return exact match': function () {
     var listener1 = function () {};
@@ -32,7 +31,6 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-
   'should return exact wildcard match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
@@ -43,7 +41,6 @@ test('hub.listenersMatching', {
 
     assert.deepEqual(result, [listener1]);
   },
-
 
   'should return single wildcard match': function () {
     var listener1 = function () {};
@@ -56,7 +53,6 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-
   'should return double wildcard match': function () {
     var listener1 = function () {};
     var listener2 = function () {};
@@ -67,7 +63,6 @@ test('hub.listenersMatching', {
 
     assert.deepEqual(result, [listener1]);
   },
-
 
   'should return single wildcard event': function () {
     var listener1 = function () {};
@@ -80,7 +75,6 @@ test('hub.listenersMatching', {
     assert.deepEqual(result, [listener1]);
   },
 
-
   'should return double wildcard event': function () {
     var listener1 = function () {};
     var listener2 = function () {};
@@ -91,7 +85,6 @@ test('hub.listenersMatching', {
 
     assert.deepEqual(result, [listener1]);
   },
-
 
   'should return generic for more specific': function () {
     var listener = function () {};

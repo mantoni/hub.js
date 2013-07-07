@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function testCases(event) {
@@ -20,7 +20,6 @@ function testCases(event) {
     before: function () {
       this.hub = hub();
     },
-
 
     'should return function': function () {
       var result;
@@ -32,7 +31,6 @@ function testCases(event) {
 
       assert.equal(typeof result, 'function');
     },
-
 
     'should resolve with value': function () {
       var spy = sinon.spy();
@@ -46,7 +44,6 @@ function testCases(event) {
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWith(spy, null, 'value');
     },
-
 
     'should resolve with error': function () {
       var spy = sinon.spy();
@@ -62,7 +59,6 @@ function testCases(event) {
       sinon.assert.calledWith(spy, err);
     },
 
-
     'should add value with callback.push': function () {
       var spy = sinon.spy();
 
@@ -75,7 +71,6 @@ function testCases(event) {
       sinon.assert.calledOnce(spy);
       sinon.assert.calledWith(spy, null, ['a', 'b']);
     },
-
 
     'should add error with callback.err': function () {
       var spy = sinon.spy();
@@ -94,7 +89,6 @@ function testCases(event) {
         errors  : [err1, err2]
       }));
     },
-
 
     'should time out after given timeout millis': sinon.test(function () {
       this.hub.on('test', function () {

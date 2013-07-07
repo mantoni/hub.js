@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.emit', {
@@ -19,7 +19,6 @@ test('hub.emit', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should work with all lower case letters': function () {
     var spy = sinon.spy();
@@ -30,7 +29,6 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-
   'should work with all upper case letters': function () {
     var spy = sinon.spy();
 
@@ -39,7 +37,6 @@ test('hub.emit', {
 
     sinon.assert.calledOnce(spy);
   },
-
 
   'should allow underscores': function () {
     var spy = sinon.spy();
@@ -50,7 +47,6 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-
   'should allow dashes': function () {
     var spy = sinon.spy();
 
@@ -59,7 +55,6 @@ test('hub.emit', {
 
     sinon.assert.calledOnce(spy);
   },
-
 
   'should allow colons': function () {
     var spy = sinon.spy();
@@ -70,7 +65,6 @@ test('hub.emit', {
     sinon.assert.calledOnce(spy);
   },
 
-
   'should allow numbers': function () {
     var spy = sinon.spy();
 
@@ -79,6 +73,5 @@ test('hub.emit', {
 
     sinon.assert.calledOnce(spy);
   }
-
 
 });

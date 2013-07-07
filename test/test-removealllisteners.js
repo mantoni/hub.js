@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function testWithoutEvent(event, listenerType) {
@@ -61,31 +61,13 @@ test('hub.removeAllListeners', {
   },
 
 
-  'should remove on(test.run)'      : testWithoutEvent('test.run',  'on'),
-  'should remove on(test.*)'        : testWithoutEvent('test.*',    'on'),
-  'should remove on(**)'            : testWithoutEvent('**',        'on'),
+  'should remove on(test.run)' : testWithoutEvent('test.run', 'on'),
+  'should remove on(test.*)'   : testWithoutEvent('test.*', 'on'),
+  'should remove on(**)'       : testWithoutEvent('**', 'on'),
 
-  'should remove before(test.run)'  : testWithoutEvent('test.run',  'before'),
-  'should remove before(test.*)'    : testWithoutEvent('test.*',    'before'),
-  'should remove before(**)'        : testWithoutEvent('**',        'before'),
-
-  'should remove after(test.run)'   : testWithoutEvent('test.run',  'after'),
-  'should remove after(test.*)'     : testWithoutEvent('test.*',    'after'),
-  'should remove after(**)'         : testWithoutEvent('**',        'after'),
-
-
-  'should remove only on(test.run)'     : testWithEvent('test.run', 'on'),
-  'should remove only on(test.*)'       : testWithEvent('test.*',   'on'),
-  'should remove only on(**)'           : testWithEvent('**',       'on'),
-
-  'should remove only before(test.run)' : testWithEvent('test.run', 'before'),
-  'should remove only before(test.*)'   : testWithEvent('test.*',   'before'),
-  'should remove only before(**)'       : testWithEvent('**',       'before'),
-
-  'should remove only after(test.run)'  : testWithEvent('test.run', 'after'),
-  'should remove only after(test.*)'    : testWithEvent('test.*',   'after'),
-  'should remove only after(**)'        : testWithEvent('**',       'after'),
-
+  'should remove only on(test.run)' : testWithEvent('test.run', 'on'),
+  'should remove only on(test.*)'   : testWithEvent('test.*', 'on'),
+  'should remove only on(**)'       : testWithEvent('**', 'on'),
 
   'should not throw if matcher does not exist': function () {
     var self = this;
@@ -94,7 +76,6 @@ test('hub.removeAllListeners', {
       self.hub.removeAllListeners('test.*');
     });
   },
-
 
   'should not remove gneric for more specific': function () {
     var spy = sinon.spy();
@@ -105,7 +86,6 @@ test('hub.removeAllListeners', {
 
     sinon.assert.calledOnce(spy);
   },
-
 
   'does not invoke listener unregistered after emit 1': function () {
     var spy = sinon.spy();
@@ -119,7 +99,6 @@ test('hub.removeAllListeners', {
 
     sinon.assert.notCalled(spy);
   },
-
 
   'does not invoke listener unregistered after emit 2': function () {
     var spy = sinon.spy();
@@ -135,7 +114,6 @@ test('hub.removeAllListeners', {
     sinon.assert.notCalled(spy);
   },
 
-
   'does not invoke listener unregistered after emit 3': function () {
     var spy = sinon.spy();
     var hub = this.hub;
@@ -149,7 +127,6 @@ test('hub.removeAllListeners', {
 
     sinon.assert.notCalled(spy);
   },
-
 
   'does not invoke listener unregistered after emit 4': function () {
     var spy = sinon.spy();

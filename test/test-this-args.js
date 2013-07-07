@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,10 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function run(method, event) {
@@ -31,11 +30,7 @@ function run(method, event) {
 
 test('this.args', {
 
-  'should return emitted arguments in before(*)'    : run('before', '*'),
-  'should return emitted arguments in on(*)'        : run('on', '*'),
-  'should return emitted arguments in after(*)'     : run('after', '*'),
-  'should return emitted arguments in before(test)' : run('before', 'test'),
-  'should return emitted arguments in on(test)'     : run('on', 'test'),
-  'should return emitted arguments in after(test)'  : run('after', 'test')
+  'should return emitted arguments in on(*)'    : run('on', '*'),
+  'should return emitted arguments in on(test)' : run('on', 'test')
 
 });

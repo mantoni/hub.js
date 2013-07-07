@@ -29,7 +29,6 @@ test('emit-event', {
     sinon.assert.calledWithExactly(spy, 42);
   },
 
-
   'uses callback followed by event': function () {
     var spy = sinon.spy();
     this.hub.on('test', function () { return 42; });
@@ -39,7 +38,6 @@ test('emit-event', {
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, null, 42);
   },
-
 
   'passes all listener results to callback': function () {
     this.hub.on('test', function () { return 'a'; });

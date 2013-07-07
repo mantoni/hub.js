@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 function testHandler(method) {
@@ -56,7 +56,6 @@ test('hub.view', {
     this.hub = hub();
   },
 
-
   'should require a namespace': function () {
     try {
       this.hub.view();
@@ -67,20 +66,17 @@ test('hub.view', {
     }
   },
 
-
   'should return object': function () {
     var view = this.hub.view('test');
 
     assert.equal(Object.prototype.toString.call(view), '[object Object]');
   },
 
-
   'should have a nice toString implementation': function () {
     var view = this.hub.view('test.me.*');
 
     assert.equal(view.toString(), '[object hub.View(test.me.*)]');
   },
-
 
   'should forward emit': function () {
     var stub      = sinon.stub(this.hub, 'emit');
@@ -93,7 +89,6 @@ test('hub.view', {
     sinon.assert.calledOn(stub, this.hub);
     sinon.assert.calledWith(stub, 'test.abc', 123, 'xyz', callback);
   },
-
 
   'should forward emit object': function () {
     var stub      = sinon.stub(this.hub, 'emit');
@@ -108,24 +103,13 @@ test('hub.view', {
         123, 'xyz', callback);
   },
 
+  'should forward on'   : testHandler('on'),
+  'should forward un'   : testHandler('un'),
+  'should forward once' : testHandler('once'),
 
-  'should forward on'         : testHandler('on'),
-  'should forward un'         : testHandler('un'),
-  'should forward before'     : testHandler('before'),
-  'should forward after'      : testHandler('after'),
-  'should forward once'       : testHandler('once'),
-  'should forward onceBefore' : testHandler('onceBefore'),
-  'should forward onceAfter'  : testHandler('onceAfter'),
-
-
-  'should forward multiple on'         : testMultiple('on'),
-  'should forward multiple un'         : testMultiple('un'),
-  'should forward multiple before'     : testMultiple('before'),
-  'should forward multiple after'      : testMultiple('after'),
-  'should forward multiple once'       : testMultiple('once'),
-  'should forward multiple onceBefore' : testMultiple('onceBefore'),
-  'should forward multiple onceAfter'  : testMultiple('onceAfter'),
-
+  'should forward multiple on'   : testMultiple('on'),
+  'should forward multiple un'   : testMultiple('un'),
+  'should forward multiple once' : testMultiple('once'),
 
   'should forward view': function () {
     var view      = this.hub.view('test');
@@ -138,20 +122,17 @@ test('hub.view', {
     assert.strictEqual(result, spy.firstCall.returnValue);
   },
 
-
   'should provide addListener as an alias for on': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.addListener, view.on);
   },
 
-
   'should provide removeListener as an alias for un': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.removeListener, view.un);
   },
-
 
   'should forward removeAllListeners without event': function () {
     var stub  = sinon.stub(this.hub, 'removeAllMatching');
@@ -163,7 +144,6 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.**');
   },
 
-
   'should forward removeAllListeners with event': function () {
     var stub  = sinon.stub(this.hub, 'removeAllListeners');
     var view  = this.hub.view('test');
@@ -173,7 +153,6 @@ test('hub.view', {
     sinon.assert.calledOnce(stub);
     sinon.assert.calledWith(stub, 'test.abc');
   },
-
 
   'should forward removeAllMatching': function () {
     var stub  = sinon.stub(this.hub, 'removeAllMatching');
@@ -185,13 +164,11 @@ test('hub.view', {
     sinon.assert.calledWith(stub, 'test.abc');
   },
 
-
   'should expose hub': function () {
     var view = this.hub.view('test');
 
     assert.strictEqual(view.hub, this.hub);
   },
-
 
   'should expose namespace': function () {
     var view = this.hub.view('test');
@@ -199,18 +176,15 @@ test('hub.view', {
     assert.strictEqual(view.namespace, 'test');
   },
 
-
   'should not create new functions for each view': function () {
     var viewA = this.hub.view('a');
     var viewB = this.hub.view('b');
 
-    assert.strictEqual(viewA.emit,    viewB.emit);
-    assert.strictEqual(viewA.once,    viewB.once);
-    assert.strictEqual(viewA.on,      viewB.on);
-    assert.strictEqual(viewA.un,      viewB.un);
-    assert.strictEqual(viewA.before,  viewB.before);
-    assert.strictEqual(viewA.after,   viewB.after);
-    assert.strictEqual(viewA.view,    viewB.view);
+    assert.strictEqual(viewA.emit, viewB.emit);
+    assert.strictEqual(viewA.once, viewB.once);
+    assert.strictEqual(viewA.on, viewB.on);
+    assert.strictEqual(viewA.un, viewB.un);
+    assert.strictEqual(viewA.view, viewB.view);
     assert.strictEqual(viewA.removeAllListeners, viewB.removeAllListeners);
   }
 

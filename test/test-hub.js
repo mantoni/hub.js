@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,16 +7,15 @@
  */
 'use strict';
 
-var test      = require('utest');
-var assert    = require('assert');
-var sinon     = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub       = require('../lib/hub');
-var listen    = require('listen');
+var hub    = require('../lib/hub');
+var listen = require('listen');
 
 
 test('hub', {
-
 
   'should expose listen': function () {
     assert.strictEqual(hub.listen, listen);
@@ -38,7 +37,6 @@ test('hub', {
     sinon.assert.called(listener2);
   },
 
-
   'should register function from prototype': function () {
     function Type() {}
     Type.prototype.test = sinon.spy();
@@ -49,7 +47,6 @@ test('hub', {
 
     sinon.assert.called(type.test);
   },
-
 
   'should not throw if called with non function values': function () {
     assert.doesNotThrow(function () {
@@ -68,14 +65,12 @@ test('hub', {
     });
   },
 
-
   'should expose View prototype': function () {
     var view = hub().view('test');
 
     assert.equal(typeof hub.View, 'function');
     assert(view instanceof hub.View);
   },
-
 
   'should not use exposed View for view creation': sinon.test(function () {
     this.stub(hub, 'View').throws(new Error());
@@ -84,6 +79,5 @@ test('hub', {
       hub().view('test');
     });
   })
-
 
 });

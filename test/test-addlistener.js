@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,10 +7,10 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
+var test   = require('utest');
+var assert = require('assert');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.addListener', {
@@ -18,7 +18,6 @@ test('hub.addListener', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should be alias for hub.on': function () {
     assert.strictEqual(this.hub.addListener, this.hub.on);

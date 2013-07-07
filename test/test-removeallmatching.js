@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.removeAllMatching', {
@@ -19,7 +19,6 @@ test('hub.removeAllMatching', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should remove exact match': function () {
     var spy1 = sinon.spy();
@@ -34,7 +33,6 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-
   'should remove exact wildcard match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
@@ -47,7 +45,6 @@ test('hub.removeAllMatching', {
     sinon.assert.notCalled(spy1);
     sinon.assert.calledOnce(spy2);
   },
-
 
   'should remove single wildcard match': function () {
     var spy1 = sinon.spy();
@@ -62,7 +59,6 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-
   'should remove double wildcard match': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
@@ -75,7 +71,6 @@ test('hub.removeAllMatching', {
     sinon.assert.notCalled(spy1);
     sinon.assert.calledOnce(spy2);
   },
-
 
   'should remove single wildcard event': function () {
     var spy1 = sinon.spy();
@@ -90,7 +85,6 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-
   'should remove double wildcard event': function () {
     var spy1 = sinon.spy();
     var spy2 = sinon.spy();
@@ -104,7 +98,6 @@ test('hub.removeAllMatching', {
     sinon.assert.calledOnce(spy2);
   },
 
-
   'should remove generic with more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);
@@ -114,7 +107,6 @@ test('hub.removeAllMatching', {
 
     sinon.assert.notCalled(spy);
   },
-
 
   'does not invoke listener unregistered after emit 1': function () {
     var spy = sinon.spy();
@@ -128,7 +120,6 @@ test('hub.removeAllMatching', {
 
     sinon.assert.notCalled(spy);
   },
-
 
   'does not invoke listener unregistered after emit 2': function () {
     var spy = sinon.spy();

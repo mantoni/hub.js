@@ -1,4 +1,4 @@
-/**
+/*
  * hub.js
  *
  * Copyright (c) 2012 Maximilian Antoni <mail@maxantoni.de>
@@ -7,11 +7,11 @@
  */
 'use strict';
 
-var test    = require('utest');
-var assert  = require('assert');
-var sinon   = require('sinon');
+var test   = require('utest');
+var assert = require('assert');
+var sinon  = require('sinon');
 
-var hub     = require('../lib/hub');
+var hub    = require('../lib/hub');
 
 
 test('hub.un wildcard', {
@@ -19,7 +19,6 @@ test('hub.un wildcard', {
   before: function () {
     this.hub = hub();
   },
-
 
   'should unsubscribe given on matcher only': function () {
     var spy1 = sinon.spy();
@@ -35,37 +34,6 @@ test('hub.un wildcard', {
     sinon.assert.calledTwice(spy2);
   },
 
-
-  'should unsubscribe given before matcher only': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.before('test.*', spy1);
-    this.hub.before('test.*', spy2);
-
-    this.hub.un('test.*', spy1);
-    this.hub.emit('test.a');
-    this.hub.emit('test.*');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.calledTwice(spy2);
-  },
-
-
-  'should unsubscribe given after matcher only': function () {
-    var spy1 = sinon.spy();
-    var spy2 = sinon.spy();
-    this.hub.after('test.*', spy1);
-    this.hub.after('test.*', spy2);
-
-    this.hub.un('test.*', spy1);
-    this.hub.emit('test.a');
-    this.hub.emit('test.*');
-
-    sinon.assert.notCalled(spy1);
-    sinon.assert.calledTwice(spy2);
-  },
-
-
   'should not unsubscribe different matcher': function () {
     var spy = sinon.spy();
     this.hub.on('test.*', spy);
@@ -75,7 +43,6 @@ test('hub.un wildcard', {
 
     sinon.assert.calledOnce(spy);
   },
-
 
   'should not fail if un is called in emit': function () {
     var self  = this;
@@ -89,7 +56,6 @@ test('hub.un wildcard', {
       self.hub.emit('test');
     });
   },
-
 
   'does not invoke listener unregistered after emit': function () {
     var spy = sinon.spy();
