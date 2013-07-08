@@ -29,21 +29,21 @@ function emitsRemoveListener(method, event) {
 }
 
 
-test('events', {
+test('event.removeListener', {
 
   before: function () {
     this.hub = hub();
   },
 
-  'emits removeListener for on(test)': emitsRemoveListener('on', 'test'),
+  'emits for on(test)': emitsRemoveListener('on', 'test'),
 
-  'emits removeListener for on(**)': emitsRemoveListener('on', '**'),
+  'emits for on(**)': emitsRemoveListener('on', '**'),
 
-  'emits removeListener for once(test)': emitsRemoveListener('once', 'test'),
+  'emits for once(test)': emitsRemoveListener('once', 'test'),
 
-  'emits removeListener for once(**)': emitsRemoveListener('once', '**'),
+  'emits for once(**)': emitsRemoveListener('once', '**'),
 
-  'emits removeListener to matchers': function () {
+  'emits to matchers': function () {
     var spy = sinon.spy();
     var listener = function () {};
 
@@ -56,7 +56,7 @@ test('events', {
   },
 
   /*
-  'does not remove listener if removeListener event was stopped':
+  'does not remove listener if stopped':
     function () {
       this.hub.on('removeListener', function () {
         this.stop();
@@ -70,7 +70,7 @@ test('events', {
       sinon.assert.calledOnce(spy);
     },
 
-  'does not remove matcher if removeListener event was stopped':
+  'does not remove matcher if stopped':
     function () {
       this.hub.on('removeListener', function () {
         this.stop();
@@ -85,19 +85,18 @@ test('events', {
     },
   */
 
-  'removes listeners regardless of removeListener emit errors':
-    function () {
-      this.hub.on('removeListener', function () {
-        throw new Error();
-      });
-      var spy = sinon.spy();
+  'removes listeners regardless of errors': function () {
+    this.hub.on('removeListener', function () {
+      throw new Error();
+    });
+    var spy = sinon.spy();
 
-      this.hub.on('test', spy);
-      this.hub.un('test', spy);
-      this.hub.emit('test');
+    this.hub.on('test', spy);
+    this.hub.un('test', spy);
+    this.hub.emit('test');
 
-      sinon.assert.notCalled(spy);
-    },
+    sinon.assert.notCalled(spy);
+  },
 
   'does not emit event for removeAllListeners': function () {
     var spy = sinon.spy();
