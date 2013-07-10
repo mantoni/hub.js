@@ -14,7 +14,7 @@ var sinon  = require('sinon');
 var hub    = require('../lib/hub');
 
 
-test('hub.once unsubscribe', {
+test('hub.once', {
 
   before: function () {
     this.hub = hub();
@@ -63,15 +63,6 @@ test('hub.once unsubscribe', {
     this.hub.once('test', function () {});
 
     assert.equal(this.hub.listeners('test').length, 1);
-  }
-
-});
-
-
-test('hub.once arguments', {
-
-  before: function () {
-    this.hub = hub();
   },
 
   'passes arguments': function () {
