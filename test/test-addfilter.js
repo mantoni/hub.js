@@ -14,7 +14,7 @@ var sinon  = require('sinon');
 var hub    = require('../lib/hub');
 
 
-test('hub.filter', {
+test('hub.addFilter', {
 
   before: function () {
     this.hub = hub();

@@ -14,23 +14,28 @@ var sinon  = require('sinon');
 var hub    = require('../lib/hub');
 
 
-function run(method, event) {
-  return function () {
-    var h   = hub();
-    var spy = sinon.spy();
-    h[method](event, spy);
-
-    h.emit('test');
-
-    assert.strictEqual(spy.thisValues[0].hub, h);
-  };
-}
-
-
 test('this.hub', {
 
-  'is hub instance in on(*)'    : run('on', '*'),
+  before: function () {
+    this.hub = hub();
+  },
 
-  'is hub instance in on(test)' : run('on', 'test')
+  'is hub instance in on(*)': function () {
+    var spy = sinon.spy();
+    this.hub.on('*', spy);
+
+    this.hub.emit('test');
+
+    assert.strictEqual(spy.thisValues[0].hub, this.hub);
+  },
+
+  'is hub instance in on(test)': function () {
+    var spy = sinon.spy();
+    this.hub.on('test', spy);
+
+    this.hub.emit('test');
+
+    assert.strictEqual(spy.thisValues[0].hub, this.hub);
+  }
 
 });
