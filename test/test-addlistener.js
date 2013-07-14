@@ -73,7 +73,7 @@ test('hub.addListener', {
     sinon.assert.calledWith(spy, 42, sinon.match.func);
   },
 
-  'does not invoke listener registered during "addListener"': function () {
+  'does not invoke listener registered in listener': function () {
     var spy = sinon.spy();
     var hub = this.hub;
 

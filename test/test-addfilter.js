@@ -38,6 +38,15 @@ test('hub.addFilter', {
     sinon.assert.calledOnce(spy);
   },
 
+  'does not pass message to listeners with different name': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('foo', spy);
+    this.hub.emit('bar');
+
+    sinon.assert.notCalled(spy);
+  },
+
   'does not invoke listener if next is not called': function () {
     var spy = sinon.spy();
 
@@ -187,6 +196,45 @@ test('hub.addFilter', {
 
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, null, []);
+  },
+
+  'does not invoke filter registered in filter': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.addFilter('test', function () {
+      hub.addFilter('test', spy);
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'invokes listener registered in filter': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+
+    hub.addFilter('test', function (next, callback) {
+      hub.addListener('test', spy);
+      next(callback);
+    });
+    hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'does not invoke listener removed in filter': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.addListener('test', spy);
+
+    hub.addFilter('test', function (next, callback) {
+      hub.removeListener('test', spy);
+      next(callback);
+    });
+    hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 });

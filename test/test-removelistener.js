@@ -136,7 +136,7 @@ function emitsRemoveListener(method, event) {
 
     this.hub[method](event, listener);
     this.hub.on('removeListener', spy);
-    this.hub.un(event, listener);
+    this.hub.removeListener(event, listener);
 
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, event, listener);
@@ -163,7 +163,7 @@ test('event.removeListener', {
 
     this.hub.on('*', spy);
     this.hub.on('some.test', listener);
-    this.hub.un('some.test', listener);
+    this.hub.removeListener('some.test', listener);
 
     sinon.assert.called(spy);
     sinon.assert.calledWith(spy, 'some.test', listener);
@@ -174,7 +174,7 @@ test('event.removeListener', {
     var spy = sinon.spy();
 
     this.hub.on('test', spy);
-    this.hub.un('test', spy);
+    this.hub.removeListener('test', spy);
     this.hub.emit('test');
 
     sinon.assert.calledOnce(spy);
@@ -185,7 +185,7 @@ test('event.removeListener', {
     var spy = sinon.spy();
 
     this.hub.on('test.*', spy);
-    this.hub.un('test.*', spy);
+    this.hub.removeListener('test.*', spy);
     this.hub.emit('test.foo');
 
     sinon.assert.calledOnce(spy);

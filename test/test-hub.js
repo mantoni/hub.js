@@ -19,21 +19,6 @@ test('hub', {
 
   'exposes listen': function () {
     assert.strictEqual(hub.listen, listen);
-  },
-
-  'exposes View prototype': function () {
-    var view = hub().view('test');
-
-    assert.equal(typeof hub.View, 'function');
-    assert(view instanceof hub.View);
-  },
-
-  'does not use exposed View for view creation': sinon.test(function () {
-    this.stub(hub, 'View').throws(new Error());
-
-    assert.doesNotThrow(function () {
-      hub().view('test');
-    });
-  })
+  }
 
 });
