@@ -235,6 +235,66 @@ test('hub.addFilter', {
     hub.emit('test');
 
     sinon.assert.notCalled(spy);
+  },
+
+  'subscribes to matching events': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('test.*', spy);
+    this.hub.emit('test.a');
+    this.hub.emit('test.b');
+
+    sinon.assert.calledTwice(spy);
+  }
+
+});
+
+
+function emitsNewFilter(method, event) {
+  return function () {
+    var spy      = sinon.spy();
+    var listener = function () {};
+
+    this.hub.on('newFilter', spy);
+    this.hub[method](event, listener);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, event, sinon.match.func);
+  };
+}
+
+test('event.newFilter', {
+
+  before: function () {
+    this.hub = hub();
+  },
+
+  'emits for addFilter(test)': emitsNewFilter('addFilter', 'test'),
+
+  'emits for addFilter(**)': emitsNewFilter('addFilter', '**'),
+
+  //'emits for once(test)': emitsNewListener('once', 'test'),
+
+  //'emits for once(**)': emitsNewListener('once', '**'),
+
+  'does not add listener if filtered': function () {
+    this.hub.addFilter('newFilter', function () {});
+    var spy = sinon.spy();
+
+    this.hub.addFilter('test', spy);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not add matcher if filtered': function () {
+    this.hub.addFilter('newFilter', function () {});
+    var spy = sinon.spy();
+
+    this.hub.addFilter('*', spy);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 });

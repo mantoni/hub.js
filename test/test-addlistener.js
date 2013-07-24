@@ -106,7 +106,7 @@ test('hub.addListener', {
     sinon.assert.calledTwice(spy);
   },
 
-  'is be invoked on single star broadcast': function () {
+  'is invoked on single star broadcast': function () {
     var spy = sinon.spy();
 
     this.hub.addListener('foo.*', spy);
@@ -115,7 +115,7 @@ test('hub.addListener', {
     sinon.assert.calledOnce(spy);
   },
 
-  'is be invoked on double star broadcast': function () {
+  'is invoked on double star broadcast': function () {
     var spy = sinon.spy();
 
     this.hub.addListener('foo.**', spy);
@@ -124,7 +124,7 @@ test('hub.addListener', {
     sinon.assert.calledOnce(spy);
   },
 
-  'does not emit to not matching events': function () {
+  'is not invoked on not matching events': function () {
     var spy = sinon.spy();
 
     this.hub.addListener('foo.*', spy);
