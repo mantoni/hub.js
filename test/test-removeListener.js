@@ -63,14 +63,13 @@ test('hub.removeListener', {
 
   'does not invoke listener unregistered after emit': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('test.a', spy);
-    hub.on('test.b', function () {});
-    hub.emit('test.*');
+    this.hub.on('test.a', spy);
+    this.hub.on('test.b', function () {});
+    this.hub.emit('test.*');
     spy.reset();
 
-    hub.removeListener('test.a', spy);
-    hub.emit('test.*');
+    this.hub.removeListener('test.a', spy);
+    this.hub.emit('test.*');
 
     sinon.assert.notCalled(spy);
   },
@@ -114,14 +113,13 @@ test('hub.removeListener', {
 
   'does not invoke listener unregistered after broadcast': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('a.*', spy);
-    hub.on('b.*', function () {});
-    hub.emit('*.*');
+    this.hub.on('a.*', spy);
+    this.hub.on('b.*', function () {});
+    this.hub.emit('*.*');
     spy.reset();
 
-    hub.removeListener('a.*', spy);
-    hub.emit('*.*');
+    this.hub.removeListener('a.*', spy);
+    this.hub.emit('*.*');
 
     sinon.assert.notCalled(spy);
   }
