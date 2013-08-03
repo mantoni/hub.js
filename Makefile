@@ -19,7 +19,7 @@ test:
 	@node -e "require('urun')('test');"
 
 phantom:
-	browserify ./test/fixture/phantom.js ${tests} | phantomic
+	browserify ${tests} | phantomic
 
 browser:
 	@echo "Consolify tests > file://`pwd`/${html}"
