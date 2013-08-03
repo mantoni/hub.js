@@ -13,6 +13,7 @@ __NOTE: This release introduces breaking changes to the API!__
 - Removed namespaced error events. Errors are only emitted to 'error' listeners
   if present.
 - Fix: Unsubscribing listeners registered with `once` did nothing.
+- Upgraded consolify to v0.4.0 and added browser-reload
 
 ## v0.13.0
 

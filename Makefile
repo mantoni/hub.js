@@ -23,7 +23,7 @@ phantom:
 
 browser:
 	@echo "Consolify tests > file://`pwd`/${html}"
-	@consolify --reload -o ${html} ${tests}
+	@consolify -o ${html} ${tests} browser-reload
 
 compile: lint test phantom browser
 	@browserify ${main} -s ${name} -o ${name}.js
