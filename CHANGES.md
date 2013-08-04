@@ -31,7 +31,7 @@ Views are now implemented as a separate module: [hub-namespace][].
 - Added benchmarks and improved wildcard emit performance.
 
 [documentation]: http://maxantoni.de/projects/hub.js/documentation.html
-[hub-namespace]: https://
+[hub-namespace]: https://github.com/mantoni/hub-namespace.js
 
 ## v0.13.0
 
