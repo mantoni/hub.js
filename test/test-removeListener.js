@@ -211,12 +211,12 @@ test('event.removeListener', {
     sinon.assert.notCalled(spy);
   },
 
-  'does not emit event for removeAllMatching': function () {
+  'does not emit event for removeMatchingListeners': function () {
     var spy = sinon.spy();
     this.hub.on('removeListener', spy);
     this.hub.on('test', function () {});
 
-    this.hub.removeAllMatching('test');
+    this.hub.removeMatchingListeners('test');
 
     sinon.assert.notCalled(spy);
   }

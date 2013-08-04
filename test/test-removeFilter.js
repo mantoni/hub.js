@@ -123,9 +123,10 @@ test('event.removeFilter', {
 
   'emits for addFilter(**)': emitsRemoveFilter('addFilter', '**'),
 
-  //'emits for once(test)': emitsRemoveFilter('once', 'test'),
+  'emits for filterOnce(test)': emitsRemoveFilter('filterOnce', 'test'),
 
-  //'emits for once(**)': emitsRemoveFilter('once', '**'),
+  //FIXME causes infinite recursion
+  //'emits for filterOnce(**)': emitsRemoveFilter('filterOnce', '**'),
 
   'does not remove listener if filtered': function () {
     this.hub.addFilter('removeFilter', function () {});
