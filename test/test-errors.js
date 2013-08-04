@@ -56,39 +56,79 @@ test('errors emitted', {
     sinon.assert.calledWith(errorSpy, this.err);
   },
 
-  'does not invoke namespace.*': function () {
+  'does not invoke * matcher twice': function () {
     var spy = sinon.spy();
-    this.hub.on('test.*', spy);
+    this.hub.on('test', function () { throw new Error('ouch'); });
+    this.hub.on('*', spy);
 
-    try {
-      this.hub.emit('test.ouch');
-    } catch (expected) {}
+    this.hub.emit('test', function () {});
 
     sinon.assert.calledOnce(spy); // and not twice!
-  }
-
-  /*
-  'invokes namespace error handlers with original scope object': function () {
-    var before = sinon.spy();
-    var spy    = sinon.spy();
-    this.hub.before('test.ouch', before);
-    this.hub.on('test.error', spy);
-
-    this.hub.emit('test.ouch');
-
-    assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
   },
 
-  'invokes root error handlers with original scope object': function () {
-    var before = sinon.spy();
-    var spy    = sinon.spy();
-    this.hub.before('test.ouch', before);
+  'sets this.event to "error"': function () {
+    var spy = sinon.spy();
     this.hub.on('error', spy);
 
     this.hub.emit('test.ouch');
 
-    assert.strictEqual(spy.firstCall.thisValue, before.firstCall.thisValue);
+    sinon.assert.calledOn(spy, sinon.match.has('event', 'error'));
+  },
+
+  'sets this.args to [err]': function () {
+    var spy = sinon.spy();
+    this.hub.on('error', spy);
+
+    this.hub.emit('test.ouch', 42, 'abc');
+
+    sinon.assert.calledOn(spy, sinon.match.has('args', [sinon.match({
+      name    : 'Error',
+      message : 'oups'
+    })]));
+  },
+
+  'sets this.cause to original scope': function () {
+    var onEvent = sinon.spy(function (next) { next(); });
+    var onError = sinon.spy();
+    this.hub.addFilter('test.ouch', onEvent);
+    this.hub.on('error', onError);
+
+    this.hub.emit('test.ouch');
+
+    sinon.assert.calledOn(onError,
+        sinon.match.has('cause', onEvent.firstCall.thisValue));
+  },
+
+  'invokes filter': function () {
+    var spy = sinon.spy();
+    this.hub.addFilter('error', spy);
+
+    this.hub.emit('test.ouch');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes filter with same scope as listener': function () {
+    var filter   = sinon.spy(function (next) { next(); });
+    var listener = sinon.spy();
+    this.hub.addFilter('error', filter);
+    this.hub.addListener('error', listener);
+
+    this.hub.emit('test.ouch');
+
+    assert.strictEqual(filter.firstCall.thisValue,
+        listener.firstCall.thisValue);
+  },
+
+  'passes listener result back to filter callback': function () {
+    var spy = sinon.spy();
+    this.hub.addFilter('error', function (next) { next(spy); });
+    this.hub.addListener('error', function () { return 42; });
+
+    this.hub.emit('test.ouch');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, [42]);
   }
-  */
 
 });
