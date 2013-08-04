@@ -94,6 +94,15 @@ hub.emit('answer', function (err, value) {
 This makes it possible to change listener implementations from synchronous to
 asynchronous without changing the publishers.
 
+By default, the return value of the last invoked listener is returned. To
+obtain an array with all return values, invoke emit like this:
+
+```js
+hub.emit({ event : 'answer', allResults : true }, function (err, values) {
+  assert.equal(values[0], 42);
+});
+```
+
 ### Filters
 
 Filters are special functions that get invoked before the listeners. A filter
@@ -106,15 +115,16 @@ A filter function is invoked with two arguments:
 - `next`: a function that must be invoked by the filter to continue processing
 - `callback`: a callback function that must be invoked to return from the call
 
-A pass-through filter looks can be implemented like this:
+A pass-through filter can be implemented like this:
 
 ```js
-hub.addFilter('event', function (next, callback) {
-  next(callback);
+hub.addFilter('event', function (next) {
+  // ...
+  next();
 });
 ```
 
-This allows to perform custom operations after an event was processed:
+Performing custom operations after an event was processed:
 
 ```js
 hub.addFilter('event', function (next, callback) {
@@ -125,7 +135,7 @@ hub.addFilter('event', function (next, callback) {
 });
 ```
 
-To pervent any further filters from being applied and to skip listener
+to pervent any further filters from being applied and to skip listener
 execution, invoke the callback directly:
 
 ```js
@@ -158,18 +168,11 @@ Both cases are handled in the same way and in this order:
 
 - If the publisher passed a callback to `emit`, the callback is invoked with
   the error as the first argument
-- If an error handler is registered, the error is passed to the handler
+- If at least one error handler is registered (filter or listener), the error
+  is emitted
 - The error is thrown
 
-All examples below assume that we have this listener implementation:
-
-```js
-hub.on('something.throws', function () {
-  throw new Error('whoups');
-});
-```
-
-#### Error handling with callbacks
+Error handling with a callback:
 
 ```js
 hub.emit('something.throws', function (err) {
@@ -180,9 +183,8 @@ hub.emit('something.throws', function (err) {
 });
 ```
 
-#### Error handler
-
-This is a "catch all" handler that will cause the hub instance to never throw.
+The error event is a "catch all" handler that will cause the hub instance to
+never throw:
 
 ```js
 hub.on('error', function (err) {
@@ -190,10 +192,8 @@ hub.on('error', function (err) {
 });
 ```
 
-#### Exception handling
-
-In case we do not pass a callback to `emit` and we don't have any of the above
-error handlers installed, the error will be thrown by emit:
+In case we do not pass a callback to `emit` and we don't have the above
+error handler installed, the error will be thrown by emit:
 
 ```js
 try {
@@ -203,6 +203,8 @@ try {
 }
 ```
 
+Caveat: If the error happens asynchronously, emit will not throw. The error
+will be throw globally with no way of handling it properly.
 
 ### Events emitted by hub.js
 
@@ -210,8 +212,9 @@ Each hub instance emits these event on event handler registration /
 deregistraion.
 
 __NOTE:__ Unless events emitted using `emit`, these events are not passed to
-matchers. That is, if a filter or a listener was added with an event name that
-contains a wildcard, the filter or listener will not be invoked.
+wildcard subscribers. That is, if a filter or a listener was added with an
+event name that contains a wildcard, the filter or listener will not be
+invoked.
 
 #### newListener
 
@@ -251,11 +254,11 @@ var hub = hubjs();
 
 #### hub.addListener(event, function)
 
-Registers a listener for an event (see "Publish / Subscribe"). The event may
-contain \* or \*\* to register a "matcher". If the listener function expects
-more arguments than are passed to `emit`, the last argument will be a callback
-function. The listener is expected to invoke the callback once completed with
-an error object or `null` and an optional return value.
+Registers a listener for an event. The event may contain glob style wildcards
+("\*" and "\*\*") to subscribe for all matching event. If the listener function
+expects more arguments than are passed to `emit`, the last argument will be a
+callback function. The listener is expected to invoke the callback once
+completed with an error object or `null` and an optional return value.
 
 #### hub.on(event, function)
 
@@ -263,12 +266,13 @@ Is an alias for `hub.addListener`.
 
 #### hub.addFilter(event, function)
 
-Registers a filter for an event. The event may contain \* or \*\* to register a
-"matcher". The filter must take a `next` function as it's first argument which
-has to be invoked in order to execute the next filter or to execute the
-listeners. This way, filters registered for the same event name form a chain.
-A second argument (`callback`) can be optionally provided to intercept the
-completion of an event. A custom callback may be passed to `next`.
+Registers a filter for an event. The event may contain glob style wildcards
+("\*" and "\*\*") to subscribe for all matching event. The filter must take a
+`next` function as it's first argument which has to be invoked in order to
+execute the next filter or to execute the listeners. This way, filters
+registered for the same event name form a chain.  A second argument
+(`callback`) can be optionally provided to intercept the completion of an
+event. A custom callback may be passed to `next`.
 
 #### hub.removeListener(event, function)
 
@@ -317,17 +321,17 @@ the first invocation.
 #### hub.emit(event\[, arg1, arg2, ...\]\[, callback\])
 
 Invokes all listeners for an event. The optional arguments are passed to each
-listener. The event may contain "\*" or "\*\*" to invoke all listeners
-registered for matching events (see "Broadcasting"). The optional callback will
+listener. The event may contain glob style wildcards ("\*" and "\*\*") to
+invoke all listeners registered for matching events. The optional callback will
 be invoked once all listeners returned. The first argument is an error if at
 least one of the listeners threw, the second argument is the return value.
 
 The given event can alternatively be an object containing at least an event
 property. Optional properties can be:
 
-- `allResults` _[Boolean]_: set to `true` to collect all listener return
-  values and pass them to the given callback as an array. Default is `false`
-  in which case only the last return value is passed.
+- `allResults`: set to `true` to collect all listener return values and pass
+  them to the given callback as an array. Default is `false` in which case only
+  the last return value is passed.
 
 Example:
 
