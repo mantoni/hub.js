@@ -4,16 +4,34 @@
 
 __NOTE: This release introduces breaking changes to the API!__
 
+This realease replaces `before`, `after`, related methods and the phase concept
+with 'filters'. Filters are described in detail in the [documentation][].
+
+Views are now implemented as a separate module: [hub-namespace][].
+
 - Removed `before`, `after`, `onceBefore` and `onceAfter`.
 - Removed `this.stop()` and `this.stopped`.
+- Removed `un` and `view`.
+- Removed the ability to register mutliple event listeners at once
+  (`on({...})` and `on(prefix, {...})`).
 - Matchers and listeners are not executed in separate phases anymore. Throwing
   in a matcher will still invoke the listeners.
 - Adding a listener in a matcher will no longer execute the listener in the
   current emit call.
-- Removed namespaced error events. Errors are only emitted to 'error' listeners
+- Removed namespaced error events. Errors are only emitted to `error` listeners
   if present.
+- Not emitting `error` events to matchers.
+- Not emitting `newListener` and `removeListener` events to matchers.
+- Renamed `removeAllMatching` to `removeMatchingListeners`.
+- Added `addFilter`, `removeFilter`, `filterOnce`, `filters`,
+  `filtersMatching`, `removeAllFilters`, `removeMatchingFilters`.
+- Emitting `newFilter` and `removeFilter` events.
 - Fix: Unsubscribing listeners registered with `once` did nothing.
-- Upgraded consolify to v0.4.0 and added browser-reload
+- Upgraded consolify to v0.4.0 and added browser-reload.
+- Added benchmarks and improved wildcard emit performance.
+
+[documentation]: http://maxantoni.de/projects/hub.js/documentation.html
+[hub-namespace]: https://
 
 ## v0.13.0
 
