@@ -62,7 +62,7 @@ test('hub.filterOnce', {
   'does not add additional filters or listeners': function () {
     this.hub.filterOnce('test', function () {});
 
-    //assert.equal(this.hub.filters('test').length, 1);
+    assert.equal(this.hub.filters('test').length, 1);
     assert.equal(this.hub.listeners('test').length, 0);
   },
 

@@ -293,9 +293,9 @@ test('event.newFilter', {
 
   'emits for addFilter(**)': emitsNewFilter('addFilter', '**'),
 
-  //'emits for once(test)': emitsNewListener('once', 'test'),
+  'emits for filterOnce(test)': emitsNewFilter('filterOnce', 'test'),
 
-  //'emits for once(**)': emitsNewListener('once', '**'),
+  'emits for filterOnce(**)': emitsNewFilter('filterOnce', '**'),
 
   'does not add listener if filtered': function () {
     this.hub.addFilter('newFilter', function () {});
@@ -313,6 +313,15 @@ test('event.newFilter', {
 
     this.hub.addFilter('*', spy);
     this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not emit newFilter event to matcher': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('*', spy);
+    this.hub.on('test', function () {});
 
     sinon.assert.notCalled(spy);
   }

@@ -125,8 +125,7 @@ test('event.removeFilter', {
 
   'emits for filterOnce(test)': emitsRemoveFilter('filterOnce', 'test'),
 
-  //FIXME causes infinite recursion
-  //'emits for filterOnce(**)': emitsRemoveFilter('filterOnce', '**'),
+  'emits for filterOnce(**)': emitsRemoveFilter('filterOnce', '**'),
 
   'does not remove listener if filtered': function () {
     this.hub.addFilter('removeFilter', function () {});
@@ -148,6 +147,17 @@ test('event.removeFilter', {
     this.hub.emit('test.foo');
 
     sinon.assert.calledOnce(spy);
+  },
+
+  'does not emit removeFilter event to matchers': function () {
+    var spy = sinon.spy();
+    var listener = function () {};
+
+    this.hub.on('*', spy);
+    this.hub.on('test', listener);
+    this.hub.removeFilter('test', listener);
+
+    sinon.assert.notCalled(spy);
   }
 
 });

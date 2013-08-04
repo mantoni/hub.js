@@ -153,21 +153,7 @@ test('event.removeListener', {
 
   'emits for once(test)': emitsRemoveListener('once', 'test'),
 
-  //FIXME comment back in once newListener is not emitted to wildcards
-  //This currently fails the build in phantomjs due to call stack size limit
-  //'emits for once(**)': emitsRemoveListener('once', '**'),
-
-  'emits to matchers': function () {
-    var spy = sinon.spy();
-    var listener = function () {};
-
-    this.hub.on('*', spy);
-    this.hub.on('some.test', listener);
-    this.hub.removeListener('some.test', listener);
-
-    sinon.assert.called(spy);
-    sinon.assert.calledWith(spy, 'some.test', listener);
-  },
+  'emits for once(**)': emitsRemoveListener('once', '**'),
 
   'does not remove listener if filtered': function () {
     this.hub.addFilter('removeListener', function () {});
@@ -217,6 +203,17 @@ test('event.removeListener', {
     this.hub.on('test', function () {});
 
     this.hub.removeMatchingListeners('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not emit removeListener event to matchers': function () {
+    var spy = sinon.spy();
+    var listener = function () {};
+
+    this.hub.on('*', spy);
+    this.hub.on('test', listener);
+    this.hub.removeListener('test', listener);
 
     sinon.assert.notCalled(spy);
   }
