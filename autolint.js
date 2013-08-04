@@ -1,6 +1,6 @@
 module.exports = {
 
-  paths         : ["lib/*.js", "test/*.js"],
+  paths         : ["lib/*.js", "test/*.js", "bench/*.js"],
 
   linterOptions : {
     indent      : 2,

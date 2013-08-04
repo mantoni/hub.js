@@ -28,7 +28,8 @@
     "phantomic"     : "~0.2.0",
     "browserify"    : ">=2.13 <3",
     "consolify"     : "~0.4.0",
-    "browser-reload": ">=1.0 <2"
+    "browser-reload": ">=1.0 <2",
+    "bench"         : "0.3.5"
   },
   "files"           : ["lib", "docs", "README.md", "CHANGES.md", "LICENSE"]
 }
