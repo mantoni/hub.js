@@ -4,7 +4,7 @@ PATH  := node_modules/.bin:${PATH}
 default: lint test phantom browser
 
 name    = "hub"
-tests   = `ls ./test/test-*`
+tests   = ./test/test-*
 html    = test/all.html
 main    = $(shell node -p "require('./package.json').main")
 version = $(shell node -p "require('./package.json').version")

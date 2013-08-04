@@ -17,7 +17,7 @@ All listeners registered for `'event'` can be invoked using `emit`:
 hub.emit('event');
 ```
 
-Anything following the event name is used as a arguments:
+Anything following the event name is used as arguments:
 
 ```js
 hub.on('log', function (message) {
@@ -26,31 +26,43 @@ hub.on('log', function (message) {
 hub.emit('log', 'oh, hi!'); 
 ```
 
-The `on` function allows to register multiple listeners:
+### Wildcard subscriptions
+
+When subscribing to an event, the event name may contain wildcards.
+
+The following example would match the events `ajax.get` and `ajax.post`:
 
 ```js
-hub.on({
-  'log': function (message) {
-    console.log(message);
-  },
-  'warn': function (message) {
-    console.warn(message);
-  }
-});
+hub.on('ajax.*', function () { /* ... */ });
 ```
 
+However, `ajax.\*` does not match `ajax.get.extended`. The dot acts as a
+separator between event name parts. To match multiple event name parts, use a
+double wildcard, e.g. `ajax.\*\*`.
+
+If a subscriber is registered with an event that contains wildcards, it is
+called a "matcher". Matchers are invoked before listeners.
+
+
+### Broadcasting
+
+Emitting an event with wildcards (\* or \*\*) is called "broadcasting". Any
+listeners matching the given event will be invoked. This also applies for
+"matchers" (see Wildcard subscriptions).
+
+```js
+hub.emit('**.destroy');
+```
 
 #### Call order
 
-One of the design goals of hub.js is to guarantee a predictable call order of
-listeners.
+One of the design goals of hub.js is to guarantee a predictable call order.
 
 - Listeners are always called in registration order.
 - The call order of "wildcard subscriptions" depends on where the wildcards are
-  used: More generic listeners are called before more specific ones.
-
-Wildcard subscriptions are explained further down on this page.
-
+  used: More generic listeners are called before more specific ones. E.g. if
+  `a.b.c` is emitted, a listener on `a.\*\*` is invoked before a listener on
+  `a.b.\*`.
 
 ### Return values
 
@@ -82,6 +94,57 @@ hub.emit('answer', function (err, value) {
 This makes it possible to change listener implementations from synchronous to
 asynchronous without changing the publishers.
 
+### Filters
+
+Filters are special functions that get invoked before the listeners. A filter
+may delay or prevent listener execution, modify arguments and return values. If
+an event triggers multiple filters, they form a queue.
+
+A filter function is invoked with two arguments:
+
+- `next`: a function that must be invoked by the filter to continue processing
+- `callback`: a callback function that must be invoked to return from the call
+
+A pass-through filter looks can be implemented like this:
+
+```js
+hub.addFilter('event', function (next, callback) {
+  next(callback);
+});
+```
+
+This allows to perform custom operations after an event was processed:
+
+```js
+hub.addFilter('event', function (next, callback) {
+  next(function (err, values) {
+    // ...
+    callback(err, values);
+  });
+});
+```
+
+To pervent any further filters from being applied and to skip listener
+execution, invoke the callback directly:
+
+```js
+hub.addFilter('event', function (next, callback) {
+  callback(null, [42]);
+});
+```
+
+Note that the callback values MUST always be an array.
+
+### Filter and listener scope (this)
+
+Filters and listeners are invoked with the same scope object with these
+properties:
+
+- `this.hub`: The hub instance the event was emitted on
+- `this.event`: The emitted event
+- `this.args`: The arguments passed to emit, without event and callback
+- `this.allResults`: Whether the event was emitted with `allResults` set to
+  `true`
 
 ### Error handling
 
@@ -140,86 +203,52 @@ try {
 ```
 
 
-### Wildcard subscriptions
-
-When subscribing to an event, the event name may contain wildcards.
-
-The following example would match the events `ajax.get` and `ajax.post`:
-
-```js
-hub.on('ajax.*', function () { /* ... */ });
-```
-
-However, `ajax.\*` does not match `ajax.get.extended`. The dot acts as a
-separator between event name parts. To match multiple event name parts, use a
-double wildcard, e.g. `ajax.\*\*`.
-
-If a subscriber is registered with an event that contains wildcards, it is
-called a "matcher". Matchers are invoked before listeners.
-
-Unless listeners, matchers do not get invoked in registration order. The more
-generic matchers are invoked before the more specific ones, e.g. if `a.b.c` is
-emitted, a listener on `a.\*\*` is invoked before a listener on `a.b.\*`.
-
-
-### Broadcasting
-
-Emitting an event with wildcards (\* or \*\*) is called "broadcasting". Any
-listeners matching the given event will be invoked. This also applies for
-"matchers" (see Wildcard subscriptions).
-
-```js
-hub.emit('**.destroy');
-```
-
-
 ### Events emitted by hub.js
 
-These events are emitted by each hub instance itself:
+Each hub instance emits these event on event handler registration /
+deregistraion.
+
+__NOTE:__ Unless events emitted using `emit`, these events are not passed to
+matchers. That is, if a filter or a listener was added with an event name that
+contains a wildcard, the filter or listener will not be invoked.
 
 #### newListener
 
-Calling `on` or `once` triggers a `newListener` event passing the event name
-and the listener function as arguments. If a filter on this event does not
-invoke `next`, the listener will not be registered.
+Calling `addListener`, `on` or `once` triggers a `newListener` event passing
+the event name and the listener function as arguments. If a filter on this
+event does not invoke `next`, the listener will not be registered.
 
 #### removeListener
 
-Calling `un` triggers a `removeListener` event passing the event name and the
-listener function as arguments. If a filter on this event does not invoke
-`next`, the listener will not be removed.
+Calling `removeListener` triggers a `removeListener` event passing the event
+name and the listener function as arguments. If a filter on this event does not
+invoke `next`, the listener will not be removed.
 
+#### newFilter
 
-### Views
+Calling `addFilter` or `filterOnce` triggers a `newFilter` event passing the
+event name and the filter function as arguments. If a filter on this event
+does not invoke `next`, the filter will not be registered.
 
-A view is created with `hub.view('some.namespace')`. The returned object has
-exactly the same API as the hub instance, but all operations are relative to
-the specified namespace.
+#### removeFilter
 
-```js
-var view = hub.view('some.namespace');
-
-// Register a listener on 'some.namespace.event':
-view.on('event', function () { /* ... */ });
-
-// Emit an event on 'some.namespace.event':
-view.emit('event');
-```
+Calling `removeFilter` triggers a `removeFilter` event passing the event name
+and the filter function as arguments. If a filter on this event does not
+invoke `next`, the filter will not be removed.
 
 -----
 
 ### API reference
 
-All listeners and callbacks are invoked with a special `this` object which is
-described in the next section.
+#### hubjs()
 
-#### hubjs(\[listeners\])
+The hub module exports a factory function which returns a hub instance.
 
-The hub module exports a factory function which takes optional listeners and
-returns a hub instance. All functions in the given listeners object will be
-installed on the hub instance using on.
+```js
+var hub = hubjs();
+```
 
-#### hub.on(event, function)
+#### hub.addListener(event, function)
 
 Registers a listener for an event (see "Publish / Subscribe"). The event may
 contain \* or \*\* to register a "matcher". If the listener function expects
@@ -227,34 +256,26 @@ more arguments than are passed to `emit`, the last argument will be a callback
 function. The listener is expected to invoke the callback once completed with
 an error object or `null` and an optional return value.
 
-#### hub.on(object)
+#### hub.on(event, function)
 
-Calls `hub.on` for each event / function pair in object. Functions on the
-prototype of the object will be registered as well.
+Is an alias for `hub.addListener`.
 
-#### hub.on(prefix, object)
+#### hub.addFilter(event, function)
 
-Calls `hub.on(event, function)` for each event / function pair in `object` with
-the given prefix. The prefix and the object properties are joined with a dot.
-Functions on the prototype of the object will be registered as well.
+Registers a filter for an event. The event may contain \* or \*\* to register a
+"matcher". The filter must take a `next` function as it's first argument which
+has to be invoked in order to execute the next filter or to execute the
+listeners. This way, filters registered for the same event name form a chain.
+A second argument (`callback`) can be optionally provided to intercept the
+completion of an event. A custom callback may be passed to `next`.
 
-#### hub.addListener(...)
-
-Is an alias for `hub.on`.
-
-#### hub.un(event, function)
+#### hub.removeListener(event, function)
 
 Unregisters a single listener for an event.
 
-#### hub.un(object)
+#### hub.removeFilter(event, function)
 
-Calls `hub.un(event, function)` for each event / function pair in `object` with
-the given prefix. The prefix and the object properties are joined with a dot.
-Functions on the prototype of the object will be registered as well.
-
-#### hub.removeListener(...)
-
-Is an alias for `hub.un`.
+Unregisters a single filter for an event.
 
 #### hub.removeAllListeners()
 
@@ -264,14 +285,32 @@ Unregisters all listeners.
 
 Unregisters all listeners for the given event.
 
-#### hub.removeAllMatching(event)
+#### hub.removeAllFilters()
+
+Unregisters all filters.
+
+#### hub.removeAllFilters(event)
+
+Unregisters all filters for the given event.
+
+#### hub.removeMatchingListeners(event)
 
 Unregisters all listeners that match the given event name. This removes all
 listeners that would be invoked if the given event would be emitted.
 
+#### hub.removeMatchingFilters(event)
+
+Unregisters all filters that match the given event name. This removes all
+listeners that would be invoked if the given event would be emitted.
+
 #### hub.once(event, function)
 
-Registers a listerner for an event that will be automatically unregistered on
+Registers a listener for an event that will be automatically unregistered on
+the first invocation.
+
+#### hub.filterOnce(event, function)
+
+Registers a filter for an event that will be automatically unregistered on
 the first invocation.
 
 #### hub.emit(event\[, arg1, arg2, ...\]\[, callback\])
@@ -302,43 +341,28 @@ hub.emit({ event : 'some.event', allResults : true }, function (err, values) {
 Returns an array of all listeners for the given event. This does not include
 matchers (see `hub.listenersMatching(event)`).
 
+#### hub.filters(event)
+
+Returns an array of all filters for the given event. This does not include
+matchers (see `hub.filtersMatching(event)`).
+
 #### hub.listenersMatching(event)
 
 Returns an array of all listeners that match the given event. This returns all
 listeners that would be invoked if the given event would be emitted.
 
-#### hub.view(namespace)
+#### hub.filtersMatching(event)
 
-Creates a view object (instanceof `hub.View`) that implements the full hub API,
-but maps all events relatively to the specified namespace (see "Views").
+Returns an array of all filters that match the given event. This returns all
+filters that would be invoked if the given event would be emitted.
 
+#### this.callback([timeout])
 
-### API of 'this' in listeners
-
-Listeners and callbacks are always called with a special scope object (`this`).
-The exposed properties are not supposed to be modified.
-
-#### hub
-
-The hub instance.
-
-#### event
-
-The current event.
-
-#### args
-
-The arguments passed to emit without the event.
-
-#### allResults
-
-true if `emit` was call with `allResults` set to true, otherwise false.
-
-#### callback([timeout])
+Only available in listeners and not in filters.
 
 Returns a callback that has to be invoked for the operation to complete.
-Listeners may obtain mutliple callbacks. The next even phase will be entered
-once all callbacks where invoked.
+Listeners may obtain mutliple callbacks. The listener invokation phase will
+only return once all callbacks where invoked.
 
 The optional timeout specifies the time in milliseconds after which the
 callback will time out, resulting in a `TimeoutError`.
