@@ -59,9 +59,10 @@ test('hub.once', {
       sinon.assert.calledOnce(spy);
     },
 
-  'does not add additional listeners': function () {
+  'does not add additional filters or listeners': function () {
     this.hub.once('test', function () {});
 
+    assert.equal(this.hub.filters('test').length, 0);
     assert.equal(this.hub.listeners('test').length, 1);
   },
 

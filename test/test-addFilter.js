@@ -143,36 +143,56 @@ test('hub.addFilter', {
   'passes callback args to function passed to next': function () {
     var spy = sinon.spy();
     this.hub.addFilter('test', function (next) { next(spy); });
-    this.hub.addFilter('test', function (next, cb) { cb(null, 42); });
+    this.hub.addFilter('test', function (next, cb) { cb(null, [42]); });
 
     this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, [42]);
+  },
+
+  'passes listeners values to function passed to next': function () {
+    var spy = sinon.spy();
+    this.hub.addFilter('test', function (next) { next(spy); });
+    this.hub.addListener('test', function () { return 'a'; });
+    this.hub.addListener('test', function () { return 'b'; });
+
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, ['a', 'b']);
+  },
+
+  'passes callback args to emit callback': function () {
+    this.hub.addFilter('test', function (next, cb) { cb(null, [42]); });
+    var spy = sinon.spy();
+
+    this.hub.emit('test', spy);
 
     sinon.assert.calledOnce(spy);
     sinon.assert.calledWith(spy, null, 42);
   },
 
-  'throws if next is not invoked with callback': function () {
-    var h = this.hub;
-    h.addFilter('test', function (next) { next(); });
+  'passes callback args array to emit callback if allResults': function () {
+    this.hub.addFilter('test', function (next, cb) { cb(null, [42]); });
+    var spy = sinon.spy();
 
-    assert.throws(function () {
-      h.emit('test');
-    }, /TypeError: No callback passed to next/);
+    this.hub.emit({ event : 'test', allResults : true }, spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, [42]);
   },
 
-  'invokes callback with error if next is not invoked with callback':
-    function () {
-      this.hub.addFilter('test', function (next) { next(); });
-      var spy = sinon.spy();
+  'uses default callback if next is invoked without args': function () {
+    this.hub.addFilter('test', function (next) { next(); });
+    this.hub.addFilter('test', function (next, cb) { cb(null, [42]); });
+    var spy = sinon.spy();
 
-      this.hub.emit('test', spy);
+    this.hub.emit('test', spy);
 
-      sinon.assert.calledOnce(spy);
-      sinon.assert.calledWithMatch(spy, {
-        name    : 'TypeError',
-        message : 'No callback passed to next'
-      });
-    },
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, null, 42);
+  },
 
   'returns undefined if callback is invoked without args': function () {
     this.hub.addFilter('test', function (next, callback) {
