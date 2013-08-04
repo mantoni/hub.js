@@ -265,6 +265,34 @@ test('hub.addFilter', {
     this.hub.emit('test.b');
 
     sinon.assert.calledTwice(spy);
+  },
+
+  'yields error if filter throws': function () {
+    var spy = sinon.spy();
+    var err = new Error('ouch');
+    this.hub.addFilter('test', function () {
+      throw err;
+    });
+
+    this.hub.emit('test', spy);
+
+    sinon.assert.calledOnce(spy);
+    sinon.assert.calledWith(spy, err);
+  },
+
+  'does not invoke next filter or listeners if filter throws': function () {
+    var filter   = sinon.spy(function (next) { next(); });
+    var listener = sinon.spy();
+    this.hub.addFilter('test', function () {
+      throw new Error('ouch');
+    });
+    this.hub.addFilter('test', filter);
+    this.hub.addListener('test', listener);
+
+    this.hub.emit('test', function () {});
+
+    sinon.assert.notCalled(filter);
+    sinon.assert.notCalled(listener);
   }
 
 });
