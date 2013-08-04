@@ -28,41 +28,41 @@ hub.emit('log', 'oh, hi!');
 
 ### Wildcard subscriptions
 
-When subscribing to an event, the event name may contain wildcards.
+When subscribing to an event, the event name may contain glob style wildcards.
 
-The following example would match the events `ajax.get` and `ajax.post`:
+The following example matches the events `ajax.get` and `ajax.post`:
 
 ```js
 hub.on('ajax.*', function () { /* ... */ });
 ```
 
-However, `ajax.\*` does not match `ajax.get.extended`. The dot acts as a
+However, `ajax.*` does not match `ajax.get.extended`. The dot acts as a
 separator between event name parts. To match multiple event name parts, use a
-double wildcard, e.g. `ajax.\*\*`.
+double wildcard, e.g. `ajax.**`.
 
-If a subscriber is registered with an event that contains wildcards, it is
-called a "matcher". Matchers are invoked before listeners.
+### Wildcard emit
 
-
-### Broadcasting
-
-Emitting an event with wildcards (\* or \*\*) is called "broadcasting". Any
-listeners matching the given event will be invoked. This also applies for
-"matchers" (see Wildcard subscriptions).
+When emitting an event, the event name may contain glob style wildcards. Any
+filter and listener matching the given event will be invoked. This also applies
+to whildcard subscriptions.
 
 ```js
 hub.emit('**.destroy');
 ```
 
-#### Call order
+### Call order
 
-One of the design goals of hub.js is to guarantee a predictable call order.
+Hub.js guarantees a predictable call order. The order is as follows:
 
-- Listeners are always called in registration order.
-- The call order of "wildcard subscriptions" depends on where the wildcards are
-  used: More generic listeners are called before more specific ones. E.g. if
-  `a.b.c` is emitted, a listener on `a.\*\*` is invoked before a listener on
-  `a.b.\*`.
+1. Wildcard filters
+2. Filters
+3. Wildcard listeners
+4. Listeners
+
+Filters and Listeners are called in registration order. The call order of
+"wildcard subscriptions" depends on where the wildcards are used: More generic
+listeners are called before more specific ones. E.g. if `a.b.c` is emitted, a
+listener on `a.**` is invoked before a listener on `a.b.*`.
 
 ### Return values
 
@@ -97,8 +97,9 @@ asynchronous without changing the publishers.
 ### Filters
 
 Filters are special functions that get invoked before the listeners. A filter
-may delay or prevent listener execution, modify arguments and return values. If
-an event triggers multiple filters, they form a queue.
+may delay or prevent listener execution, modify arguments and return values,
+and add / remove listeners. If an event triggers multiple filters, they form a
+queue.
 
 A filter function is invoked with two arguments:
 
@@ -135,7 +136,7 @@ hub.addFilter('event', function (next, callback) {
 
 Note that the callback values MUST always be an array.
 
-### Filter and listener scope (this)
+### This in filter and listener
 
 Filters and listeners are invoked with the same scope object with these
 properties:
@@ -316,7 +317,7 @@ the first invocation.
 #### hub.emit(event\[, arg1, arg2, ...\]\[, callback\])
 
 Invokes all listeners for an event. The optional arguments are passed to each
-listener. The event may contain `\*` or `\*\*` to invoke all listeners
+listener. The event may contain "\*" or "\*\*" to invoke all listeners
 registered for matching events (see "Broadcasting"). The optional callback will
 be invoked once all listeners returned. The first argument is an error if at
 least one of the listeners threw, the second argument is the return value.
