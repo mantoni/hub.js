@@ -20,16 +20,16 @@
     "listen"        : ">=1.0 <2"
   },
   "devDependencies" : {
-    "utest"         : "~0.0.8",
-    "urun"          : "~0.0.6",
-    "sinon"         : "~1.6.0",
-    "uglify-js"     : "~1.2.6",
-    "autolint"      : "~1.0.4",
-    "phantomic"     : "~0.2.0",
+    "utest"         : "0.0.8",
+    "urun"          : "0.0.6",
+    "sinon"         : ">=1.7 <2",
+    "uglify-js"     : ">=1.2 <2",
+    "autolint"      : ">=1.0 <2",
+    "phantomic"     : "0.2.0",
     "browserify"    : ">=2.13 <3",
-    "consolify"     : "~0.4.0",
+    "consolify"     : "0.4.0",
     "browser-reload": ">=1.0 <2",
-    "bench"         : "0.3.5"
+    "bench"         : "~0.3.5"
   },
   "files"           : ["lib", "docs", "README.md", "CHANGES.md", "LICENSE"]
 }
