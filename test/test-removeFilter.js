@@ -84,6 +84,16 @@ test('hub.removeFilter', {
     this.hub.emit('*.*');
 
     sinon.assert.notCalled(spy);
+  },
+
+  'removes once filter': function () {
+    var spy = sinon.spy();
+    this.hub.filterOnce('test', spy);
+
+    this.hub.removeFilter('test', spy);
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
   }
 
 });
