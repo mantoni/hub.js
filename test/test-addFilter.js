@@ -61,7 +61,7 @@ test('hub.addFilter', {
   'invokes listener if next is called': function () {
     var spy = sinon.spy();
 
-    this.hub.addFilter('test', function (next) { next(function () {}); });
+    this.hub.addFilter('test', function (next) { next(); });
     this.hub.addListener('test', spy);
     this.hub.emit('test');
     this.hub.emit('*');
@@ -82,7 +82,7 @@ test('hub.addFilter', {
   'exposes hub and args in scope 2': function () {
     var spy = sinon.spy();
 
-    this.hub.addFilter('test', function (next) { next(function () {}); });
+    this.hub.addFilter('test', function (next) { next(); });
     this.hub.addFilter('test', spy);
     this.hub.emit('test', 123, 'abc');
 
@@ -101,7 +101,7 @@ test('hub.addFilter', {
     sinon.assert.calledOnce(filter1);
     sinon.assert.notCalled(filter2);
 
-    filter1.callArg(0, function () {});
+    filter1.callArg(0);
 
     sinon.assert.calledOnce(filter2);
   },
@@ -248,9 +248,9 @@ test('hub.addFilter', {
     var hub = this.hub;
     hub.addListener('test', spy);
 
-    hub.addFilter('test', function (next, callback) {
+    hub.addFilter('test', function (next) {
       hub.removeListener('test', spy);
-      next(callback);
+      next();
     });
     hub.emit('test');
 
@@ -293,6 +293,42 @@ test('hub.addFilter', {
 
     sinon.assert.notCalled(filter);
     sinon.assert.notCalled(listener);
+  },
+
+  'invokes filter added in filter': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('test', function (next) {
+      this.hub.addFilter('test', spy);
+      next();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes filter added in wildcard filter': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('*', function (next) {
+      this.hub.addFilter('test', spy);
+      next();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes wildcard filter added in wildcard filter': function () {
+    var spy = sinon.spy();
+
+    this.hub.addFilter('*', function (next) {
+      this.hub.addFilter('*', spy);
+      next();
+    });
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
   }
 
 });

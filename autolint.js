@@ -7,7 +7,8 @@ module.exports = {
     maxlen      : 78,
     node        : true,
     plusplus    : true,
-    vars        : true
+    vars        : true,
+    nomen       : true
   }
 
 };
