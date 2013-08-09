@@ -51,7 +51,7 @@ test('hub.emit', {
 
 });
 
-
+/*
 function matchingListeners(method) {
   return function () {
     var spy1 = sinon.spy();
@@ -464,3 +464,4 @@ test('emit-callback', {
   }
 
 });
+*/
