@@ -73,18 +73,6 @@ test('hub.addListener', {
     sinon.assert.calledWith(spy, 42, sinon.match.func);
   },
 
-  'does not invoke listener registered in listener': function () {
-    var spy = sinon.spy();
-    var hub = this.hub;
-
-    hub.addListener('test', function () {
-      hub.addListener('test', spy);
-    });
-    hub.emit('test');
-
-    sinon.assert.notCalled(spy);
-  },
-
   'invokes listener registered after emit': function () {
     var spy = sinon.spy();
     this.hub.addListener('test.a', function () {});
@@ -275,6 +263,39 @@ test('hub.addListener', {
 
     hub.addListener('b.*', spy);
     hub.emit('*.*');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes listener added in listener': function () {
+    var spy = sinon.spy();
+
+    this.hub.addListener('test', function () {
+      this.hub.addListener('test', spy);
+    });
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes listener added in wildcard listener': function () {
+    var spy = sinon.spy();
+
+    this.hub.addListener('*', function () {
+      this.hub.addListener('test', spy);
+    });
+    this.hub.emit('test');
+
+    sinon.assert.calledOnce(spy);
+  },
+
+  'invokes wildcard listener added in wildcard listener': function () {
+    var spy = sinon.spy();
+
+    this.hub.addListener('*', function () {
+      this.hub.addListener('*', spy);
+    });
+    this.hub.emit('test');
 
     sinon.assert.calledOnce(spy);
   }
