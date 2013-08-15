@@ -75,28 +75,24 @@ test('errors emitted', {
     sinon.assert.calledOn(spy, sinon.match.has('event', 'error'));
   },
 
-  'sets this.args to [err]': function () {
+  'sets this.args to [err, cause]': function () {
     var spy = sinon.spy();
     this.hub.on('error', spy);
 
     this.hub.emit('test.ouch', 42, 'abc');
 
-    sinon.assert.calledOn(spy, sinon.match.has('args', [sinon.match({
+    var matchError = sinon.match({
       name    : 'Error',
       message : 'oups'
-    })]));
-  },
-
-  'sets this.cause to original scope': function () {
-    var onEvent = sinon.spy(function (next) { next(); });
-    var onError = sinon.spy();
-    this.hub.addFilter('test.ouch', onEvent);
-    this.hub.on('error', onError);
-
-    this.hub.emit('test.ouch');
-
-    sinon.assert.calledOn(onError,
-        sinon.match.has('cause', onEvent.firstCall.thisValue));
+    });
+    var matchCause = sinon.match({
+      hub   : this.hub,
+      event : 'test.ouch',
+      args  : [42, 'abc']
+    });
+    sinon.assert.calledWith(spy, matchError, matchCause);
+    sinon.assert.calledOn(spy,
+        sinon.match.has('args', [matchError, matchCause]));
   },
 
   'invokes filter': function () {
