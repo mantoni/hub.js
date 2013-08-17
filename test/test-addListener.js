@@ -298,7 +298,31 @@ test('hub.addListener', {
     this.hub.emit('test');
 
     sinon.assert.calledOnce(spy);
-  }
+  },
+
+  'invokes more specific wildcard listener inserted in wildcard listener':
+    function () {
+      var spy = sinon.spy();
+
+      this.hub.addListener('**', function () {
+        this.hub.addListener('test.**', spy);
+      });
+      this.hub.addListener('test.a.*', function () {});
+      this.hub.emit('test.a.b');
+
+      sinon.assert.calledOnce(spy);
+    },
+
+  'does not invoke listener twice if more specific was already registered':
+    function () {
+      var spy = sinon.spy();
+
+      this.hub.addListener('test.*', function () {});
+      this.hub.addListener('**', spy);
+      this.hub.emit('test.x');
+
+      sinon.assert.calledOnce(spy);
+    }
 
 });
 
@@ -312,7 +336,7 @@ function emitsNewListener(method, event) {
     this.hub[method](event, listener);
 
     sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, event, sinon.match.func);
+    sinon.assert.calledWith(spy, event, listener);
   };
 }
 

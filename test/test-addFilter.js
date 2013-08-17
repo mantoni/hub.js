@@ -343,7 +343,7 @@ function emitsNewFilter(method, event) {
     this.hub[method](event, listener);
 
     sinon.assert.calledOnce(spy);
-    sinon.assert.calledWith(spy, event, sinon.match.func);
+    sinon.assert.calledWith(spy, event, listener);
   };
 }
 
