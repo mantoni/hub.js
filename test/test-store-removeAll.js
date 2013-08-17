@@ -11,36 +11,36 @@ var test   = require('utest');
 var assert = require('assert');
 var sinon  = require('sinon');
 
-var store  = require('../lib/store');
+var list   = require('../lib/list');
 
 
-test('store.removeAll', {
+test('list.removeAll', {
 
   before: function () {
-    this.store = store();
+    this.list = list();
   },
 
   'causes isEmpty to return true': function () {
-    this.store.push(42);
+    this.list.push(42);
 
-    this.store.removeAll();
+    this.list.removeAll();
 
-    assert.strictEqual(this.store.isEmpty(), true);
+    assert.strictEqual(this.list.isEmpty(), true);
   },
 
   'resets hasNext to false for new iterator': function () {
-    this.store.push(42);
+    this.list.push(42);
 
-    this.store.removeAll();
+    this.list.removeAll();
 
-    assert.strictEqual(this.store.iterator().hasNext(), false);
+    assert.strictEqual(this.list.iterator().hasNext(), false);
   },
 
   'resets hasNext to false for existing iterator': function () {
-    this.store.push(42);
-    var iterator = this.store.iterator();
+    this.list.push(42);
+    var iterator = this.list.iterator();
 
-    this.store.removeAll();
+    this.list.removeAll();
 
     assert.strictEqual(iterator.hasNext(), false);
   }

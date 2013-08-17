@@ -11,32 +11,32 @@ var test   = require('utest');
 var assert = require('assert');
 var sinon  = require('sinon');
 
-var store  = require('../lib/store');
+var list   = require('../lib/list');
 
 
-test('store.iterator', {
+test('list.iterator', {
 
   before: function () {
-    this.store = store();
+    this.list = list();
   },
 
   'has no next item initially': function () {
-    var i = this.store.iterator();
+    var i = this.list.iterator();
 
     assert(!i.hasNext());
   },
 
   'has next item after push': function () {
-    this.store.push(1);
+    this.list.push(1);
 
-    var i = this.store.iterator();
+    var i = this.list.iterator();
 
     assert(i.hasNext());
   },
 
   'returns pushed value and set hasNext to false': function () {
-    this.store.push(42);
-    var i = this.store.iterator();
+    this.list.push(42);
+    var i = this.list.iterator();
 
     var v = i.next();
 
@@ -45,9 +45,9 @@ test('store.iterator', {
   },
 
   'does not set hasNext to false': function () {
-    this.store.push(1);
-    this.store.push(2);
-    var i = this.store.iterator();
+    this.list.push(1);
+    this.list.push(2);
+    var i = this.list.iterator();
 
     i.next();
 
@@ -55,10 +55,10 @@ test('store.iterator', {
   },
 
   'returnes each pushed value in push order': function () {
-    this.store.push(1);
-    this.store.push(2);
-    this.store.push(3);
-    var i = this.store.iterator();
+    this.list.push(1);
+    this.list.push(2);
+    this.list.push(3);
+    var i = this.list.iterator();
 
     assert.equal(i.next(), 1);
     assert.equal(i.next(), 2);
@@ -67,12 +67,12 @@ test('store.iterator', {
   },
 
   'returns object pushed after next': function () {
-    var i   = this.store.iterator();
+    var i   = this.list.iterator();
     var spy = sinon.spy();
-    this.store.push(1);
+    this.list.push(1);
 
     i.next();
-    this.store.push(2);
+    this.list.push(2);
 
     assert(i.hasNext());
 

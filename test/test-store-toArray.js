@@ -11,28 +11,28 @@ var test   = require('utest');
 var assert = require('assert');
 var sinon  = require('sinon');
 
-var store  = require('../lib/store');
+var list   = require('../lib/list');
 
 
-test('store.toArray', {
+test('list.toArray', {
 
   before: function () {
-    this.store = store();
+    this.list = list();
   },
 
-  'returns empty array for empty store': function () {
-    var a = this.store.toArray();
+  'returns empty array for empty list': function () {
+    var a = this.list.toArray();
 
     assert.deepEqual(a, []);
   },
 
   'returns pushed values': function () {
-    this.store.push(1);
-    this.store.push(3);
-    this.store.push(7);
-    this.store.push(42);
+    this.list.push(1);
+    this.list.push(3);
+    this.list.push(7);
+    this.list.push(42);
 
-    var a = this.store.toArray();
+    var a = this.list.toArray();
 
     assert.deepEqual(a, [1, 3, 7, 42]);
   }

@@ -11,23 +11,23 @@ var test   = require('utest');
 var assert = require('assert');
 var sinon  = require('sinon');
 
-var store  = require('../lib/store');
+var list   = require('../lib/list');
 
 
-test('store.remove', {
+test('list.remove', {
 
   before: function () {
-    this.store = store();
+    this.list = list();
   },
 
   'does not iterate removed value': function () {
-    this.store.push(1);
-    this.store.push(2);
-    this.store.push(3);
-    var i = this.store.iterator();
+    this.list.push(1);
+    this.list.push(2);
+    this.list.push(3);
+    var i = this.list.iterator();
 
     i.next();
-    this.store.remove(2);
+    this.list.remove(2);
 
     assert(i.hasNext());
 
@@ -36,18 +36,18 @@ test('store.remove', {
   },
 
   'replaces _tail with _head if last item is removed': function () {
-    this.store.push('x');
-    this.store.remove('x');
+    this.list.push('x');
+    this.list.remove('x');
 
-    assert.strictEqual(this.store._tail, this.store._head);
+    assert.strictEqual(this.list._tail, this.list._head);
   },
 
   'replaces _tail with new last item on remove': function () {
-    this.store.push('x');
-    this.store.push('y');
-    this.store.remove('y');
+    this.list.push('x');
+    this.list.push('y');
+    this.list.remove('y');
 
-    assert.strictEqual(this.store._tail.value, 'x');
+    assert.strictEqual(this.list._tail.value, 'x');
   }
 
 });
