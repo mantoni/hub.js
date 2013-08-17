@@ -77,7 +77,7 @@ test('hub.removeAllListeners', {
     });
   },
 
-  'does not remove gneric for more specific': function () {
+  'does not remove generic for more specific': function () {
     var spy = sinon.spy();
     this.hub.on('**.a', spy);
 
@@ -89,55 +89,105 @@ test('hub.removeAllListeners', {
 
   'does not invoke listener unregistered after emit 1': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('test.a', spy);
-    hub.emit('test.*');
+    this.hub.on('test.a', spy);
+    this.hub.emit('test.*');
     spy.reset();
 
-    hub.removeAllListeners('test.a');
-    hub.emit('test.*');
+    this.hub.removeAllListeners('test.a');
+    this.hub.emit('test.*');
 
     sinon.assert.notCalled(spy);
   },
 
   'does not invoke listener unregistered after emit 2': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('test.*', spy);
-    hub.emit('test.a');
+    this.hub.on('test.*', spy);
+    this.hub.emit('test.a');
     spy.reset();
 
-    hub.removeAllListeners('test.*');
+    this.hub.removeAllListeners('test.*');
 
-    hub.emit('test.a');
+    this.hub.emit('test.a');
 
     sinon.assert.notCalled(spy);
   },
 
   'does not invoke listener unregistered after emit 3': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('test.*', spy);
-    hub.emit('test.a');
+    this.hub.on('test.*', spy);
+    this.hub.emit('test.a');
     spy.reset();
 
-    hub.removeAllListeners();
+    this.hub.removeAllListeners();
 
-    hub.emit('test.a');
+    this.hub.emit('test.a');
 
     sinon.assert.notCalled(spy);
   },
 
   'does not invoke listener unregistered after emit 4': function () {
     var spy = sinon.spy();
-    var hub = this.hub;
-    hub.on('test.a', spy);
-    hub.emit('test.*');
+    this.hub.on('test.a', spy);
+    this.hub.emit('test.*');
     spy.reset();
 
-    hub.removeAllListeners();
+    this.hub.removeAllListeners();
 
-    hub.emit('test.*');
+    this.hub.emit('test.*');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not invoke listener unregistered in filter 1': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.addFilter('test', function (next) {
+      hub.removeAllListeners('test');
+      next();
+    });
+    hub.on('test', spy);
+
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not invoke listener unregistered in filter 2': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.addFilter('test', function (next) {
+      hub.removeAllListeners();
+      next();
+    });
+    hub.on('test', spy);
+
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not invoke listener unregistered in listener 1': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test', function () {
+      hub.removeAllListeners('test');
+    });
+    hub.on('test', spy);
+
+    this.hub.emit('test');
+
+    sinon.assert.notCalled(spy);
+  },
+
+  'does not invoke listener unregistered in listener 2': function () {
+    var spy = sinon.spy();
+    var hub = this.hub;
+    hub.on('test', function () {
+      hub.removeAllListeners();
+    });
+    hub.on('test', spy);
+
+    this.hub.emit('test');
 
     sinon.assert.notCalled(spy);
   }
