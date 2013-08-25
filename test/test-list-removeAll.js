@@ -43,6 +43,15 @@ test('list.removeAll', {
     this.list.removeAll();
 
     assert.strictEqual(iterator.hasNext(), false);
+  },
+
+  'does not break push': function () {
+    this.list.push(1);
+
+    this.list.removeAll();
+    this.list.push(2);
+
+    assert.deepEqual(this.list.toArray(), [2]);
   }
 
 });

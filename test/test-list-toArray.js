@@ -27,14 +27,24 @@ test('list.toArray', {
   },
 
   'returns pushed values': function () {
-    this.list.push(1);
+    this.list.push(2);
     this.list.push(3);
     this.list.push(7);
     this.list.push(42);
 
     var a = this.list.toArray();
 
-    assert.deepEqual(a, [1, 3, 7, 42]);
+    assert.deepEqual(a, [2, 3, 7, 42]);
+  },
+
+  'appends values to given array': function () {
+    this.list.push(7);
+    this.list.push(42);
+
+    var a = [2, 3];
+    this.list.toArray(a);
+
+    assert.deepEqual(a, [2, 3, 7, 42]);
   }
 
 });
