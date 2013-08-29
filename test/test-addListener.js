@@ -302,15 +302,18 @@ test('hub.addListener', {
 
   'invokes more specific wildcard listener inserted in wildcard listener':
     function () {
-      var spy = sinon.spy();
+      var spyA = sinon.spy(function a() {});
+      var spyB = sinon.spy(function b() {});
 
       this.hub.addListener('**', function () {
-        this.hub.addListener('test.**', spy);
+        this.hub.addListener('test.**', spyA);
       });
-      this.hub.addListener('test.a.*', function () {});
+      this.hub.addListener('test.a.*', spyB);
       this.hub.emit('test.a.b');
 
-      sinon.assert.calledOnce(spy);
+      sinon.assert.calledOnce(spyA);
+      sinon.assert.calledOnce(spyB);
+      sinon.assert.callOrder(spyA, spyB);
     },
 
   'does not invoke listener twice if more specific was already registered':
