@@ -114,6 +114,24 @@ test('forrest', {
     assert.deepEqual(items(this.forrest, 'a.**'), [1, 2, 3, 4]);
     assert.deepEqual(items(this.forrest, 'a.b.**'), [1, 2, 3, 4]);
     assert.deepEqual(items(this.forrest, 'a.b.c.*'), [1, 2, 3, 4]);
+  },
+
+  'inserts n.a for n.* and *.a': function () {
+    this.forrest.set('*.a', 1);
+    this.forrest.set('n.*', 2);
+    this.forrest.set('n.a', 3);
+
+    assert.deepEqual(items(this.forrest, '*.a'), [1, 2, 3]);
+    assert.deepEqual(items(this.forrest, 'n.*'), [1, 2, 3]);
+    assert.deepEqual(items(this.forrest, 'n.a'), [1, 2, 3]);
+  },
+
+  'keeps *.a and *.b separated': function () {
+    this.forrest.set('*.a', 1);
+    this.forrest.set('*.b', 2);
+
+    assert.deepEqual(items(this.forrest, '*.a'), [1]);
+    assert.deepEqual(items(this.forrest, '*.b'), [2]);
   }
 
 });
