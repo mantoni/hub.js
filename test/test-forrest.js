@@ -132,6 +132,94 @@ test('forrest', {
 
     assert.deepEqual(items(this.forrest, '*.a'), [1]);
     assert.deepEqual(items(this.forrest, '*.b'), [2]);
+  },
+
+  'does not iterate over items twice': function () {
+    this.forrest.set('**', 1);
+    this.forrest.set('*.a', 2);
+    this.forrest.set('n.*', 3);
+    this.forrest.set('n.a', 4);
+
+    assert.deepEqual(items(this.forrest, '**'), [1, 2, 3, 4]);
+  },
+
+  'iterates over siblings in correct order': function () {
+    this.forrest.set('**', 1);
+    this.forrest.set('n.*', 3);
+    this.forrest.set('*.a', 2);
+
+    assert.deepEqual(items(this.forrest, '**'), [1, 2, 3]);
+  },
+
+  'removes item': function () {
+    this.forrest.set('a', 1);
+    this.forrest.set('b', 2);
+    this.forrest.set('c', 3);
+
+    this.forrest.remove('b');
+
+    assert.deepEqual(items(this.forrest, '*'), ['1', '3']);
+  },
+
+  'remove deep child': function () {
+    this.forrest.set('a.*', 1);
+    this.forrest.set('a.b', 2);
+
+    this.forrest.remove('a.b');
+
+    assert.deepEqual(items(this.forrest, '**'), ['1']);
+  },
+
+  'removes wildcard child': function () {
+    this.forrest.set('a.*', 1);
+
+    this.forrest.remove('a.*');
+
+    assert.deepEqual(items(this.forrest, '**'), []);
+  },
+
+  'does not remove children': function () {
+    this.forrest.set('n.*', 1);
+    this.forrest.set('n.a', 2);
+    this.forrest.set('n.b', 3);
+
+    this.forrest.remove('n.*');
+
+    assert.deepEqual(items(this.forrest, '**'), [2, 3]);
+  },
+
+  'does not iterate over removed parent': function () {
+    this.forrest.set('*', 1);
+    this.forrest.set('a', 2);
+
+    this.forrest.remove('*');
+
+    assert.deepEqual(items(this.forrest, 'a'), [2]);
+  },
+
+  'does not iterate over removed child': function () {
+    this.forrest.set('*', 1);
+    this.forrest.set('a', 2);
+
+    this.forrest.remove('a');
+
+    assert.deepEqual(items(this.forrest, '*'), [1]);
+  },
+
+  'removes from sibling': function () {
+    this.forrest.set('*.a', 1);
+    this.forrest.set('n.*', 2);
+    this.forrest.set('n.a', 3);
+
+    this.forrest.remove('n.*');
+
+    //console.log(this.forrest.toString());
+    assert.deepEqual(items(this.forrest, '**'), [1, 3]);
+    /*
+    assert.deepEqual(items(this.forrest, '*.a'), [1, 2, 3]);
+    assert.deepEqual(items(this.forrest, 'n.*'), [1, 2, 3]);
+    assert.deepEqual(items(this.forrest, 'n.a'), [1, 2, 3]);
+    */
   }
 
 });
