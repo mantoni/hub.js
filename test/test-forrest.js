@@ -158,7 +158,7 @@ test('forrest', {
 
     this.forrest.remove('b');
 
-    assert.deepEqual(items(this.forrest, '*'), ['1', '3']);
+    assert.deepEqual(items(this.forrest, '*'), [1, 3]);
   },
 
   'remove deep child': function () {
@@ -167,7 +167,7 @@ test('forrest', {
 
     this.forrest.remove('a.b');
 
-    assert.deepEqual(items(this.forrest, '**'), ['1']);
+    assert.deepEqual(items(this.forrest, '**'), [1]);
   },
 
   'removes wildcard child': function () {
@@ -213,13 +213,10 @@ test('forrest', {
 
     this.forrest.remove('n.*');
 
-    //console.log(this.forrest.toString());
     assert.deepEqual(items(this.forrest, '**'), [1, 3]);
-    /*
-    assert.deepEqual(items(this.forrest, '*.a'), [1, 2, 3]);
-    assert.deepEqual(items(this.forrest, 'n.*'), [1, 2, 3]);
-    assert.deepEqual(items(this.forrest, 'n.a'), [1, 2, 3]);
-    */
+    assert.deepEqual(items(this.forrest, '*.a'), [1, 3]);
+    assert.deepEqual(items(this.forrest, 'n.*'), [3]);
+    assert.deepEqual(items(this.forrest, 'n.a'), [1, 3]);
   }
 
 });
