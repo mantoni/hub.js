@@ -217,6 +217,14 @@ test('forrest', {
     assert.deepEqual(items(this.forrest, '*.a'), [1, 3]);
     assert.deepEqual(items(this.forrest, 'n.*'), [3]);
     assert.deepEqual(items(this.forrest, 'n.a'), [1, 3]);
+  },
+
+  'replaces deep child': function () {
+    this.forrest.set('a.**', 3);
+    this.forrest.set('a.b.c', 7);
+    this.forrest.set('a.b.c', 42);
+
+    assert.deepEqual(items(this.forrest, '**'), [3, 42]);
   }
 
 });
