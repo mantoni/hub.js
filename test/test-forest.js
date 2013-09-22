@@ -30,17 +30,17 @@ test('forest', {
     this.forest = forest();
   },
 
-  'sets first item': function () {
+  'adds first item': function () {
     this.forest.add('test', 42);
 
     assert.deepEqual(items(this.forest), [42]);
   },
 
-  'replaces item with same name': function () {
+  'adds second item with same name': function () {
     this.forest.add('test', 1);
     this.forest.add('test', 2);
 
-    assert.deepEqual(items(this.forest), [2]);
+    assert.deepEqual(items(this.forest), [1, 2]);
   },
 
   'adds item with different name': function () {
@@ -219,12 +219,29 @@ test('forest', {
     assert.deepEqual(items(this.forest, 'n.a'), [1, 3]);
   },
 
-  'replaces deep child': function () {
+  'adds deep child': function () {
     this.forest.add('a.**', 3);
     this.forest.add('a.b.c', 7);
     this.forest.add('a.b.c', 42);
 
-    assert.deepEqual(items(this.forest, '**'), [3, 42]);
+    assert.deepEqual(items(this.forest, '**'), [3, 7, 42]);
+  },
+
+  'removes item from names list': function () {
+    this.forest.add('a', 7);
+    this.forest.add('a', 42);
+
+    this.forest.remove('a', 7);
+
+    assert.deepEqual(items(this.forest, '**'), [42]);
+  },
+
+  'removes tree node if last item from list was removed': function () {
+    this.forest.add('a', 1);
+
+    this.forest.remove('a', 1);
+
+    assert.strictEqual(this.forest._cache.hasOwnProperty('a'), false);
   }
 
 });
