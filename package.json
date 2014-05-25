@@ -1,35 +1,46 @@
 {
-  "name"            : "hubjs",
-  "version"         : "0.14.0",
-  "description"     : "Pub/Sub oriented JavaScript for Node and the browser",
-  "keywords"        : ["event", "emitter", "listener", "pubsub"],
-  "author"          : "Maximilian Antoni (http://maxantoni.de)",
-  "homepage"        : "http://maxantoni.de/projects/hub.js/",
-  "main"            : "./lib/hub.js",
-  "engines"         : {
-    "node"          : ">=0.6"
+  "name": "hubjs",
+  "version": "0.14.0",
+  "description": "Pub/Sub oriented JavaScript for Node and the browser",
+  "keywords": [
+    "event",
+    "emitter",
+    "listener",
+    "pubsub"
+  ],
+  "author": "Maximilian Antoni (http://maxantoni.de)",
+  "homepage": "http://maxantoni.de/projects/hub.js/",
+  "main": "./lib/hub.js",
+  "engines": {
+    "node": ">=0.10"
   },
-  "scripts"         : {
-    "test"          : "make test"
+  "scripts": {
+    "start": "mocha --watch",
+    "lint": "jslint --color './**/*.js'",
+    "wd": "mochify --wd",
+    "test": "npm run lint && mocha && mochify --cover"
   },
-  "repository"      : {
-    "type"          : "git",
-    "url"           : "https://github.com/mantoni/hub.js.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mantoni/hub.js.git"
   },
-  "dependencies"    : {
-    "listen"        : ">=1.0 <2"
+  "dependencies": {
+    "glob-events": "~0.4.1",
+    "glob-filter": "~0.1.0",
+    "async-glob-events": "~0.1.1",
+    "inherits": "^2.0.1"
   },
-  "devDependencies" : {
-    "utest"         : "0.0.8",
-    "urun"          : "0.0.6",
-    "sinon"         : ">=1.7 <2",
-    "uglify-js"     : ">=1.2 <2",
-    "autolint"      : ">=1.0 <2",
-    "phantomic"     : "0.2.0",
-    "browserify"    : ">=2.13 <3",
-    "consolify"     : "0.4.0",
-    "browser-reload": ">=1.0 <2",
-    "bench"         : "~0.3.5"
+  "devDependencies": {
+    "mocha": "^1.19.0",
+    "jslint": "~0.5.2",
+    "mochify": "~0.9.2",
+    "bench": "~0.3.5"
   },
-  "files"           : ["lib", "docs", "README.md", "CHANGES.md", "LICENSE"]
+  "files": [
+    "lib",
+    "README.md",
+    "CHANGES.md",
+    "LICENSE"
+  ],
+  "license": "MIT"
 }
