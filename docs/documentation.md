@@ -1,6 +1,14 @@
+### Creating instances
+
+```js
+var hubjs = require('hubjs');
+
+var hub = hubjs.create();
+```
+
 ### Publish / Subscribe
 
-Hub.js is an implementation of the [publish-subscribe
+Hub.js is an extended implementation of the [publish-subscribe
 pattern](http://en.wikipedia.org/wiki/Publish–subscribe_pattern).
 
 A subscription is made like this:
