@@ -111,4 +111,34 @@ describe('emit', function () {
     sinon.assert.calledWith(spy, null, 42);
   });
 
+  it('passes arguments as this.args to filters', function () {
+    var spy = sinon.spy();
+    h.addFilter('a', spy);
+
+    h.emit('a', 123, 'abc');
+
+    sinon.assert.calledOn(spy, sinon.match.has('args', [123, 'abc']));
+  });
+
+  it('passes arguments to listeners', function () {
+    var spy = sinon.spy();
+    h.addListener('a', spy);
+
+    h.emit('a', 123, 'abc');
+
+    sinon.assert.calledWith(spy, 123, 'abc');
+  });
+
+  it('uses modified args from filter for listeners', function () {
+    h.addFilter('a', function () {
+      this.args.push(42, 'ab');
+    });
+    var spy = sinon.spy();
+    h.addListener('a', spy);
+
+    h.emit('a');
+
+    sinon.assert.calledWith(spy, 42, 'ab');
+  });
+
 });
