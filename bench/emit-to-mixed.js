@@ -12,7 +12,7 @@ var hub   = require('../lib/hub')();
 
 
 hub.addFilter('test.one', function (next, callback) { next(callback); });
-hub.addListener('test.one', function () {});
+hub.addListener('test.one', function () { return; });
 
 
 exports.compare = {

@@ -15,12 +15,15 @@ exports.compare = {
 
   'once()': function () {
     var hub = hubjs();
-    hub.once('test', function () {});
+    hub.once('test', function () { return; });
   },
 
   'once(a, b, c)': function () {
     var hub = hubjs();
-    hub.once('test', function (a, b, c) {});
+    hub.once('test', function (a, b, c) {
+      /*jslint unparam: true*/
+      return;
+    });
   }
 
 };

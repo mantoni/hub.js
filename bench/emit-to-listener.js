@@ -11,8 +11,8 @@ var bench = require('bench');
 var hub   = require('../lib/hub')();
 
 
-hub.addListener('test.one', function () {});
-hub.addListener('test.one', function () {});
+hub.addListener('test.one', function () { return; });
+hub.addListener('test.one', function () { return; });
 
 
 exports.compare = {

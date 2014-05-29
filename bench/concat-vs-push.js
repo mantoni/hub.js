@@ -20,7 +20,7 @@ exports.compare = {
 
   'push.apply': function () {
     var a = ['a', 'b', 'c'];
-    a.push.apply(a, ['x', 'y', 'z']);
+    Array.prototype.push.apply(a, ['x', 'y', 'z']);
   }
 
 };

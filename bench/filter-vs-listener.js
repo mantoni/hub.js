@@ -12,8 +12,8 @@ var hub   = require('../lib/hub')();
 
 
 function filter(next, callback) { next(callback); }
-function listener1() {}
-function listener2() {}
+function listener1() { return; }
+function listener2() { return; }
 
 exports.compare = {
 
