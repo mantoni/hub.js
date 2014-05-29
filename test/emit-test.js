@@ -9,57 +9,53 @@
 'use strict';
 
 var assert       = require('assert');
+var sinon        = require('sinon');
 var Filter       = require('glob-filter').Filter;
 var AsyncEmitter = require('async-glob-events').AsyncEmitter;
 var hub          = require('../lib/hub');
 
 
-
 describe('emit', function () {
   var h;
-  var c;
-
-  function listener() {
-    c += 'l';
-  }
 
   beforeEach(function () {
     h = hub.create();
-    c = '';
   });
 
   it('invokes filter and listener', function () {
-    h.addFilter('a', function () {
-      c += 'f';
-    });
-    h.addListener('a', listener);
+    var f = sinon.spy();
+    var l = sinon.spy();
+    h.addFilter('a', f);
+    h.addListener('a', l);
 
     h.emit('a');
 
-    assert.equal(c, 'fl');
+    sinon.assert.callOrder(f, l);
   });
 
   it('does not invoke listener if filter does not yield', function () {
+    var spy = sinon.spy();
     h.addFilter('a', function (next) {
       /*jslint unparam: true*/
-      c += 'f';
+      return;
     });
-    h.addListener('a', listener);
+    h.addListener('a', spy);
 
     h.emit('a');
 
-    assert.equal(c, 'f');
+    sinon.assert.notCalled(spy);
   });
 
   it('invokes listener even if filter throws', function () {
+    var spy = sinon.spy();
     h.addFilter('a', function () {
       throw new Error();
     });
-    h.addListener('a', listener);
+    h.addListener('a', spy);
 
     h.emit('a');
 
-    assert.equal(c, 'l');
+    sinon.assert.calledOnce(spy);
   });
 
   it('yields error from filter', function () {
@@ -68,12 +64,10 @@ describe('emit', function () {
       throw error;
     });
 
-    var err;
-    h.emit('a', function (e) {
-      err = e;
-    });
+    var spy = sinon.spy();
+    h.emit('a', spy);
 
-    assert.strictEqual(err, error);
+    sinon.assert.calledWith(spy, error);
   });
 
   it('yields error from listener', function () {
@@ -82,12 +76,10 @@ describe('emit', function () {
       throw error;
     });
 
-    var err;
-    h.emit('a', function (e) {
-      err = e;
-    });
+    var spy = sinon.spy();
+    h.emit('a', spy);
 
-    assert.strictEqual(err, error);
+    sinon.assert.calledWith(spy, error);
   });
 
   it('passes error from listener back to filter', function () {
@@ -95,16 +87,28 @@ describe('emit', function () {
     h.addListener('a', function () {
       throw error;
     });
-    var err;
+    var spy = sinon.spy();
     h.addFilter('a', function (next) {
-      next(function (e) {
-        err = e;
-      });
+      next(spy);
     });
 
     h.emit('a');
 
-    assert.strictEqual(err, error);
+    sinon.assert.calledWith(spy, error);
+  });
+
+  it('passes callback value from listener back to filter', function () {
+    h.addListener('a', function (callback) {
+      callback(null, 42);
+    });
+    var spy = sinon.spy();
+    h.addFilter('a', function (next) {
+      next(spy);
+    });
+
+    h.emit('a');
+
+    sinon.assert.calledWith(spy, null, 42);
   });
 
 });
