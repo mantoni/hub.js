@@ -72,6 +72,10 @@ Filters and Listeners are called in registration order. The call order of
 listeners are called before more specific ones. E.g. if `a.b.c` is emitted, a
 listener on `a.**` is invoked before a listener on `a.b.*`.
 
+For more information on wildcard priorities, see the [glob-tree match
+expressions](https://github.com/mantoni/glob-tree.js#match-expressions)
+documentation.
+
 ### Return values
 
 Listeners may return a value to the publisher either by using the `return`
