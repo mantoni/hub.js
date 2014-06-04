@@ -141,4 +141,65 @@ describe('emit', function () {
     sinon.assert.calledWith(spy, 42, 'ab');
   });
 
+  it('returns result array if allResults is set to true', function () {
+    h.addListener('a', function () {
+      return 'x';
+    });
+    h.addListener('a', function () {
+      return 'y';
+    });
+
+    var spy = sinon.spy();
+    h.emit({ event : 'a', allResults : true }, spy);
+
+    sinon.assert.calledWith(spy, null, ['x', 'y']);
+  });
+
+  it('does not invoke filter matchers if excluded', function () {
+    var spy = sinon.spy();
+    h.addFilter('*', spy);
+
+    h.emit({ event : 'a', matchers : false });
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke listener matchers if excluded', function () {
+    var spy = sinon.spy();
+    h.addListener('*', spy);
+
+    h.emit({ event : 'a', matchers : false });
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke filter if only matchers', function () {
+    var spy = sinon.spy();
+    h.addFilter('a', spy);
+
+    h.emit({ event : 'a', listeners : false });
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke listener if only matchers', function () {
+    var spy = sinon.spy();
+    h.addListener('a', spy);
+
+    h.emit({ event : 'a', listeners : false });
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('passes arbitrary properties to listeners in scope', function () {
+    var muchFeature;
+    h.addListener('a', function () {
+      muchFeature = this.muchFeature;
+    });
+
+    h.emit({ event : 'a', muchFeature : 'such wow!' });
+
+    assert.equal(muchFeature, 'such wow!');
+  });
+
 });
