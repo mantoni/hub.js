@@ -25,13 +25,5 @@ You can also use npm and bundle it with your application using
 
 ## Development
 
-Here is what you need:
-
  - `npm install` will install all the dev dependencies
- - `make` does all of the following
- - `make lint` lint the code with JSLint
- - `make test` runs all unit tests in Node
- - `make browser` generates a static web page at `test/all.html` to run the tests in a browser
- - `make phantom` runs all tests in a [headless WebKit](http://phantomjs.org/). Make sure `phantomjs` is in your path.
-
-To build a standalone browserified package containing the merged / minified scripts run `make package`.
+ - `npm test` runs JSLint and the tests in Node and PhantomJS
