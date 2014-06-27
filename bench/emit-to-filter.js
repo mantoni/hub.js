@@ -8,7 +8,7 @@
 'use strict';
 
 var bench = require('bench');
-var hub   = require('../lib/hub')();
+var hub   = require('../lib/hub').create();
 
 
 hub.addFilter('test.one', function (next, callback) { next(callback); });

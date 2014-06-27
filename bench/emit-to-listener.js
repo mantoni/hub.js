@@ -8,7 +8,7 @@
 'use strict';
 
 var bench = require('bench');
-var hub   = require('../lib/hub')();
+var hub   = require('../lib/hub').create();
 
 
 hub.addListener('test.one', function () { return; });
