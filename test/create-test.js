@@ -38,4 +38,19 @@ describe('create', function () {
     assert.strictEqual(h.filters, Filter.prototype.filters);
   });
 
+  it('configures filter with "reverse" = true', function () {
+    var h = hub.create();
+    var a = [];
+
+    h.addFilter('a', function () {
+      a.push('1');
+    });
+    h.addFilter('a', function () {
+      a.push('2');
+    });
+    h.emit('a');
+
+    assert.equal(a.join(), '2,1');
+  });
+
 });
