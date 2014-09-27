@@ -19,7 +19,7 @@ describe('emit', function () {
   var h;
 
   beforeEach(function () {
-    h = hub.create();
+    h = new hub.Hub();
   });
 
   it('invokes filter and listener', function () {

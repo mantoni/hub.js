@@ -17,19 +17,19 @@ var hub          = require('../lib/hub');
 describe('create', function () {
 
   it('returns an instance of Hub', function () {
-    var h = hub.create();
+    var h = new hub.Hub();
 
     assert(h instanceof hub.Hub);
   });
 
   it('returns an instance of AsyncEmitter', function () {
-    var h = hub.create();
+    var h = new hub.Hub();
 
     assert(h instanceof AsyncEmitter);
   });
 
   it('implements filter functions', function () {
-    var h = hub.create();
+    var h = new hub.Hub();
 
     assert.strictEqual(h.addFilter, Filter.prototype.addFilter);
     assert.strictEqual(h.filterOnce, Filter.prototype.filterOnce);
@@ -39,7 +39,7 @@ describe('create', function () {
   });
 
   it('configures filter with "reverse" = true', function () {
-    var h = hub.create();
+    var h = new hub.Hub();
     var a = [];
 
     h.addFilter('a', function () {
