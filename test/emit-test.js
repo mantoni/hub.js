@@ -53,7 +53,7 @@ describe('emit', function () {
     });
     h.addListener('a', spy);
 
-    h.emit('a');
+    h.emit('a', function () { return; });
 
     sinon.assert.calledOnce(spy);
   });
@@ -95,6 +95,26 @@ describe('emit', function () {
     h.emit('a');
 
     sinon.assert.calledWith(spy, error);
+  });
+
+  it('throws error from filter', function () {
+    h.addFilter('a', function () {
+      throw new Error();
+    });
+
+    assert.throws(function () {
+      h.emit('a');
+    }, Error);
+  });
+
+  it('throws error from listener', function () {
+    h.addListener('a', function () {
+      throw new Error();
+    });
+
+    assert.throws(function () {
+      h.emit('a');
+    }, Error);
   });
 
   it('passes callback value from listener back to filter', function () {
