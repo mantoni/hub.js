@@ -320,6 +320,10 @@ listeners that would be invoked if the given event would be emitted.
 Unregisters all filters that match the given event name. This removes all
 listeners that would be invoked if the given event would be emitted.
 
+#### hub.removeAll()
+
+Unregisters all filters and all listeners.
+
 #### hub.once(event, function)
 
 Registers a listener for an event that will be automatically unregistered on
