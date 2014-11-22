@@ -30,9 +30,9 @@
     "inherits": "^2.0"
   },
   "devDependencies": {
-    "mocha": "^1.21",
     "jslint": "^0.6",
-    "mochify": "^1.1",
+    "mocha": "^2.0",
+    "mochify": "^2.0",
     "bench": "^0.3",
     "sinon": "^1.10"
   },
