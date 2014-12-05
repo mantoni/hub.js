@@ -35,27 +35,21 @@ var hub = new Hub();
 ```
 
 
+## API
+
+- `Hub()`: Constructor function.
+
 ## Hub API
 
-This implementation is highly modular. `Hub` inherits from
-[async-glob-events][]`.AsyncEmitter` and has the [glob-filter][] API mixed in.
+Inherits from [async-glob-events][]`.AsyncEmitter` and has the [glob-filter][]
+API mixed in.
 
-
-
-## Deduped dependency tree
-
-    hubjs
-    ├── async-glob-events
-    ├─┬ glob-events
-    │ └─┬ glob-store
-    │   ├─┬ glob-tree
-    │   │ └── live-tree
-    │   └── live-list
-    ├─┬ glob-filter
-    │ └── min-filter
-    ├── inherits
-    ├── listen
-    └── min-iterator
+- `emit(event, ...)`: Invokes the filter chain for the given event before
+  invoking the listeners. After all listeners returned, the filter callback
+  chain is invoked.
+- `removeAll([event])`: Unregisters all filters and all listeners, or all
+  filters and all listeners for the given event. Matching rules are not
+  applied.
 
 ## Development
 
