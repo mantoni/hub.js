@@ -18,7 +18,7 @@
     "start": "mochify --watch",
     "lint": "jslint --color \"**/*.js\"",
     "wd": "mochify --wd",
-    "test": "npm run lint && mocha && mochify --cover"
+    "test": "npm run lint && echo '#node:' && mocha -R dot && mochify --cover"
   },
   "repository": {
     "type": "git",
