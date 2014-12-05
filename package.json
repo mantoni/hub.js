@@ -15,7 +15,7 @@
     "node": ">=0.10"
   },
   "scripts": {
-    "start": "mocha --watch",
+    "start": "mochify --watch",
     "lint": "jslint --color \"**/*.js\"",
     "wd": "mochify --wd",
     "test": "npm run lint && mocha && mochify --cover"
@@ -25,8 +25,8 @@
     "url": "https://github.com/mantoni/hub.js.git"
   },
   "dependencies": {
-    "glob-filter": "^1.0",
-    "async-glob-events": "^1.0",
+    "glob-filter": "^1.1",
+    "async-glob-events": "^1.1",
     "inherits": "^2.0"
   },
   "devDependencies": {

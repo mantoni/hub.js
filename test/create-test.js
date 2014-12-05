@@ -35,6 +35,7 @@ describe('create', function () {
     assert.strictEqual(h.filterOnce, Filter.prototype.filterOnce);
     assert.strictEqual(h.removeFilter, Filter.prototype.removeFilter);
     assert.strictEqual(h.removeAllFilters, Filter.prototype.removeAllFilters);
+    assert.strictEqual(h.filterIterator, Filter.prototype.filterIterator);
     assert.strictEqual(h.filters, Filter.prototype.filters);
   });
 
