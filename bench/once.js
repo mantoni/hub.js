@@ -14,12 +14,12 @@ var hubjs = require('../lib/hub');
 exports.compare = {
 
   'once()': function () {
-    var hub = hubjs.create();
+    var hub = hubjs.Hub();
     hub.once('test', function () { return; });
   },
 
   'once(a, b, c)': function () {
-    var hub = hubjs.create();
+    var hub = hubjs.Hub();
     hub.once('test', function (a, b, c) {
       /*jslint unparam: true*/
       return;

@@ -8,7 +8,6 @@
 'use strict';
 
 var bench = require('bench');
-var hubjs = require('../lib/hub');
 
 
 exports.compare = {
