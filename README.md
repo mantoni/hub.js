@@ -13,8 +13,8 @@ Pub/Sub oriented JavaScript - For Node.js and the browser
 - Emit events with glob event names (`*` and `**`)
 - Register [filter chains][] for events with glob names (`*` and `**`)
 - Pass a callback as the last argument to `emit` and receive asynchronous
-  errors and return values from listeners
-- Add and remove listeners and filters during event processing
+  errors / return values from listeners
+- Safely add and remove listeners and filters during event processing
 - Test suite runs on Node.js 0.10, PhantomJS, Chrome, Firefox and IE 9 / 10
 - 100% test coverage
 
