@@ -47,9 +47,10 @@ API mixed in.
 - `emit(event, ...)`: Invokes the filter chain for the given event before
   invoking the listeners. After all listeners returned, the filter callback
   chain is invoked.
-- `removeAll([event])`: Unregisters all filters and all listeners, or all
-  filters and all listeners for the given event. Matching rules are not
-  applied.
+- `removeAll([event])`: Unregisters all filters and all listeners, or the
+  filters and listeners registered for the given event. Matching rules are not
+  applied. This means `removeAll('*')` will remove listeners registered for
+  `'*'`, but it will not remove listeners registered for `'event'`.
 
 ## Development
 
