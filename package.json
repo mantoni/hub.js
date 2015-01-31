@@ -1,7 +1,7 @@
 {
   "name": "hubjs",
   "version": "1.0.0",
-  "description": "Pub/Sub oriented JavaScript for Node and the browser",
+  "description": "The most advanced EventEmitter for Node and the browser",
   "keywords": [
     "event",
     "emitter",
@@ -18,7 +18,7 @@
     "start": "mochify --watch",
     "lint": "jslint --color \"**/*.js\"",
     "wd": "mochify --wd",
-    "test": "npm run lint && echo '#node:' && mocha -R dot && mochify --cover"
+    "test": "npm run lint && echo '# node:' && mocha -R dot && mochify --cover"
   },
   "repository": {
     "type": "git",

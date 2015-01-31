@@ -4,7 +4,7 @@
 [![SemVer]](http://semver.org)
 [![License]](https://github.com/mantoni/hub.js/blob/master/LICENSE)
 
-Pub/Sub oriented JavaScript - For Node.js and the browser
+The most advanced EventEmitter for Node and the browser.
 
 # Features
 
