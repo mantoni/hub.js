@@ -1,6 +1,13 @@
 # Changes
 
-## v0.14.0
+## 1.0.0
+
+- Completely rewritten from the ground up
+- Cleaner API
+- Dramatic performance improvements
+- Highly modularized
+
+## 0.14.0
 
 __NOTE: This release introduces breaking changes to the API!__
 
@@ -33,7 +40,7 @@ Views are now implemented as a separate module: [hub-namespace][].
 [documentation]: http://maxantoni.de/projects/hub.js/documentation.html
 [hub-namespace]: https://github.com/mantoni/hub-namespace.js
 
-## v0.13.0
+## 0.13.0
 
 __NOTE: This release introduces breaking changes to the API!__
 
@@ -42,7 +49,7 @@ __NOTE: This release introduces breaking changes to the API!__
 - `this.options` does no longer exist. `this.allResults` is exposed directlry
   instead.
 
-## v0.12.0
+## 0.12.0
 
 __NOTE: This release introduces breaking changes to the API!__
 
@@ -58,20 +65,20 @@ __NOTE: This release introduces breaking changes to the API!__
 - Run tests in Phantom.JS using Browserify and Phantomic
 - Run tests in browsers with a standalone test HTML file generated with Consolify
 
-## v0.11.0
+## 0.11.0
 
 - matcher '\*\*.x' is now invoked if emitting 'test.\*'
 - removeAllListeners('test.\*') does not remove matcher '\*\*.x'
 - removeAllMatchers('test.\*') does remove matcher '\*\*.x'
 - listener(event) and listenersMatching(event) behave accordingly
 
-## v0.9.0
+## 0.9.0
 
 - Fixed view.removeAllListeners()
 - Invoking listeners that are registered during emit
 - Improved test case failure messages
 
-## v0.8.0
+## 0.8.0
 
 - Fix once, onceBefore and onceAfter with wildcards
 - Fix for error events
@@ -83,7 +90,7 @@ __NOTE: This release introduces breaking changes to the API!__
 - Test case naming
 - Added test case for callback timeouts
 
-## v0.7.0
+## 0.7.0
 
 - Emitting error events
 - Not throwing if there are no listeners
