@@ -9,7 +9,7 @@
     "pubsub"
   ],
   "author": "Maximilian Antoni (http://maxantoni.de)",
-  "homepage": "http://maxantoni.de/projects/hub.js/",
+  "homepage": "https://github.com/mantoni/hub.js",
   "main": "./lib/hub.js",
   "engines": {
     "node": ">=0.10"
