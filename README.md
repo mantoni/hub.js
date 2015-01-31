@@ -285,7 +285,7 @@ called before more specific ones. E.g. if `a.b.c` is emitted, a listener on
 `a.**` is invoked before a listener on `a.b.*`.
 
 For more information on wildcard priorities, see the [glob-tree match
-expressions][match-expression] documentation.
+expressions][match-expressions] documentation.
 
 ## API
 
