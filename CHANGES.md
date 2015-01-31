@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.1
+
+- Change project decription
+
 ## 1.0.0
 
 - Completely rewritten from the ground up
