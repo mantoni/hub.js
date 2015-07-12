@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.2
+
+- Configure all "add" and "remove" events as internal
+
 ## 1.0.1
 
 - Change project decription
