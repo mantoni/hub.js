@@ -222,4 +222,40 @@ describe('emit', function () {
     assert.equal(muchFeature, 'such wow!');
   });
 
+  it('does not invoke newFilter listener on emit "*"', function () {
+    var spy = sinon.spy();
+    h.addListener('newFilter', spy);
+
+    h.emit('*');
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke removeFilter listener on emit "*"', function () {
+    var spy = sinon.spy();
+    h.addListener('removeFilter', spy);
+
+    h.emit('*');
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke newListener filter on emit "*"', function () {
+    var spy = sinon.spy();
+    h.addFilter('newListener', spy);
+
+    h.emit('*');
+
+    sinon.assert.notCalled(spy);
+  });
+
+  it('does not invoke removeListener filter on emit "*"', function () {
+    var spy = sinon.spy();
+    h.addFilter('removeListener', spy);
+
+    h.emit('*');
+
+    sinon.assert.notCalled(spy);
+  });
+
 });
