@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.3
+
+- Forward `newFilter` and `removeFilter` events
+
 ## 1.0.2
 
 - Configure all "add" and "remove" events as internal
