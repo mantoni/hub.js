@@ -15,10 +15,11 @@
     "node": ">=0.10"
   },
   "scripts": {
-    "start": "mochify --watch",
-    "lint": "jslint --color \"**/*.js\"",
+    "watch": "mochify --watch",
+    "lint": "jslint --edition=latest --color \"**/*.js\"",
     "wd": "mochify --wd",
-    "test": "npm run lint && echo '# node:' && mocha -R dot && mochify --cover"
+    "pretest": "npm run lint",
+    "test": "echo '# node:' && mocha -R dot && mochify --cover"
   },
   "repository": {
     "type": "git",
@@ -30,7 +31,7 @@
     "inherits": "^2.0"
   },
   "devDependencies": {
-    "jslint": "^0.6",
+    "jslint": "^0.8",
     "mocha": "^2.0",
     "mochify": "^2.0",
     "bench": "^0.3",
