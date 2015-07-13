@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.4
+
+- Fix forwarding of internal filter events
+
 ## 1.0.3
 
 - Forward `newFilter` and `removeFilter` events
