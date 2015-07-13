@@ -43,4 +43,30 @@ describe('events', function () {
     sinon.assert.calledWith(s, 'test', f);
   });
 
+  it('invokes filter for "newFilter" event with `next`', function () {
+    var n, a, f = sinon.spy();
+    h.addFilter('newFilter', function (next) {
+      n = next;
+      a = this.args;
+    });
+
+    h.addFilter('test', f);
+
+    assert.deepEqual(a, ['test', f]);
+    assert.equal(typeof n, 'function');
+  });
+
+  it('invokes filter for "newListener" event with `next`', function () {
+    var n, a, f = sinon.spy();
+    h.addFilter('newListener', function (next) {
+      n = next;
+      a = this.args;
+    });
+
+    h.addListener('test', f);
+
+    assert.deepEqual(a, ['test', f]);
+    assert.equal(typeof n, 'function');
+  });
+
 });
