@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.5
+
+- Improve behavior of internal events
+
 ## 1.0.4
 
 - Fix forwarding of internal filter events
