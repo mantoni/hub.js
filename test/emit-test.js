@@ -10,7 +10,6 @@
 
 var assert       = require('assert');
 var sinon        = require('sinon');
-var Filter       = require('glob-filter').Filter;
 var AsyncEmitter = require('async-glob-events').AsyncEmitter;
 var hub          = require('../lib/hub');
 
