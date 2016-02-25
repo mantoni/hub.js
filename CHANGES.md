@@ -1,5 +1,9 @@
 # Changes
 
+## 1.0.6
+
+- Fix global error event listener behavior
+
 ## 1.0.5
 
 - Improve behavior of internal events

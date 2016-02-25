@@ -1,6 +1,6 @@
 {
   "name": "hubjs",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "The most advanced EventEmitter for Node and the browser",
   "keywords": [
     "event",
