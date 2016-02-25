@@ -116,6 +116,27 @@ describe('emit', function () {
     }, Error);
   });
 
+  it("emits error event on hub", function () {
+    var err = new Error();
+    var sa, se;
+    h.addListener('a', function () {
+      sa = this;
+      throw err;
+    });
+    h.addListener('error', function () {
+      se = this;
+    });
+
+    h.emit('a', 123, [true, 'x']);
+
+    assert.equal(se.event, 'error');
+    assert.deepEqual(se.args, [err]);
+    assert.strictEqual(se.emitter, h);
+    assert.equal(se.cause.event, 'a');
+    assert.deepEqual(se.cause.args, [123, [true, 'x']]);
+    assert.strictEqual(se.cause.scope, sa);
+  });
+
   it('passes callback value from listener back to filter', function () {
     h.addListener('a', function (callback) {
       callback(null, 42);

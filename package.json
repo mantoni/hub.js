@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "glob-filter": "^1.4",
-    "async-glob-events": "^1.4",
+    "async-glob-events": "^1.5",
     "inherits": "^2.0"
   },
   "devDependencies": {
